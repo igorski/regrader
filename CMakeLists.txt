@@ -100,11 +100,13 @@ set(VSTSDK_PLUGIN_SOURCE
 
 set(regrader_sources
     src/global.h
+    src/audiobuffer.h
+    src/audiobuffer.cpp
     src/paramids.h
     src/lfo.h
     src/lfo.cpp
-    src/regrader.h
-    src/regrader.cpp
+    src/regraderprocess.h
+    src/regraderprocess.cpp
     src/vst.h
     src/vst.cpp
     src/vstentry.cpp

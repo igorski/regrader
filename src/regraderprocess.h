@@ -20,22 +20,42 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef __REGRADER_H_INCLUDED__
-#define __REGRADER_H_INCLUDED__
+#ifndef __REGRADERPROCESS__H_INCLUDED__
+#define __REGRADERPROCESS__H_INCLUDED__
 
 #include "global.h"
+#include "audiobuffer.h"
+
+using namespace Steinberg;
 
 namespace Igorski {
-class Regrader {
+class RegraderProcess {
+
+    // max delay time (in milliseconds)
+    const int MAX_DELAY_TIME = 20000;
 
     public:
-        Regrader();
-        ~Regrader();
+        RegraderProcess( int amountOfChannels );
+        ~RegraderProcess();
 
         // apply effect to incoming sampleBuffer contents
-        void process( float** sampleBuffer, int amountOfChannels, int bufferSize );
+        void process( float** inBuffer, float** outBuffer, int numInChannels, int numOutChannels,
+            int bufferSize, uint32 sampleFramesSize
+        );
+
+        // set delay time (in milliseconds)
+        void setDelayTime( float value );
+        void setDelayFeedback( float value );
+        void setDelayMix( float value );
 
     private:
+        AudioBuffer* _delayBuffer;
+        int* _delayIndices;
+        int _delayTime;
+        int _maxTime;
+        float _delayMix;
+        float _delayFeedback;
+        int _amountOfChannels;
 
 };
 }

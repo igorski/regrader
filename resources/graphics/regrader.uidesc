@@ -12,7 +12,7 @@
 
         <!-- ADSR module -->
         <!-- attack slider -->
-        <view control-tag="Unit1::Attack" origin="130, 126" size="126, 18" class="CSlider"
+        <view control-tag="Unit1::DelayTime" origin="130, 126" size="126, 18" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
             bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
             draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
@@ -21,7 +21,7 @@
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
         <!-- decay slider -->
-        <view control-tag="Unit1::Decay" origin="130, 150" size="126, 18" class="CSlider"
+        <view control-tag="Unit1::DelayFeedback" origin="130, 150" size="126, 18" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
             bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
             draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
@@ -30,7 +30,7 @@
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
         <!-- sustain slider -->
-        <view control-tag="Unit1::Sustain" origin="130, 174" size="126, 18" class="CSlider"
+        <view control-tag="Unit1::DelayMix" origin="130, 174" size="126, 18" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
             bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
             draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"

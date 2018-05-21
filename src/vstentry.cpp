@@ -68,7 +68,7 @@ BEGIN_FACTORY_DEF( "igorski.nl",
                 "Fx",                            // Subcategory for this Plug-in
                 FULL_VERSION_STR,                // Plug-in version
                 kVstVersionString,               // the VST 3 SDK version (do not change this)
-                Regrader::createInstance )         // function pointer called when this component should be instantiated
+                Regrader::createInstance )       // function pointer called when this component should be instantiated
 
     // its kVstComponentControllerClass component
     DEF_CLASS2( INLINE_UID_FROM_FUID( RegraderControllerUID ),

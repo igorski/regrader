@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2018 Igor Zinken - http://www.igorski.nl
+ * Copyright (c) 2013-2018 Igor Zinken - http://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -20,22 +20,31 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include "regrader.h"
+#ifndef __AUDIOBUFFER_H_INCLUDED__
+#define __AUDIOBUFFER_H_INCLUDED__
 
-namespace Igorski {
+#include "global.h"
+#include <vector>
 
-Regrader::Regrader() {
+class AudioBuffer
+{
+    public:
+        AudioBuffer( int aAmountOfChannels, int aBufferSize );
+        ~AudioBuffer();
 
-}
+        int amountOfChannels;
+        int bufferSize;
+        bool loopeable;
 
-Regrader::~Regrader() {
+        float* getBufferForChannel( int aChannelNum );
+        int mergeBuffers( AudioBuffer* aBuffer, int aReadOffset, int aWriteOffset, float aMixVolume );
+        void silenceBuffers();
+        void adjustBufferVolumes( float volume );
+        void applyMonoSource();
+        AudioBuffer* clone();
 
-}
+    protected:
+        std::vector<float*>* _buffers;
+};
 
-/* public methods */
-
-void Regrader::process( float** sampleBuffer, int amountOfChannels, int bufferSize ) {
-    // TODO: make awesome.
-}
-
-}
+#endif

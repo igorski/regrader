@@ -40,7 +40,7 @@ namespace Vst {
 //------------------------------------------------------------------------
 // Regrader Implementation
 //------------------------------------------------------------------------
-Regrader::Regrader ()
+Regrader::Regrader()
 : fDelayTime( 0.f )
 , fDelayFeedback( 1.f )
 , fDelayMix( .5f )
@@ -50,6 +50,7 @@ Regrader::Regrader ()
 , fFormant( 0.f )
 , fLFOFormant( 1.f )
 , fLFOFormantDepth( 0.f )
+, regraderProcess( 0 )
 , currentProcessMode( -1 ) // -1 means not initialized
 {
     // register its editor class (the same as used in entry.cpp)
@@ -60,7 +61,7 @@ Regrader::Regrader ()
 Regrader::~Regrader ()
 {
     // free all allocated resources
-    delete regrader;
+    delete regraderProcess;
 }
 
 //------------------------------------------------------------------------
@@ -73,11 +74,14 @@ tresult PLUGIN_API Regrader::initialize( FUnknown* context )
         return result;
 
     //---create Audio In/Out buses------
-    //addAudioInput ( STR16( "Stereo In" ),  SpeakerArr::kStereo );
+    addAudioInput ( STR16( "Stereo In" ),  SpeakerArr::kStereo );
     addAudioOutput( STR16( "Stereo Out" ), SpeakerArr::kStereo );
 
     //---create Event In/Out buses (1 bus with only 1 channel)------
     addEventInput( STR16( "Event In" ), 1 );
+
+    // TODO: creating a bunch of extra channels for no apparent reason?
+    regraderProcess = new Igorski::RegraderProcess( 6 );
 
     return kResultOk;
 }
@@ -107,7 +111,7 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
     // In this example there are 4 steps:
     // 1) Read inputs parameters coming from host (in order to adapt our model values)
     // 2) Read inputs events coming from host (note on/off events)
-    // 3) Process the gain of the input buffer to the output buffer
+    // 3) Apply the effect using the input buffer into the output buffer
 
     //---1) Read input parameter changes-----------
     IParameterChanges* paramChanges = data.inputParameterChanges;
@@ -181,7 +185,7 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
     // according to docs: processing context (optional, but most welcome)
 //
 //    if ( data.processContext != nullptr ) {
-//        synth->init(( int ) data.processContext->sampleRate, data.processContext->tempo );
+//        regrader->init(( int ) data.processContext->sampleRate, data.processContext->tempo );
 //    }
 
     //---2) Read input events-------------
@@ -192,26 +196,33 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
     //---3) Process Audio---------------------
     //-------------------------------------
 
-    if ( data.numOutputs == 0 )
+    if ( data.numInputs == 0 || data.numOutputs == 0 || regraderProcess == 0 )
     {
         // nothing to do
         return kResultOk;
     }
 
-    int32 numChannels = data.outputs[ 0 ].numChannels;
+    int32 numInChannels  = data.inputs[ 0 ].numChannels;
+    int32 numOutChannels = data.outputs[ 0 ].numChannels;
 
     // --- get audio buffers----------------
     uint32 sampleFramesSize = getSampleFramesSizeInBytes( processSetup, data.numSamples );
     void** in  = getChannelBuffersPointer( processSetup, data.inputs [ 0 ] );
     void** out = getChannelBuffersPointer( processSetup, data.outputs[ 0 ] );
 
-    // process !
-
-    // updateProperties is a bit brute force, we're syncing the module properties
+    // updating of the properties like this is a bit brute force, we're syncing the module properties
     // with this model, can we do it when there is an actual CHANGE in the model?
-    //synth->updateProperties( fAttack, fDecay, fSustain, fRelease, fRingModRate );
+    regraderProcess->setDelayTime( fDelayTime );
+    regraderProcess->setDelayFeedback( fDelayFeedback );
+    regraderProcess->setDelayMix( fDelayMix );
+    // e.o. updates
 
-    regrader->process(( float** ) out, numChannels, data.numSamples );
+    // process the incoming sound!
+
+    regraderProcess->process(
+        ( float** ) in, ( float** ) out, numInChannels, numOutChannels,
+        data.numSamples, sampleFramesSize
+    );
 
     // there should always be output
 
@@ -377,14 +388,12 @@ tresult PLUGIN_API Regrader::setupProcessing( ProcessSetup& newSetup )
 
     Igorski::VST::SAMPLE_RATE = newSetup.sampleRate;
 
-    regrader = new Igorski::Regrader();
-
     return AudioEffect::setupProcessing( newSetup );
 }
 
 //------------------------------------------------------------------------
 tresult PLUGIN_API Regrader::setBusArrangements( SpeakerArrangement* inputs,  int32 numIns,
-                                               SpeakerArrangement* outputs, int32 numOuts )
+                                                 SpeakerArrangement* outputs, int32 numOuts )
 {
     if ( numIns == 1 && numOuts == 1 )
     {

@@ -124,7 +124,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
 
     RangeParameter* formantParam = new RangeParameter(
         USTRING( "Formant" ), kFormantId, USTRING( "0 - 6" ),
-        0, 0, 6,
+        0.f, 1.f, 0.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( formantParam );

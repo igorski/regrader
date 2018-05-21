@@ -24,7 +24,7 @@
 #define _VST_HEADER__
 
 #include "public.sdk/source/vst/vstaudioeffect.h"
-#include "regrader.h"
+#include "regraderprocess.h"
 #include "global.h"
 
 namespace Steinberg {
@@ -102,7 +102,7 @@ class Regrader : public AudioEffect
 
         int32 currentProcessMode;
 
-        Igorski::Regrader* regrader;
+        Igorski::RegraderProcess* regraderProcess;
 };
 
 //------------------------------------------------------------------------
