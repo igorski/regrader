@@ -37,7 +37,9 @@ enum
 
     kFormantId,               // formant
     kLFOFormantId,            // formant LFO rate
-    kLFOFormantDepthId        // depth for formant LFO
+    kLFOFormantDepthId,       // depth for formant LFO
+
+    kVuPPMId                  // for the Vu value return to host
 };
 
 #endif

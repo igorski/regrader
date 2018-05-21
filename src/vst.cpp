@@ -41,16 +41,17 @@ namespace Vst {
 // Regrader Implementation
 //------------------------------------------------------------------------
 Regrader::Regrader()
-: fDelayTime( 0.f )
-, fDelayFeedback( 1.f )
+: fDelayTime( 0.025f )
+, fDelayFeedback( 0.2f )
 , fDelayMix( .5f )
-, fBitResolution( 0.f )
+, fBitResolution( 1.f )
 , fLFOBitResolution( .5f )
 , fLFOBitResolutionDepth( 1.f )
 , fFormant( 0.f )
 , fLFOFormant( 1.f )
 , fLFOFormantDepth( 0.f )
 , regraderProcess( 0 )
+, outputGainOld( 0.f )
 , currentProcessMode( -1 ) // -1 means not initialized
 {
     // register its editor class (the same as used in entry.cpp)
@@ -100,6 +101,9 @@ tresult PLUGIN_API Regrader::setActive (TBool state)
         sendTextMessage( "Regrader::setActive (true)" );
     else
         sendTextMessage( "Regrader::setActive (false)" );
+
+    // reset output level meter
+    outputGainOld = 0.f;
 
     // call our parent setActive
     return AudioEffect::setActive( state );
@@ -215,6 +219,8 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
     regraderProcess->setDelayTime( fDelayTime );
     regraderProcess->setDelayFeedback( fDelayFeedback );
     regraderProcess->setDelayMix( fDelayMix );
+    regraderProcess->bitCrusher->setAmount( fBitResolution );
+    regraderProcess->formantFilter->setVowel( fFormant );
     // e.o. updates
 
     // process the incoming sound!
@@ -224,10 +230,22 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
         data.numSamples, sampleFramesSize
     );
 
-    // there should always be output
+    // output flags
 
-    data.outputs[ 0 ].silenceFlags = false;
+    data.outputs[ 0 ].silenceFlags = false; // there should always be output
+    float outputGain = regraderProcess->limiter->getLinearGR();
 
+    //---4) Write output parameter changes-----------
+    IParameterChanges* outParamChanges = data.outputParameterChanges;
+    // a new value of VuMeter will be send to the host
+    // (the host will send it back in sync to our controller for updating our editor)
+    if ( outParamChanges && outputGainOld != outputGain ) {
+        int32 index = 0;
+        IParamValueQueue* paramQueue = outParamChanges->addParameterData( kVuPPMId, index );
+        if ( paramQueue )
+            paramQueue->addPoint( 0, outputGain, index );
+    }
+    outputGainOld = outputGain;
     return kResultOk;
 }
 

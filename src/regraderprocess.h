@@ -25,6 +25,9 @@
 
 #include "global.h"
 #include "audiobuffer.h"
+#include "bitcrusher.h"
+#include "formantfilter.h"
+#include "limiter.h"
 
 using namespace Steinberg;
 
@@ -32,7 +35,7 @@ namespace Igorski {
 class RegraderProcess {
 
     // max delay time (in milliseconds)
-    const int MAX_DELAY_TIME = 20000;
+    const int MAX_DELAY_TIME = 10000;
 
     public:
         RegraderProcess( int amountOfChannels );
@@ -48,8 +51,14 @@ class RegraderProcess {
         void setDelayFeedback( float value );
         void setDelayMix( float value );
 
+        BitCrusher* bitCrusher;
+        FormantFilter* formantFilter;
+        Limiter* limiter;
+
     private:
-        AudioBuffer* _delayBuffer;
+        AudioBuffer* _delayBuffer; // holds delay memory
+        AudioBuffer* _tempBuffer;  // used during process cycle for applying effects onto delay mix
+
         int* _delayIndices;
         int _delayTime;
         int _maxTime;

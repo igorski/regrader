@@ -100,6 +100,8 @@ class Regrader : public AudioEffect
         float fLFOFormant;
         float fLFOFormantDepth;
 
+        float outputGainOld; // for visualizing output gain in DAW
+
         int32 currentProcessMode;
 
         Igorski::RegraderProcess* regraderProcess;

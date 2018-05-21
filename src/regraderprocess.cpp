@@ -21,9 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include "regraderprocess.h"
-#include <algorithm>
 #include <math.h>
-#include "util.h" // QQQ: debug only
 
 namespace Igorski {
 
@@ -34,17 +32,26 @@ RegraderProcess::RegraderProcess( int amountOfChannels ) {
     _delayFeedback = .1f;
 
     _delayBuffer  = new AudioBuffer( amountOfChannels, _maxTime );
+    _tempBuffer   = new AudioBuffer( amountOfChannels, _maxTime / 10 );
     _delayIndices = new int[ amountOfChannels ];
 
     for ( int i = 0; i < amountOfChannels; ++i ) {
         _delayIndices[ i ] = 0;
     }
     _amountOfChannels = amountOfChannels;
+
+    bitCrusher    = new BitCrusher( 8, .5f, .5f );
+    formantFilter = new FormantFilter( 0.f );
+    limiter       = new Limiter( 10.f, 500.f, .6f );
 }
 
 RegraderProcess::~RegraderProcess() {
-    delete   _delayBuffer;
     delete[] _delayIndices;
+    delete _delayBuffer;
+    delete _tempBuffer;
+    delete bitCrusher;
+    delete formantFilter;
+    delete limiter;
 }
 
 /* public methods */
@@ -52,10 +59,10 @@ RegraderProcess::~RegraderProcess() {
 void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInChannels, int numOutChannels,
                                int bufferSize, uint32 sampleFramesSize ) {
     float delaySample;
-    int readIndex, delayIndex, channelDelayBufferChannel;
+    int i, readIndex, delayIndex, channelDelayBufferChannel;
 
     // clear existing output buffer contents
-    for ( int32 i = 0; i < numOutChannels; i++ )
+    for ( i = 0; i < numOutChannels; i++ )
         memset( outBuffer[ i ], 0, sampleFramesSize );
 
     float dryMix = 1.0f - _delayMix;
@@ -64,10 +71,11 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
     {
         float* channelInBuffer    = inBuffer[ c ];
         float* channelOutBuffer   = outBuffer[ c ];
+        float* channelTempBuffer  = _tempBuffer->getBufferForChannel( c );
         float* channelDelayBuffer = _delayBuffer->getBufferForChannel( c );
         delayIndex = _delayIndices[ c ];
 
-        for ( int32 i = 0; i < bufferSize; ++i )
+        for ( i = 0; i < bufferSize; ++i )
         {
             readIndex = delayIndex - _delayTime + 1;
 
@@ -76,7 +84,7 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
             }
 
             // read the previously delayed samples from the buffer
-            // ( for feedback purposes ) and append the current sample to it
+            // ( for feedback purposes ) and append the current incoming sample to it
 
             delaySample = channelDelayBuffer[ readIndex ];
             channelDelayBuffer[ delayIndex ] = channelInBuffer[ i ] + delaySample * _delayFeedback;
@@ -85,26 +93,38 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
                 delayIndex = 0;
             }
 
-            // write the wet mix of the effect into the output buffer
-            channelOutBuffer[ i ] = delaySample * _delayMix;
+            // write the delay sample into the temp buffer
+            channelTempBuffer[ i ] = delaySample;
         }
         // update last index for this channel
         _delayIndices[ c ] = delayIndex;
 
-        // apply the processing on the delay buffer
-        // TODO...
+        // apply the effect processing on the temp buffer
+        // TODO: set/reset LFO's when processing next channel(s)
+
+        formantFilter->process( channelTempBuffer, bufferSize );
+        bitCrusher->process( channelTempBuffer, bufferSize );
 
         // mix the input buffer into the output (dry mix)
 
-        for ( int i = 0; i < bufferSize; ++i )
+        for ( i = 0; i < bufferSize; ++i ) {
+
+            // wet mix (e.g. the effected delay signal)
+            channelOutBuffer[ i ] = channelTempBuffer[ i ] * _delayMix;
+
+            // dry mix (e.g. mix in the input signal)
             channelOutBuffer[ i ] += ( channelInBuffer[ i ] * dryMix );
+        }
     }
+
+    // limit the signal as it can get quite hot
+    limiter->process( outBuffer, bufferSize, ( numOutChannels > 1 ));
 }
 
 /* setters */
 
 void RegraderProcess::setDelayTime( float value ) {
-    _delayTime = ( int ) round( std::min( 1.f, std::max( 0.f, value )) * _maxTime );
+    _delayTime = ( int ) round( VST::cap( value ) * _maxTime );
 
     for ( int i = 0; i < _amountOfChannels; ++i ) {
         if ( _delayIndices[ i ] >= _delayTime )

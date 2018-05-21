@@ -10,8 +10,8 @@
         background-color="~ BlackCColor" background-color-draw-style="filled and stroked" bitmap="background"
         class="CViewContainer"  mouse-enabled="true"  transparent="false">
 
-        <!-- ADSR module -->
-        <!-- attack slider -->
+        <!-- Delay module -->
+        <!-- delay time slider -->
         <view control-tag="Unit1::DelayTime" origin="130, 126" size="126, 18" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
             bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
@@ -20,7 +20,7 @@
             mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
-        <!-- decay slider -->
+        <!-- delay feedback slider -->
         <view control-tag="Unit1::DelayFeedback" origin="130, 150" size="126, 18" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
             bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
@@ -29,7 +29,7 @@
             mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
-        <!-- sustain slider -->
+        <!-- delay mix slider -->
         <view control-tag="Unit1::DelayMix" origin="130, 174" size="126, 18" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
             bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
@@ -38,8 +38,9 @@
             mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
-        <!-- release slider -->
-        <view control-tag="Unit1::Release" origin="130, 198" size="126, 18" class="CSlider"
+        <!-- BitCrusher module -->
+        <!-- bit resolution slider -->
+        <view control-tag="Unit1::BitResolution" origin="130, 198" size="126, 18" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
             bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
             draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
@@ -47,27 +48,8 @@
             mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
-        <!-- filter module -->
-        <!-- cutoff slider -->
-        <view control-tag="Unit1::Cutoff" origin="402, 126" size="126, 18" class="CSlider"
-            background-offset="0, 0" bitmap="slider_background"
-            bitmap-offset="0, 0" default-value="440" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
-            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
-            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="12000" min-value="50"
-            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
-            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
-
-        <!-- resonance slider -->
-        <view control-tag="Unit1::Resonance" origin="402, 150" size="126, 18" class="CSlider"
-            background-offset="0, 0" bitmap="slider_background"
-            bitmap-offset="0, 0" default-value="0.1" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
-            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
-            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="0.7071067811865476" min-value="0.1"
-            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
-            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
-
         <!-- LFO rate slider -->
-        <view control-tag="Unit1::LFORate" origin="402, 174" size="126, 18" class="CSlider"
+        <view control-tag="Unit1::LFOBitResolution" origin="402, 174" size="126, 18" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
             bitmap-offset="0, 0" default-value="0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
             draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
@@ -76,7 +58,7 @@
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
         <!-- LFO depth slider -->
-        <view control-tag="Unit1::LFODepth" origin="402, 198" size="126, 18" class="CSlider"
+        <view control-tag="Unit1::LFOBitResolutionDepth" origin="402, 198" size="126, 18" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
             bitmap-offset="0, 0" default-value="0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
             draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
@@ -84,15 +66,33 @@
             mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
-        <!-- Ring modulator slider -->
-        <view control-tag="Unit1::RingModRate" origin="602, 42" size="126, 18" class="CSlider"
+        <!-- Formant filter module -->
+        <!-- formant slider -->
+        <view control-tag="Unit1::Formant" origin="630, 198" size="126, 18" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
-            bitmap-offset="0, 0" default-value="0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
             draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
-            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="10000" min-value="0"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="1" min-value="0"
             mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
+        <!-- LFO rate slider -->
+        <view control-tag="Unit1::LFOFormant" origin="602, 174" size="126, 18" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="10" min-value="0"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
+
+        <!-- LFO depth slider -->
+        <view control-tag="Unit1::LFOFormantDepth" origin="602, 198" size="126, 18" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="10" min-value="0"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
     </template>
     <variables/>
     <custom>

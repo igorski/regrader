@@ -102,9 +102,15 @@ set(regrader_sources
     src/global.h
     src/audiobuffer.h
     src/audiobuffer.cpp
-    src/paramids.h
+    src/formantfilter.h
+    src/formantfilter.cpp
+    src/bitcrusher.h
+    src/bitcrusher.cpp
     src/lfo.h
     src/lfo.cpp
+    src/limiter.h
+    src/limiter.cpp
+    src/paramids.h
     src/regraderprocess.h
     src/regraderprocess.cpp
     src/vst.h

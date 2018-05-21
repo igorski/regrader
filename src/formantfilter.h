@@ -1,7 +1,8 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2018 Igor Zinken - https://www.igorski.nl
+ * based on public source code by alex@smartelectronix.com, adapted
+ * by Igor Zinken - http://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -20,52 +21,33 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef __UTIL_HEADER__
-#define __UTIL_HEADER__
-
-#include <fstream>
-#include <string>
-#include <time.h>
+#ifndef __FORMANTFILTER_H_INCLUDED__
+#define __FORMANTFILTER_H_INCLUDED__
 
 namespace Igorski {
-namespace Util {
+class FormantFilter {
 
-    /**
-     * Convenience method to log a message to a file
-     * multiple messages can be written to the same file (are
-     * separated by a new line)
-     *
-     * This should be used for debugging purposes only
-     */
-    void log( const char* message, const char* filename )
-    {
-        std::ofstream out;
+    public:
+        FormantFilter( double aVowel );
+        ~FormantFilter();
 
-        char buff[20];
-        struct tm *sTm;
+        void setVowel( double aVowel );
 
-        time_t now = time( 0 );
-        sTm        = gmtime( &now );
+        void process( float* inBuffer, int bufferSize );
 
-        strftime( buff, sizeof( buff ), "%Y-%m-%d %H:%M:%S", sTm );
+        static const int VOWEL_A = 0;
+        static const int VOWEL_E = 1;
+        static const int VOWEL_I = 2;
+        static const int VOWEL_O = 3;
+        static const int VOWEL_U = 4;
 
-        out.open( filename, std::ios_base::app );
-        out << buff << " " << message << "\n";
-
-        out.close();
-    }
-
-    void log( std::string message, const char* filename )
-    {
-        log( message.c_str(), filename );
-    }
-
-    void log( int value, const char* filename )
-    {
-        log( std::to_string( value ), filename );
-    }
-
-}
+    private:
+        double  _vowel;
+        double _currentCoeffs[ 11 ];
+        double _coeffs[ 5 ][ 11 ];
+        double _memory[ 10 ];
+        void calculateCoeffs();
+};
 }
 
 #endif

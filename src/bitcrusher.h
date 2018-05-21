@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2018 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2013-2018 Igor Zinken - http://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -20,52 +20,27 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef __UTIL_HEADER__
-#define __UTIL_HEADER__
-
-#include <fstream>
-#include <string>
-#include <time.h>
+#ifndef __BITCRUSHER_H_INCLUDED__
+#define __BITCRUSHER_H_INCLUDED__
 
 namespace Igorski {
-namespace Util {
+class BitCrusher {
 
-    /**
-     * Convenience method to log a message to a file
-     * multiple messages can be written to the same file (are
-     * separated by a new line)
-     *
-     * This should be used for debugging purposes only
-     */
-    void log( const char* message, const char* filename )
-    {
-        std::ofstream out;
+    public:
+        BitCrusher( float amount, float inputMix, float outputMix );
 
-        char buff[20];
-        struct tm *sTm;
+        void process( float* inBuffer, int bufferSize );
 
-        time_t now = time( 0 );
-        sTm        = gmtime( &now );
+        void setAmount( float value ); // range between -1 to +1
+        void setInputMix( float value );
+        void setOutputMix( float value );
 
-        strftime( buff, sizeof( buff ), "%Y-%m-%d %H:%M:%S", sTm );
-
-        out.open( filename, std::ios_base::app );
-        out << buff << " " << message << "\n";
-
-        out.close();
-    }
-
-    void log( std::string message, const char* filename )
-    {
-        log( message.c_str(), filename );
-    }
-
-    void log( int value, const char* filename )
-    {
-        log( std::to_string( value ), filename );
-    }
-
-}
+    private:
+        int _bits; // we scale the amount to integers in the 1-16 range
+        float _amount;
+        float _inputMix;
+        float _outputMix;
+};
 }
 
 #endif
