@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vstgui-ui-description version="1">
+    <fonts>
+    </fonts>
+    <colors>
+        <color name="Focus" rgba="#279bffff"/>
+    </colors>
+    <template
+        maxSize="788, 250" minSize="788, 250" size="788, 250" name="view" opacity="1" origin="0, 0"
+        background-color="~ BlackCColor" background-color-draw-style="filled and stroked" bitmap="background"
+        class="CViewContainer"  mouse-enabled="true"  transparent="false">
+
+        <!-- ADSR module -->
+        <!-- attack slider -->
+        <view control-tag="Unit1::Attack" origin="130, 126" size="126, 18" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="1" min-value="0"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
+
+        <!-- decay slider -->
+        <view control-tag="Unit1::Decay" origin="130, 150" size="126, 18" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="1" min-value="0"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
+
+        <!-- sustain slider -->
+        <view control-tag="Unit1::Sustain" origin="130, 174" size="126, 18" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="1" min-value="0"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
+
+        <!-- release slider -->
+        <view control-tag="Unit1::Release" origin="130, 198" size="126, 18" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="1" min-value="0"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
+
+        <!-- filter module -->
+        <!-- cutoff slider -->
+        <view control-tag="Unit1::Cutoff" origin="402, 126" size="126, 18" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="440" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="12000" min-value="50"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
+
+        <!-- resonance slider -->
+        <view control-tag="Unit1::Resonance" origin="402, 150" size="126, 18" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0.1" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="0.7071067811865476" min-value="0.1"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
+
+        <!-- LFO rate slider -->
+        <view control-tag="Unit1::LFORate" origin="402, 174" size="126, 18" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="10" min-value="0"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
+
+        <!-- LFO depth slider -->
+        <view control-tag="Unit1::LFODepth" origin="402, 198" size="126, 18" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="10" min-value="0"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
+
+        <!-- Ring modulator slider -->
+        <view control-tag="Unit1::RingModRate" origin="602, 42" size="126, 18" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="10000" min-value="0"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
+
+    </template>
+    <variables/>
+    <custom>
+        <attributes color="Focus" enabled="false" name="FocusDrawing" width="1"/>
+        <attributes Size="5, 5" name="UIGridController"/>
+        <attributes SelectedTemplate="view" name="UITemplateController"/>
+        <attributes EditViewScale="1" EditorSize="0, 0, 882, 716"
+                    SplitViewSize_0_0="0.6402877697841726778449356061173602938652"
+                    SplitViewSize_0_1="0.3309352517985611474848894886235939338803"
+                    SplitViewSize_1_0="0.506474820143884896239683257590513676405"
+                    SplitViewSize_1_1="0.486330935251798546214985208280268125236"
+                    SplitViewSize_2_0="0.636054421768707523021646466077072545886"
+                    SplitViewSize_2_1="0.3582766439909297329080573035753332078457"
+                    TabSwitchValue="0" Version="1" name="UIEditController" />
+        <attributes name="UIAttributesController"/>
+        <attributes SelectedRow="23" name="UIViewCreatorDataSource"/>
+        <attributes SelectedRow="4" name="UIBitmapsDataSource"/>
+        <attributes Path="resources/graphics/regrader.uidesc" name="VST3Editor"/>
+        <attributes SelectedRow="2" name="UITagsDataSource"/>
+        <attributes SelectedRow="0" name="UIColorsDataSource"/>
+        <attributes SelectedRow="-1" name="UIGradientsDataSource"/>
+        <attributes SelectedRow="-1" name="UIFontsDataSource"/>
+    </custom>
+    <bitmaps>
+        <bitmap name="background" path="background.png"/>
+        <bitmap name="slider_background" path="slider_background.png"/>
+        <bitmap name="slider_handle" path="slider_handle.png"/>
+        <bitmap name="slider_handle#2x" path="slider_handle_2.0x.png" scale-factor="2"/>
+    </bitmaps>
+    <control-tags>
+        <control-tag name="UI::SendMessage"              tag="1000"/>
+        <control-tag name="Unit1::DelayTime"             tag="0"/>
+        <control-tag name="Unit1::DelayFeedback"         tag="1"/>
+        <control-tag name="Unit1::DelayMix"              tag="2"/>
+        <control-tag name="Unit1::BitResolution"         tag="3"/>
+        <control-tag name="Unit1::LFOBitResolution"      tag="4"/>
+        <control-tag name="Unit1::LFOBitResolutionDepth" tag="5"/>
+        <control-tag name="Unit1::Formant"               tag="6"/>
+        <control-tag name="Unit1::LFOFormant"            tag="7"/>
+        <control-tag name="Unit1::LFOFormantDepth"       tag="8"/>
+
+    </control-tags>
+</vstgui-ui-description>
