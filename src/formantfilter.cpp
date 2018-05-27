@@ -109,19 +109,24 @@ void FormantFilter::process( float* inBuffer, int bufferSize )
     if ( _vowel == 0.f )
         return;
 
+    float in;
+    double res;
+
     for ( int i = 0; i < bufferSize; ++i )
     {
-        float res = ( _currentCoeffs[ 0 ]  * inBuffer[ i ] +
-                      _currentCoeffs[ 1 ]  * _memory[ 0 ] +
-                      _currentCoeffs[ 2 ]  * _memory[ 1 ] +
-                      _currentCoeffs[ 3 ]  * _memory[ 2 ] +
-                      _currentCoeffs[ 4 ]  * _memory[ 3 ] +
-                      _currentCoeffs[ 5 ]  * _memory[ 4 ] +
-                      _currentCoeffs[ 6 ]  * _memory[ 5 ] +
-                      _currentCoeffs[ 7 ]  * _memory[ 6 ] +
-                      _currentCoeffs[ 8 ]  * _memory[ 7 ] +
-                      _currentCoeffs[ 9 ]  * _memory[ 8 ] +
-                      _currentCoeffs[ 10 ] * _memory[ 9 ] );
+        in = inBuffer[ i ];
+
+        res = ( _currentCoeffs[ 0 ]  * in +
+                _currentCoeffs[ 1 ]  * _memory[ 0 ] +
+                _currentCoeffs[ 2 ]  * _memory[ 1 ] +
+                _currentCoeffs[ 3 ]  * _memory[ 2 ] +
+                _currentCoeffs[ 4 ]  * _memory[ 3 ] +
+                _currentCoeffs[ 5 ]  * _memory[ 4 ] +
+                _currentCoeffs[ 6 ]  * _memory[ 5 ] +
+                _currentCoeffs[ 7 ]  * _memory[ 6 ] +
+                _currentCoeffs[ 8 ]  * _memory[ 7 ] +
+                _currentCoeffs[ 9 ]  * _memory[ 8 ] +
+                _currentCoeffs[ 10 ] * _memory[ 9 ] );
 
         _memory[ 9 ] = _memory[ 8 ];
         _memory[ 8 ] = _memory[ 7 ];
@@ -134,7 +139,7 @@ void FormantFilter::process( float* inBuffer, int bufferSize )
         _memory[ 1 ] = _memory[ 0 ];
         _memory[ 0 ] = res;
 
-        inBuffer[ i ] = res;
+        inBuffer[ i ] = ( float ) res;
 
         // oscillator attached to formant filter ? travel the vowel values
         // between the minimum and maximum frequencies
