@@ -50,7 +50,7 @@ void BitCrusher::process( float* inBuffer, int bufferSize )
     {
         short input = ( short ) (( inBuffer[ i ] * _inputMix ) * SHRT_MAX );
         short prevent_offset = ( short )( -1 >> bits );
-        input &= ( -1 << ( 16 - _bits ));
+        input &= ( -1 << ( 16 - bits ));
         inBuffer[ i ] = (( input + prevent_offset ) * _outputMix ) / SHRT_MAX;
     }
 }
@@ -62,7 +62,7 @@ void BitCrusher::setAmount( float value )
     _amount = value;
 
     // scale float to 1 - 16 bit range
-    _bits = ( int ) floor( VST::scale( value, 1, 15 )) + 1;
+    _bits = ( int ) ( floor( VST::scale( value, 1, 15 )) + 1 );
 }
 
 void BitCrusher::setInputMix( float value )

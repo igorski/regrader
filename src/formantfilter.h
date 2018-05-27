@@ -42,12 +42,17 @@ class FormantFilter {
         void cacheLFO();
         LFO* lfo;
 
+        // vowel value ranges at which the phoneme sound changes
 
         static const int VOWEL_A = 0;
         static const int VOWEL_E = 1;
         static const int VOWEL_I = 2;
         static const int VOWEL_O = 3;
         static const int VOWEL_U = 4;
+
+        // a vowel of "0" basically bypasses this filter, lets
+        // create a tiny value to engage the filter at VOWEL_A
+        static const float MIN_VOWEL() { return 0.000001f; };
 
         bool hasLFO;
 
@@ -57,13 +62,14 @@ class FormantFilter {
         double _coeffs[ 5 ][ 11 ];
         double _memory[ 10 ];
 
-        void calculateCoeffs();
+        void cacheCoeffs();
+        void calcCoeffs();
 
         float _lfoDepth;
         float _lfoRange;
         float _lfoMin;
         float _lfoMax;
-        double _orgVowel;
+        double _tempVowel;
 };
 }
 

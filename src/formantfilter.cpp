@@ -42,9 +42,8 @@ FormantFilter::FormantFilter( double aVowel )
     for ( i = 0; i < 10; i++ )
         _memory[ i ] = 0.0;
 
-    calculateCoeffs();
+    cacheCoeffs();
     setVowel( aVowel );
-    _orgVowel = _vowel;
 
     lfo    = new LFO();
     hasLFO = false;
@@ -65,42 +64,16 @@ double FormantFilter::getVowel()
 
 void FormantFilter::setVowel( double aVowel )
 {
+    float tempRatio = _tempVowel / std::max(( double ) MIN_VOWEL(), _vowel );
+
     _vowel = aVowel;
 
-    double interpolationThreshold = .7;
+    // in case filter is attached to oscillator, keep relative offset
+    // of currently moving vowel in place
+    _tempVowel = ( hasLFO ) ? _vowel * tempRatio : _vowel;
 
-    // Linearly interpolate the values when below threshold
-    // TODO : this is weak ;) keep calculated coeffecient values within double range
-
-    if ( aVowel < interpolationThreshold )
-    {
-        int roundVowel  = ( int )( aVowel * 4.0 );
-        double fracpart = aVowel - roundVowel;
-
-        for ( int i = 0; i < 11; i++ )
-        {
-            _currentCoeffs[ i ] = _coeffs[ roundVowel ][ i ] * ( 1.0 - fracpart ) +
-                                ( _coeffs[ roundVowel + ( roundVowel < 4 )][ i ] * fracpart );
-        }
-    }
-    else
-    {
-        // interpolation beyond this point is quite nasty... keep in exact range
-
-        int min      = ( int ) round( aVowel );
-        int max      = min < ( 4 /* _coeffs.length - 1 */ ) ? min + 1 : min;
-        double delta = std::abs( min - aVowel );
-
-        int l = 11;
-
-        for ( int i = 0; i < l; ++i )
-        {
-            double minCoeff = _coeffs[ min ][ i ];
-            double maxCoeff = _coeffs[ max ][ i ];
-
-            _currentCoeffs[ i ] = delta < .5 ? minCoeff : maxCoeff;
-        }
-    }
+    cacheLFO();
+    calcCoeffs();
 }
 
 void FormantFilter::process( float* inBuffer, int bufferSize )
@@ -143,7 +116,8 @@ void FormantFilter::process( float* inBuffer, int bufferSize )
         {
             // multiply by .5 and add .5 to make the LFO's bipolar waveform unipolar
             float lfoValue = lfo->peek() * .5f  + .5f;
-            setVowel( std::min( _lfoMax, _lfoMin + _lfoRange * lfoValue ));
+            _tempVowel = std::min( _lfoMax, _lfoMin + _lfoRange * lfoValue );
+            calcCoeffs();
         }
     }
 }
@@ -155,33 +129,38 @@ void FormantFilter::setLFO( float LFORatePercentage, float LFODepth )
 
     hasLFO = enabled;
 
-    if ( hasLFO && !wasEnabled ) {
+    bool hadChange = ( wasEnabled != enabled ) || _lfoDepth != LFODepth;
+
+    if ( enabled )
         lfo->setRate(
             VST::MIN_LFO_RATE() + (
                 LFORatePercentage * ( VST::MAX_LFO_RATE() - VST::MIN_LFO_RATE() )
             )
         );
+
+    // turning LFO off
+    if ( !hasLFO && wasEnabled )
+        _tempVowel = _vowel;
+
+    if ( hadChange ) {
         _lfoDepth = LFODepth;
-        _orgVowel = _vowel;
+        calcCoeffs();
         cacheLFO();
-    }
-    else if ( !hasLFO ) {
-        setVowel( _orgVowel );
     }
 }
 
 void FormantFilter::cacheLFO()
 {
     _lfoRange = ( float ) _vowel * _lfoDepth;
-    _lfoMax   = std::min( ( float ) VOWEL_U, ( float ) _vowel + _lfoRange / 2.f );
-    _lfoMin   = std::max( 0.000001f, ( float ) _vowel - _lfoRange / 2.f );
+    _lfoMax   = std::min(( float ) VOWEL_U, ( float ) _vowel + _lfoRange / 2.f );
+    _lfoMin   = std::max(( float ) MIN_VOWEL(), ( float ) _vowel - _lfoRange / 2.f );
 }
 
 /* private methods */
 
-// store the vowel coefficients
+// stores the vowel coefficients
 
-void FormantFilter::calculateCoeffs()
+void FormantFilter::cacheCoeffs()
 {
     // vowel "A"
 
@@ -253,4 +232,43 @@ void FormantFilter::calculateCoeffs()
     _coeffs[ VOWEL_U ][ 9 ]  = 8.338655623;
     _coeffs[ VOWEL_U ][ 10 ] = -0.910251753;
 }
+
+void FormantFilter::calcCoeffs()
+{
+    double interpolationThreshold = 0.f;//.7;
+
+    // Linearly interpolate the values when below threshold
+    // TODO : this is weak ;) keep calculated coeffecient values within double range
+
+    if ( _tempVowel < interpolationThreshold )
+    {
+        int roundVowel  = ( int )( _tempVowel * 4.0 );
+        double fracpart = _tempVowel - roundVowel;
+
+        for ( int i = 0; i < 11; i++ )
+        {
+            _currentCoeffs[ i ] = _coeffs[ roundVowel ][ i ] * ( 1.0 - fracpart ) +
+                                ( _coeffs[ roundVowel + ( roundVowel < 4 )][ i ] * fracpart );
+        }
+    }
+    else
+    {
+        // interpolation beyond this point is quite nasty... keep in exact range
+
+        int min      = ( int ) round( _tempVowel );
+        int max      = min < ( 4 /* _coeffs.length - 1 */ ) ? min + 1 : min;
+        double delta = std::abs( min - _tempVowel );
+
+        int l = 11;
+
+        for ( int i = 0; i < l; ++i )
+        {
+            double minCoeff = _coeffs[ min ][ i ];
+            double maxCoeff = _coeffs[ max ][ i ];
+
+            _currentCoeffs[ i ] = delta < .5 ? minCoeff : maxCoeff;
+        }
+    }
+}
+
 }

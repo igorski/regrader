@@ -113,8 +113,8 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
             formantFilter->setVowel( orgFormantVowel );
         }
 
-        bitCrusher->process( channelTempBuffer, bufferSize );
         formantFilter->process( channelTempBuffer, bufferSize );
+        bitCrusher->process( channelTempBuffer, bufferSize );
 
         // mix the input buffer into the output (dry mix)
 
