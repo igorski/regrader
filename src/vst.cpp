@@ -220,6 +220,7 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
     regraderProcess->setDelayFeedback( fDelayFeedback );
     regraderProcess->setDelayMix( fDelayMix );
     regraderProcess->bitCrusher->setAmount( fBitResolution );
+    regraderProcess->bitCrusher->setLFO( fLFOBitResolution, fLFOBitResolutionDepth );
     regraderProcess->formantFilter->setVowel( fFormant );
     regraderProcess->formantFilter->setLFO( fLFOFormant, fLFOFormantDepth );
     // e.o. updates

@@ -23,23 +23,38 @@
 #ifndef __BITCRUSHER_H_INCLUDED__
 #define __BITCRUSHER_H_INCLUDED__
 
+#include "lfo.h"
+
 namespace Igorski {
 class BitCrusher {
 
     public:
         BitCrusher( float amount, float inputMix, float outputMix );
+        ~BitCrusher();
 
+        void setLFO( float LFORatePercentage, float LFODepth );
         void process( float* inBuffer, int bufferSize );
 
         void setAmount( float value ); // range between -1 to +1
         void setInputMix( float value );
         void setOutputMix( float value );
 
+        LFO* lfo;
+        bool hasLFO;
+
     private:
         int _bits; // we scale the amount to integers in the 1-16 range
         float _amount;
         float _inputMix;
         float _outputMix;
+
+        void cacheLFO();
+        void calcBits();
+        float _tempAmount;
+        float _lfoDepth;
+        float _lfoRange;
+        float _lfoMax;
+        float _lfoMin;
 };
 }
 

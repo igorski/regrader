@@ -76,6 +76,33 @@ void FormantFilter::setVowel( double aVowel )
     calcCoeffs();
 }
 
+void FormantFilter::setLFO( float LFORatePercentage, float LFODepth )
+{
+    bool wasEnabled = hasLFO;
+    bool enabled    = LFORatePercentage > 0.f;
+
+    hasLFO = enabled;
+
+    bool hadChange = ( wasEnabled != enabled ) || _lfoDepth != LFODepth;
+
+    if ( enabled )
+        lfo->setRate(
+            VST::MIN_LFO_RATE() + (
+                LFORatePercentage * ( VST::MAX_LFO_RATE() - VST::MIN_LFO_RATE() )
+            )
+        );
+
+    // turning LFO off
+    if ( !hasLFO && wasEnabled )
+        _tempVowel = _vowel;
+
+    if ( hadChange ) {
+        _lfoDepth = LFODepth;
+        calcCoeffs();
+        cacheLFO();
+    }
+}
+
 void FormantFilter::process( float* inBuffer, int bufferSize )
 {
     // if vowel is 0, don't do anything.
@@ -119,33 +146,6 @@ void FormantFilter::process( float* inBuffer, int bufferSize )
             _tempVowel = std::min( _lfoMax, _lfoMin + _lfoRange * lfoValue );
             calcCoeffs();
         }
-    }
-}
-
-void FormantFilter::setLFO( float LFORatePercentage, float LFODepth )
-{
-    bool wasEnabled = hasLFO;
-    bool enabled    = LFORatePercentage > 0.f;
-
-    hasLFO = enabled;
-
-    bool hadChange = ( wasEnabled != enabled ) || _lfoDepth != LFODepth;
-
-    if ( enabled )
-        lfo->setRate(
-            VST::MIN_LFO_RATE() + (
-                LFORatePercentage * ( VST::MAX_LFO_RATE() - VST::MIN_LFO_RATE() )
-            )
-        );
-
-    // turning LFO off
-    if ( !hasLFO && wasEnabled )
-        _tempVowel = _vowel;
-
-    if ( hadChange ) {
-        _lfoDepth = LFODepth;
-        calcCoeffs();
-        cacheLFO();
     }
 }
 
