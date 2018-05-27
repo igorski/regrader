@@ -221,6 +221,7 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
     regraderProcess->setDelayMix( fDelayMix );
     regraderProcess->bitCrusher->setAmount( fBitResolution );
     regraderProcess->formantFilter->setVowel( fFormant );
+    regraderProcess->formantFilter->setLFO( fLFOFormant, fLFOFormantDepth );
     // e.o. updates
 
     // process the incoming sound!

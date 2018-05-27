@@ -44,14 +44,24 @@ FormantFilter::FormantFilter( double aVowel )
 
     calculateCoeffs();
     setVowel( aVowel );
+    _orgVowel = _vowel;
+
+    lfo    = new LFO();
+    hasLFO = false;
+    cacheLFO();
 }
 
 FormantFilter::~FormantFilter()
 {
-    // _currentCoeffs and _memory weren't allocated with new[], nothing to delete[] ;)
+    delete lfo;
 }
 
 /* public methods */
+
+double FormantFilter::getVowel()
+{
+    return _vowel;
+}
 
 void FormantFilter::setVowel( double aVowel )
 {
@@ -125,7 +135,46 @@ void FormantFilter::process( float* inBuffer, int bufferSize )
         _memory[ 0 ] = res;
 
         inBuffer[ i ] = res;
+
+        // oscillator attached to formant filter ? travel the vowel values
+        // between the minimum and maximum frequencies
+
+        if ( hasLFO )
+        {
+            // multiply by .5 and add .5 to make the LFO's bipolar waveform unipolar
+            float lfoValue = lfo->peek() * .5f  + .5f;
+            setVowel( std::min( _lfoMax, _lfoMin + _lfoRange * lfoValue ));
+        }
     }
+}
+
+void FormantFilter::setLFO( float LFORatePercentage, float LFODepth )
+{
+    bool wasEnabled = hasLFO;
+    bool enabled    = LFORatePercentage > 0.f;
+
+    hasLFO = enabled;
+
+    if ( hasLFO && !wasEnabled ) {
+        lfo->setRate(
+            VST::MIN_LFO_RATE() + (
+                LFORatePercentage * ( VST::MAX_LFO_RATE() - VST::MIN_LFO_RATE() )
+            )
+        );
+        _lfoDepth = LFODepth;
+        _orgVowel = _vowel;
+        cacheLFO();
+    }
+    else if ( !hasLFO ) {
+        setVowel( _orgVowel );
+    }
+}
+
+void FormantFilter::cacheLFO()
+{
+    _lfoRange = ( float ) _vowel * _lfoDepth;
+    _lfoMax   = std::min( ( float ) VOWEL_U, ( float ) _vowel + _lfoRange / 2.f );
+    _lfoMin   = std::max( 0.000001f, ( float ) _vowel - _lfoRange / 2.f );
 }
 
 /* private methods */

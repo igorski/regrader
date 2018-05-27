@@ -24,6 +24,8 @@
 #ifndef __FORMANTFILTER_H_INCLUDED__
 #define __FORMANTFILTER_H_INCLUDED__
 
+#include "lfo.h"
+
 namespace Igorski {
 class FormantFilter {
 
@@ -31,9 +33,15 @@ class FormantFilter {
         FormantFilter( double aVowel );
         ~FormantFilter();
 
+        double getVowel();
         void setVowel( double aVowel );
 
         void process( float* inBuffer, int bufferSize );
+
+        void setLFO( float LFORatePercentage, float LFODepth );
+        void cacheLFO();
+        LFO* lfo;
+
 
         static const int VOWEL_A = 0;
         static const int VOWEL_E = 1;
@@ -41,12 +49,21 @@ class FormantFilter {
         static const int VOWEL_O = 3;
         static const int VOWEL_U = 4;
 
+        bool hasLFO;
+
     private:
         double  _vowel;
         double _currentCoeffs[ 11 ];
         double _coeffs[ 5 ][ 11 ];
         double _memory[ 10 ];
+
         void calculateCoeffs();
+
+        float _lfoDepth;
+        float _lfoRange;
+        float _lfoMin;
+        float _lfoMax;
+        double _orgVowel;
 };
 }
 

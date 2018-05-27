@@ -29,7 +29,7 @@ namespace Igorski {
 class LFO {
 
     public:
-        LFO( float sampleRate );
+        LFO();
         ~LFO();
 
         float getRate();
@@ -48,6 +48,7 @@ class LFO {
         inline float peek()
         {
             // the wave table offset to read from
+            float SR_OVER_LENGTH = VST::SAMPLE_RATE / ( float ) TABLE_SIZE;
             int readOffset = ( _accumulator == 0.f ) ? 0 : ( int ) ( _accumulator / SR_OVER_LENGTH );
 
             // increment the accumulators read offset
@@ -70,7 +71,6 @@ class LFO {
 
         float _rate;
         float _accumulator;   // is read offset in wave table buffer
-        float SR_OVER_LENGTH;
 };
 }
 

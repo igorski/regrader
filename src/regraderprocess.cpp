@@ -67,6 +67,10 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
     float dryMix = 1.0f - _delayMix;
 
+    // formant filter LFO properties
+    float initialFormantLFOOffset = formantFilter->hasLFO ? formantFilter->lfo->getAccumulator() : 0.f;
+    float orgFormantVowel         = formantFilter->getVowel();
+
     for ( int32 c = 0; c < numInChannels; ++c )
     {
         float* channelInBuffer    = inBuffer[ c ];
@@ -100,10 +104,17 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
         _delayIndices[ c ] = delayIndex;
 
         // apply the effect processing on the temp buffer
-        // TODO: set/reset LFO's when processing next channel(s)
 
-        formantFilter->process( channelTempBuffer, bufferSize );
+        // when processing each new channel restore to the same LFO offset to get the same movement ;)
+
+        if ( formantFilter->hasLFO && c > 0 )
+        {
+            formantFilter->lfo->setAccumulator( initialFormantLFOOffset );
+            formantFilter->setVowel( orgFormantVowel );
+        }
+
         bitCrusher->process( channelTempBuffer, bufferSize );
+        formantFilter->process( channelTempBuffer, bufferSize );
 
         // mix the input buffer into the output (dry mix)
 
