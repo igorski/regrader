@@ -374,6 +374,7 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
     float toSaveLFOBitResolution      = fLFOBitResolution;
     float toSaveLFOBitResolutionDepth = fLFOBitResolutionDepth;
     float toSaveDecimator             = fDecimator;
+    float toSaveDecimatorChain        = fDecimatorChain;
     float toSaveLFODecimator          = fLFODecimator;
 
 #if BYTEORDER == kBigEndian
@@ -385,6 +386,7 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
     SWAP_32( toSaveLFOBitResolution )
     SWAP_32( toSaveLFOBitResolutionDepth )
     SWAP_32( toSaveDecimator )
+    SWAP_32( toSaveDecimatorChain )
     SWAP_32( toSaveLFODecimator )
 #endif
 
@@ -396,6 +398,7 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
     state->write( &toSaveLFOBitResolution,      sizeof( float ));
     state->write( &toSaveLFOBitResolutionDepth, sizeof( float ));
     state->write( &toSaveDecimator,             sizeof( float ));
+    state->write( &toSaveDecimatorChain,        sizeof( float ));
     state->write( &toSaveLFODecimator,          sizeof( float ));
 
     return kResultOk;
