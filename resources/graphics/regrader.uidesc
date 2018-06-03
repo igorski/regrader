@@ -48,6 +48,15 @@
             mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
+        <!-- Pre/post delay mix -->
+        <view control-tag="Unit1::BitCrusherChain" origin="15, 174" size="145, 25" autosize-to-fit="false" class="CCheckBox"
+              background-offset="0, 0" boxfill-color="~ WhiteCColor"  autosize="bottom"
+              boxframe-color="~ BlackCColor" checkmark-color="~ BlackCColor"
+              default-value="0" draw-crossbox="true" font="~ NormalFontSmall" font-color="Light Grey" frame-width="1"
+              max-value="1" min-value="0" mouse-enabled="true" opacity="1" round-rect-radius="0"
+              title="BitCrusher post delay mix" transparent="false"
+              wants-focus="true" wheel-inc-value="0.1"/>
+
         <!-- LFO rate slider -->
         <view control-tag="Unit1::LFOBitResolution" origin="402, 174" size="126, 18" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
@@ -85,6 +94,15 @@
             mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
+        <!-- Pre/post delay mix -->
+        <view control-tag="Unit1::DecimatorChain" origin="15, 174" size="145, 25" autosize-to-fit="false" class="CCheckBox"
+              background-offset="0, 0" boxfill-color="~ WhiteCColor"  autosize="bottom"
+              boxframe-color="~ BlackCColor" checkmark-color="~ BlackCColor"
+              default-value="0" draw-crossbox="true" font="~ NormalFontSmall" font-color="Light Grey" frame-width="1"
+              max-value="1" min-value="0" mouse-enabled="true" opacity="1" round-rect-radius="0"
+              title="Decimator pre/post delay mix" transparent="false"
+              wants-focus="true" wheel-inc-value="0.1"/>
+
     </template>
     <variables/>
     <custom>
@@ -120,10 +138,12 @@
         <control-tag name="Unit1::DelayFeedback"         tag="1"/>
         <control-tag name="Unit1::DelayMix"              tag="2"/>
         <control-tag name="Unit1::BitResolution"         tag="3"/>
-        <control-tag name="Unit1::LFOBitResolution"      tag="4"/>
-        <control-tag name="Unit1::LFOBitResolutionDepth" tag="5"/>
-        <control-tag name="Unit1::Decimator"             tag="6"/>
-        <control-tag name="Unit1::LFODecimator"          tag="7"/>
+        <control-tag name="Unit1::BitResolutionChain"    tag="4"/>
+        <control-tag name="Unit1::LFOBitResolution"      tag="5"/>
+        <control-tag name="Unit1::LFOBitResolutionDepth" tag="6"/>
+        <control-tag name="Unit1::Decimator"             tag="7"/>
+        <control-tag name="Unit1::DecimatorChain"        tag="8"/>
+        <control-tag name="Unit1::LFODecimator"          tag="9"/>
 
     </control-tags>
 </vstgui-ui-description>

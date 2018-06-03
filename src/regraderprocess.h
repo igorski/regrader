@@ -55,6 +55,12 @@ class RegraderProcess {
         Decimator* decimator;
         Limiter* limiter;
 
+        // whether effects are applied onto the input delay signal or onto
+        // the delayed signal itself (false = on input, true = on delay)
+
+        bool bitCrusherPostMix;
+        bool decimatorPostMix;
+
     private:
         AudioBuffer* _delayBuffer; // holds delay memory
         AudioBuffer* _tempBuffer;  // used during process cycle for applying effects onto delay mix
@@ -65,6 +71,13 @@ class RegraderProcess {
         float _delayMix;
         float _delayFeedback;
         int _amountOfChannels;
+
+        // use a clone of the input buffer on which we can
+        // perform pre-delay mix processing (we need to keep
+        // the original in buffer intact for dry/wet mix purposes)
+
+        void cloneInBuffer( float** inBuffer, int numInChannels, int bufferSize );
+        AudioBuffer* _cloneInBuffer;
 
 };
 }

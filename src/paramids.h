@@ -32,10 +32,12 @@ enum
     kDelayMixId,              // delay mix
 
     kBitResolutionId,         // bit resolution
+    kBitResolutionChainId,    // bit resolution pre/post delay mix
     kLFOBitResolutionId,      // bit resolution LFO rate
     kLFOBitResolutionDepthId, // depth for bit resolution LFO
 
     kDecimatorId,             // decimator
+    kDecimatorChainId,        // decimator pre/post delay mix
     kLFODecimatorId,          // decimator LFO rate
 
     kVuPPMId                  // for the Vu value return to host

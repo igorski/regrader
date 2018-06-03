@@ -106,6 +106,10 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     );
     parameters.addParameter( bitParam );
 
+    parameters.addParameter(
+        USTRING("BitCrusher chain"), 0, 1, 0, ParameterInfo::kCanAutomate, kBitResolutionChainId
+    );
+
     RangeParameter* bitLfoRateParam = new RangeParameter(
         USTRING( "Bit LFO rate" ), kLFOBitResolutionId, USTRING( "Hz" ),
         Igorski::VST::MIN_LFO_RATE(), Igorski::VST::MAX_LFO_RATE(), Igorski::VST::MIN_LFO_RATE(),
@@ -128,6 +132,10 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( decimatorParam );
+
+    parameters.addParameter(
+        USTRING("Decimator chain"), 0, 1, 0, ParameterInfo::kCanAutomate, kDecimatorChainId
+    );
 
     RangeParameter* decimatorLfoRateParam = new RangeParameter(
         USTRING( "Decimator rate" ), kLFODecimatorId, USTRING( "%" ),
@@ -172,6 +180,10 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
         if ( state->read( &savedBitResolution, sizeof( float )) != kResultOk )
             return kResultFalse;
 
+        float savedBitResolutionChain = 0;
+        if ( state->read( &savedBitResolutionChain, sizeof( float )) != kResultOk )
+            return kResultFalse;
+
         float savedLFOBitResolution = Igorski::VST::MIN_LFO_RATE();
         if ( state->read( &savedLFOBitResolution, sizeof( float )) != kResultOk )
             return kResultFalse;
@@ -184,28 +196,35 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
         if ( state->read( &savedDecimator, sizeof( float )) != kResultOk )
             return kResultFalse;
 
+        float savedDecimatorChain = 0;
+        if ( state->read( &savedDecimatorChain, sizeof( float )) != kResultOk )
+            return kResultFalse;
+
         float savedLFODecimator = 0.f;
         if ( state->read( &savedLFODecimator, sizeof( float )) != kResultOk )
             return kResultFalse;
-
 
 #if BYTEORDER == kBigEndian
     SWAP_32( savedDelayTime )
     SWAP_32( savedDelayFeedback )
     SWAP_32( savedDelayMix )
     SWAP_32( savedBitResolution )
+    SWAP_32( savedBitResolutionChain )
     SWAP_32( savedLFOBitResolution )
     SWAP_32( savedLFOBitResolutionDepth )
     SWAP_32( savedDecimator )
+    SWAP_32( savedDecimatorChain )
     SWAP_32( savedLFODecimator )
 #endif
         setParamNormalized( kDelayTimeId,             savedDelayTime );
         setParamNormalized( kDelayFeedbackId,         savedDelayFeedback );
         setParamNormalized( kDelayMixId,              savedDelayMix );
         setParamNormalized( kBitResolutionId,         savedBitResolution );
+        setParamNormalized( kBitResolutionChainId,    savedBitResolutionChain );
         setParamNormalized( kLFOBitResolutionId,      savedLFOBitResolution );
         setParamNormalized( kLFOBitResolutionDepthId, savedLFOBitResolutionDepth );
         setParamNormalized( kDecimatorId,             savedDecimator );
+        setParamNormalized( kDecimatorChainId,        savedDecimatorChain );
         setParamNormalized( kLFODecimatorId,          savedLFODecimator );
 
         state->seek( sizeof ( float ), IBStream::kIBSeekCur );
@@ -312,8 +331,10 @@ tresult PLUGIN_API RegraderController::getParamStringByValue( ParamID tag, Param
         case kDelayFeedbackId:
         case kDelayMixId:
         case kBitResolutionId:
+        case kBitResolutionChainId:
         case kLFOBitResolutionDepthId:
         case kDecimatorId:
+        case kDecimatorChainId:
         case kLFODecimatorId:
         {
             char text[32];

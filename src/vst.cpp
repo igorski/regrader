@@ -45,10 +45,12 @@ Regrader::Regrader()
 , fDelayFeedback( 0.2f )
 , fDelayMix( .5f )
 , fBitResolution( 1.f )
+, fBitResolutionChain( 0.f )
 , fLFOBitResolution( .0f )
 , fLFOBitResolutionDepth( .75f )
 , fDecimator( 1.f )
 , fLFODecimator( 0.f )
+, fDecimatorChain( 1.f )
 , regraderProcess( 0 )
 , outputGainOld( 0.f )
 , currentProcessMode( -1 ) // -1 means not initialized
@@ -82,6 +84,7 @@ tresult PLUGIN_API Regrader::initialize( FUnknown* context )
 
     // TODO: creating a bunch of extra channels for no apparent reason?
     regraderProcess = new Igorski::RegraderProcess( 6 );
+    syncModel();
 
     return kResultOk;
 }
@@ -156,6 +159,11 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
                             fBitResolution = ( float ) value;
                         break;
 
+                    case kBitResolutionChainId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            fBitResolutionChain = ( float ) value;
+                        break;
+
                     case kLFOBitResolutionId:
                         if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
                             fLFOBitResolution = ( float ) value;
@@ -171,11 +179,17 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
                             fDecimator = ( float ) value;
                         break;
 
+                    case kDecimatorChainId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            fDecimatorChain = ( float ) value;
+                        break;
+
                     case kLFODecimatorId:
                         if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
                             fLFODecimator = ( float ) value;
                         break;
                 }
+                syncModel();
             }
         }
     }
@@ -207,17 +221,6 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
     uint32 sampleFramesSize = getSampleFramesSizeInBytes( processSetup, data.numSamples );
     void** in  = getChannelBuffersPointer( processSetup, data.inputs [ 0 ] );
     void** out = getChannelBuffersPointer( processSetup, data.outputs[ 0 ] );
-
-    // updating of the properties like this is a bit brute force, we're syncing the module properties
-    // with this model, can we do it when there is an actual CHANGE in the model?
-    regraderProcess->setDelayTime( fDelayTime );
-    regraderProcess->setDelayFeedback( fDelayFeedback );
-    regraderProcess->setDelayMix( fDelayMix );
-    regraderProcess->bitCrusher->setAmount( fBitResolution );
-    regraderProcess->bitCrusher->setLFO( fLFOBitResolution, fLFOBitResolutionDepth );
-    regraderProcess->decimator->setBits( ( int )( fDecimator * 32.f ));
-    regraderProcess->decimator->setRate( fLFODecimator );
-    // e.o. updates
 
     // process the incoming sound!
 
@@ -277,6 +280,10 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
     if ( state->read( &savedBitResolution, sizeof ( float )) != kResultOk )
         return kResultFalse;
 
+    float savedBitResolutionChain = 0.f;
+    if ( state->read( &savedBitResolutionChain, sizeof ( float )) != kResultOk )
+        return kResultFalse;
+
     float savedLFOBitResolution = 0.f;
     if ( state->read( &savedLFOBitResolution, sizeof ( float )) != kResultOk )
         return kResultFalse;
@@ -289,6 +296,10 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
     if ( state->read( &savedDecimator, sizeof ( float )) != kResultOk )
         return kResultFalse;
 
+    float savedDecimatorChain = 0.f;
+    if ( state->read( &savedDecimatorChain, sizeof ( float )) != kResultOk )
+        return kResultFalse;
+
     float savedLFODecimator = 1.f;
     if ( state->read( &savedLFODecimator, sizeof ( float )) != kResultOk )
         return kResultFalse;
@@ -298,9 +309,11 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
     SWAP_32( savedDelayFeedback )
     SWAP_32( savedDelayMix )
     SWAP_32( savedBitResolution )
+    SWAP_32( savedBitResolutionChain )
     SWAP_32( savedLFOBitResolution )
     SWAP_32( savedLFOBitResolutionDepth )
     SWAP_32( savedDecimator )
+    SWAP_32( savedDecimatorChain )
     SWAP_32( savedLFODecimator )
 #endif
 
@@ -308,9 +321,11 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
     fDelayFeedback         = savedDelayFeedback;
     fDelayMix              = savedDelayMix;
     fBitResolution         = savedBitResolution;
+    fBitResolutionChain    = savedBitResolutionChain;
     fLFOBitResolution      = savedLFOBitResolution;
     fLFOBitResolutionDepth = savedLFOBitResolutionDepth;
     fDecimator             = savedDecimator;
+    fDecimatorChain        = savedDecimatorChain;
     fLFODecimator          = savedLFODecimator;
 
     // Example of using the IStreamAttributes interface
@@ -355,6 +370,7 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
     float toSaveDelayFeedback         = fDelayFeedback;
     float toSaveDelayMix              = fDelayMix;
     float toSaveBitResolution         = fBitResolution;
+    float toSaveBitResolutionChain    = fBitResolutionChain;
     float toSaveLFOBitResolution      = fLFOBitResolution;
     float toSaveLFOBitResolutionDepth = fLFOBitResolutionDepth;
     float toSaveDecimator             = fDecimator;
@@ -365,6 +381,7 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
     SWAP_32( toSaveDelayFeedback )
     SWAP_32( toSaveDelayMix )
     SWAP_32( toSaveBitResolution )
+    SWAP_32( toSaveBitResolutionChain )
     SWAP_32( toSaveLFOBitResolution )
     SWAP_32( toSaveLFOBitResolutionDepth )
     SWAP_32( toSaveDecimator )
@@ -375,6 +392,7 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
     state->write( &toSaveDelayFeedback,         sizeof( float ));
     state->write( &toSaveDelayMix,              sizeof( float ));
     state->write( &toSaveBitResolution,         sizeof( float ));
+    state->write( &toSaveBitResolutionChain,    sizeof( float ));
     state->write( &toSaveLFOBitResolution,      sizeof( float ));
     state->write( &toSaveLFOBitResolutionDepth, sizeof( float ));
     state->write( &toSaveDecimator,             sizeof( float ));
@@ -487,6 +505,21 @@ tresult PLUGIN_API Regrader::notify( IMessage* message )
     }
 
     return AudioEffect::notify( message );
+}
+
+void Regrader::syncModel()
+{
+    regraderProcess->setDelayTime( fDelayTime );
+    regraderProcess->setDelayFeedback( fDelayFeedback );
+    regraderProcess->setDelayMix( fDelayMix );
+
+    regraderProcess->bitCrusherPostMix = ( fBitResolutionChain > 0.5f );
+    regraderProcess->decimatorPostMix  = ( fDecimatorChain > 0.5f );
+
+    regraderProcess->bitCrusher->setAmount( fBitResolution );
+    regraderProcess->bitCrusher->setLFO( fLFOBitResolution, fLFOBitResolutionDepth );
+    regraderProcess->decimator->setBits( ( int )( fDecimator * 32.f ));
+    regraderProcess->decimator->setRate( fLFODecimator );
 }
 
 //------------------------------------------------------------------------

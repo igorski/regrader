@@ -93,10 +93,12 @@ class Regrader : public AudioEffect
         float fDelayMix;
 
         float fBitResolution;
+        float fBitResolutionChain;
         float fLFOBitResolution;
         float fLFOBitResolutionDepth;
 
         float fDecimator;
+        float fDecimatorChain;
         float fLFODecimator;
 
         float outputGainOld; // for visualizing output gain in DAW
@@ -104,6 +106,10 @@ class Regrader : public AudioEffect
         int32 currentProcessMode;
 
         Igorski::RegraderProcess* regraderProcess;
+
+        // synchronize the processors model with UI led changes
+
+        void syncModel();
 };
 
 //------------------------------------------------------------------------

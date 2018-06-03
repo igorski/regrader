@@ -43,6 +43,12 @@ RegraderProcess::RegraderProcess( int amountOfChannels ) {
     bitCrusher = new BitCrusher( 8, .5f, .5f );
     decimator  = new Decimator( 32, 0.f );
     limiter    = new Limiter( 10.f, 500.f, .6f );
+
+    bitCrusherPostMix = false;
+    decimatorPostMix  = false;
+
+    // will be lazily created in the process function
+    _cloneInBuffer = 0;
 }
 
 RegraderProcess::~RegraderProcess() {
@@ -52,6 +58,7 @@ RegraderProcess::~RegraderProcess() {
     delete bitCrusher;
     delete decimator;
     delete limiter;
+    delete _cloneInBuffer;
 }
 
 /* public methods */
@@ -71,13 +78,32 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
     bool hasDecimator = ( decimator->getRate() > 0.f );
     float initialDecimatorLFOOffset = decimator->getAccumulator();
 
+    // clone in buffer for pre-mix processing
+    cloneInBuffer( inBuffer, numInChannels, bufferSize );
+
     for ( int32 c = 0; c < numInChannels; ++c )
     {
         float* channelInBuffer    = inBuffer[ c ];
+        float* channelInCloneBuffer = _cloneInBuffer->getBufferForChannel( c );
         float* channelOutBuffer   = outBuffer[ c ];
         float* channelTempBuffer  = _tempBuffer->getBufferForChannel( c );
         float* channelDelayBuffer = _delayBuffer->getBufferForChannel( c );
         delayIndex = _delayIndices[ c ];
+
+        // when processing each new channel restore to the same LFO offset to get the same movement ;)
+
+        if ( hasDecimator && c > 0 )
+            decimator->setAccumulator( initialDecimatorLFOOffset );
+
+        // PRE MIX processing
+
+        if ( !bitCrusherPostMix )
+            bitCrusher->process( channelInCloneBuffer, bufferSize );
+
+        if ( !decimatorPostMix )
+            decimator->process( channelInCloneBuffer, bufferSize );
+
+        // DELAY processing applied onto the temp buffer
 
         for ( i = 0; i < bufferSize; ++i )
         {
@@ -91,7 +117,7 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
             // ( for feedback purposes ) and append the current incoming sample to it
 
             delaySample = channelDelayBuffer[ readIndex ];
-            channelDelayBuffer[ delayIndex ] = channelInBuffer[ i ] + delaySample * _delayFeedback;
+            channelDelayBuffer[ delayIndex ] = channelInCloneBuffer[ i ] + delaySample * _delayFeedback;
 
             if ( ++delayIndex == _delayTime ) {
                 delayIndex = 0;
@@ -103,17 +129,14 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
         // update last index for this channel
         _delayIndices[ c ] = delayIndex;
 
-        // apply the effect processing on the temp buffer
+        // POST MIX processing
+        // apply the post mix effect processing on the temp buffer
 
-        // when processing each new channel restore to the same LFO offset to get the same movement ;)
+        if ( bitCrusherPostMix )
+            bitCrusher->process( channelTempBuffer, bufferSize );
 
-        if ( hasDecimator && c > 0 )
-        {
-            decimator->setAccumulator( initialDecimatorLFOOffset );
-        }
-
-        decimator->process( channelTempBuffer, bufferSize );
-        bitCrusher->process( channelTempBuffer, bufferSize );
+        if ( decimatorPostMix )
+            decimator->process( channelTempBuffer, bufferSize );
 
         // mix the input buffer into the output (dry mix)
 
@@ -133,7 +156,8 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
 /* setters */
 
-void RegraderProcess::setDelayTime( float value ) {
+void RegraderProcess::setDelayTime( float value )
+{
     _delayTime = ( int ) round( VST::cap( value ) * _maxTime );
 
     for ( int i = 0; i < _amountOfChannels; ++i ) {
@@ -142,12 +166,36 @@ void RegraderProcess::setDelayTime( float value ) {
     }
 }
 
-void RegraderProcess::setDelayMix( float value ) {
+void RegraderProcess::setDelayMix( float value )
+{
     _delayMix = value;
 }
 
-void RegraderProcess::setDelayFeedback( float value ) {
+void RegraderProcess::setDelayFeedback( float value )
+{
     _delayFeedback = value;
+}
+
+void RegraderProcess::cloneInBuffer( float** inBuffer, int numInChannels, int bufferSize )
+{
+    // if clone buffer wasn't created yet or the buffer size has changed
+    // delete existing buffer and create new to match properties
+
+    if ( _cloneInBuffer == 0 || _cloneInBuffer->bufferSize != bufferSize ) {
+        delete _cloneInBuffer;
+        _cloneInBuffer = new AudioBuffer( numInChannels, bufferSize );
+    }
+
+    // clone the in buffer contents
+
+    for ( int c = 0; c < numInChannels; ++c ) {
+        float* inChannelBuffer  = inBuffer[ c ];
+        float* outChannelBuffer = _cloneInBuffer->getBufferForChannel( c );
+
+        for ( int i = 0; i < bufferSize; ++i ) {
+            outChannelBuffer[ i ] = inChannelBuffer[ i ];
+        }
+    }
 }
 
 }
