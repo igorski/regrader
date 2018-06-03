@@ -1,7 +1,7 @@
 # REGRADER
 
 Regrader is a VST3.0 plug-in which provides a basic delay effect in which the repeats degrade in
-various ways (e.g. resolution or formant) for a nice twist on the ears.
+various ways to provide a nice twist on the ears.
 
 ## On compatibility
 

@@ -26,7 +26,7 @@
 #include "global.h"
 #include "audiobuffer.h"
 #include "bitcrusher.h"
-#include "formantfilter.h"
+#include "decimator.h"
 #include "limiter.h"
 
 using namespace Steinberg;
@@ -52,7 +52,7 @@ class RegraderProcess {
         void setDelayMix( float value );
 
         BitCrusher* bitCrusher;
-        FormantFilter* formantFilter;
+        Decimator* decimator;
         Limiter* limiter;
 
     private:

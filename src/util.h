@@ -60,6 +60,11 @@ namespace Util {
         log( message.c_str(), filename );
     }
 
+    void log( float value, const char* filename )
+    {
+        log( std::to_string( value ), filename );
+    }
+
     void log( int value, const char* filename )
     {
         log( std::to_string( value ), filename );

@@ -20,18 +20,26 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef __LFO_H_INCLUDED__
-#define __LFO_H_INCLUDED__
+#ifndef __DECIMATOR_H_INCLUDED__
+#define __DECIMATOR_H_INCLUDED__
 
-#include "global.h"
+#include "audiobuffer.h"
 
 namespace Igorski {
-class LFO {
+class Decimator {
 
     public:
-        LFO();
-        ~LFO();
 
+        Decimator( int bits, float rate );
+        ~Decimator();
+
+        // the output resolution, value between 1 - 32
+        int getBits();
+        void setBits( int value );
+
+        // decimator has an internal oscillator
+        // as the effect is applied at the peak of the cycle
+        // the range is 0 - 1 where 1 implies the original sample rate
         float getRate();
         void setRate( float value );
 
@@ -41,37 +49,13 @@ class LFO {
         float getAccumulator();
         void setAccumulator( float offset );
 
-        /**
-         * retrieve a value from the wave table for the current
-         * accumulator position, this method also increments
-         * the accumulator and keeps it within bounds
-         */
-        inline float peek()
-        {
-            // the wave table offset to read from
-            float SR_OVER_LENGTH = VST::SAMPLE_RATE / ( float ) TABLE_SIZE;
-            int readOffset = ( _accumulator == 0.f ) ? 0 : ( int ) ( _accumulator / SR_OVER_LENGTH );
-
-            // increment the accumulators read offset
-            _accumulator += _rate;
-
-            // keep the accumulator within the bounds of the sample frequency
-            if ( _accumulator > VST::SAMPLE_RATE )
-                _accumulator -= VST::SAMPLE_RATE;
-
-            // return the sample present at the calculated offset within the table
-            return VST::TABLE[ readOffset ];
-        }
+        void process( float* sampleBuffer, int bufferSize );
 
     private:
-
-        // see Igorski::VST::LFO_TABLE;
-        static const int TABLE_SIZE = 128;
-
-        // used internally
-
+        int _bits;
+        long _m;
         float _rate;
-        float _accumulator;   // is read offset in wave table buffer
+        float _accumulator;
 };
 }
 

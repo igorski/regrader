@@ -35,9 +35,8 @@ enum
     kLFOBitResolutionId,      // bit resolution LFO rate
     kLFOBitResolutionDepthId, // depth for bit resolution LFO
 
-    kFormantId,               // formant
-    kLFOFormantId,            // formant LFO rate
-    kLFOFormantDepthId,       // depth for formant LFO
+    kDecimatorId,             // decimator
+    kLFODecimatorId,          // decimator LFO rate
 
     kVuPPMId                  // for the Vu value return to host
 };

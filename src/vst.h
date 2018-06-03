@@ -96,9 +96,8 @@ class Regrader : public AudioEffect
         float fLFOBitResolution;
         float fLFOBitResolutionDepth;
 
-        float fFormant;
-        float fLFOFormant;
-        float fLFOFormantDepth;
+        float fDecimator;
+        float fLFODecimator;
 
         float outputGainOld; // for visualizing output gain in DAW
 

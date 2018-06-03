@@ -32,6 +32,13 @@ namespace VST {
         return std::min( 1.f, std::max( 0.f, value ));
     }
 
+    // conenience method to ensure a sample is in the valid -1.f - +1.f range
+
+    inline float capSample( float value )
+    {
+        return std::min( 1.f, std::max( -1.f, value ));
+    }
+
     // convenience method to scale given value and its expected maxValue against
     // an arbitrary range (defined by maxCompareValue in relation to maxValue)
 

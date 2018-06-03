@@ -66,9 +66,9 @@
             mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
-        <!-- Formant filter module -->
-        <!-- formant slider -->
-        <view control-tag="Unit1::Formant" origin="630, 198" size="126, 18" class="CSlider"
+        <!-- Decimator module -->
+        <!-- bit slider -->
+        <view control-tag="Unit1::Decimator" origin="630, 198" size="126, 18" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
             bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
             draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
@@ -77,22 +77,14 @@
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
         <!-- LFO rate slider -->
-        <view control-tag="Unit1::LFOFormant" origin="602, 174" size="126, 18" class="CSlider"
+        <view control-tag="Unit1::LFODecimator" origin="602, 174" size="126, 18" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
             bitmap-offset="0, 0" default-value="0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
             draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
-            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="10" min-value="0"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="1" min-value="0"
             mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
-        <!-- LFO depth slider -->
-        <view control-tag="Unit1::LFOFormantDepth" origin="602, 198" size="126, 18" class="CSlider"
-            background-offset="0, 0" bitmap="slider_background"
-            bitmap-offset="0, 0" default-value="0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
-            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
-            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="10" min-value="0"
-            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
-            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
     </template>
     <variables/>
     <custom>
@@ -130,9 +122,8 @@
         <control-tag name="Unit1::BitResolution"         tag="3"/>
         <control-tag name="Unit1::LFOBitResolution"      tag="4"/>
         <control-tag name="Unit1::LFOBitResolutionDepth" tag="5"/>
-        <control-tag name="Unit1::Formant"               tag="6"/>
-        <control-tag name="Unit1::LFOFormant"            tag="7"/>
-        <control-tag name="Unit1::LFOFormantDepth"       tag="8"/>
+        <control-tag name="Unit1::Decimator"             tag="6"/>
+        <control-tag name="Unit1::LFODecimator"          tag="7"/>
 
     </control-tags>
 </vstgui-ui-description>

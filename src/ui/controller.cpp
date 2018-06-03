@@ -120,28 +120,21 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     );
     parameters.addParameter( bitLfoDepthParam );
 
-    // formant filter controls
+    // decimator controls
 
-    RangeParameter* formantParam = new RangeParameter(
-        USTRING( "Formant" ), kFormantId, USTRING( "0 - 6" ),
+    RangeParameter* decimatorParam = new RangeParameter(
+        USTRING( "Decimator resolution" ), kDecimatorId, USTRING( "1 - 32" ),
         0.f, 1.f, 0.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
-    parameters.addParameter( formantParam );
+    parameters.addParameter( decimatorParam );
 
-    RangeParameter* formantLfoRateParam = new RangeParameter(
-        USTRING( "Formant LFO rate" ), kLFOFormantId, USTRING( "Hz" ),
-        Igorski::VST::MIN_LFO_RATE(), Igorski::VST::MAX_LFO_RATE(), Igorski::VST::MIN_LFO_RATE(),
-        0, ParameterInfo::kCanAutomate, unitId
-    );
-    parameters.addParameter( formantLfoRateParam );
-
-    RangeParameter* formantLfoDepthParam = new RangeParameter(
-        USTRING( "Formant LFO depth" ), kLFOFormantDepthId, USTRING( "%" ),
+    RangeParameter* decimatorLfoRateParam = new RangeParameter(
+        USTRING( "Decimator rate" ), kLFODecimatorId, USTRING( "%" ),
         0.f, 1.f, 0.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
-    parameters.addParameter( formantLfoDepthParam );
+    parameters.addParameter( decimatorLfoRateParam );
 
     // initialization
 
@@ -187,16 +180,12 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
         if ( state->read( &savedLFOBitResolutionDepth, sizeof( float )) != kResultOk )
             return kResultFalse;
 
-        float savedFormant = 0.f;
-        if ( state->read( &savedFormant, sizeof( float )) != kResultOk )
+        float savedDecimator = 1.f;
+        if ( state->read( &savedDecimator, sizeof( float )) != kResultOk )
             return kResultFalse;
 
-        float savedLFOFormant = Igorski::VST::MIN_LFO_RATE();
-        if ( state->read( &savedLFOFormant, sizeof( float )) != kResultOk )
-            return kResultFalse;
-
-        float savedLFOFormantDepth = 1.f;
-        if ( state->read( &savedLFOFormantDepth, sizeof( float )) != kResultOk )
+        float savedLFODecimator = 0.f;
+        if ( state->read( &savedLFODecimator, sizeof( float )) != kResultOk )
             return kResultFalse;
 
 
@@ -207,9 +196,8 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
     SWAP_32( savedBitResolution )
     SWAP_32( savedLFOBitResolution )
     SWAP_32( savedLFOBitResolutionDepth )
-    SWAP_32( savedFormant )
-    SWAP_32( savedLFOFormant )
-    SWAP_32( savedLFOFormantDepth )
+    SWAP_32( savedDecimator )
+    SWAP_32( savedLFODecimator )
 #endif
         setParamNormalized( kDelayTimeId,             savedDelayTime );
         setParamNormalized( kDelayFeedbackId,         savedDelayFeedback );
@@ -217,9 +205,8 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
         setParamNormalized( kBitResolutionId,         savedBitResolution );
         setParamNormalized( kLFOBitResolutionId,      savedLFOBitResolution );
         setParamNormalized( kLFOBitResolutionDepthId, savedLFOBitResolutionDepth );
-        setParamNormalized( kFormantId,               savedFormant );
-        setParamNormalized( kLFOFormantId,            savedLFOFormant );
-        setParamNormalized( kLFOFormantDepthId,       savedLFOFormantDepth );
+        setParamNormalized( kDecimatorId,             savedDecimator );
+        setParamNormalized( kLFODecimatorId,          savedLFODecimator );
 
         state->seek( sizeof ( float ), IBStream::kIBSeekCur );
     }
@@ -326,8 +313,8 @@ tresult PLUGIN_API RegraderController::getParamStringByValue( ParamID tag, Param
         case kDelayMixId:
         case kBitResolutionId:
         case kLFOBitResolutionDepthId:
-        case kFormantId:
-        case kLFOFormantDepthId:
+        case kDecimatorId:
+        case kLFODecimatorId:
         {
             char text[32];
             sprintf( text, "%.2f", ( float ) valueNormalized );
@@ -336,14 +323,13 @@ tresult PLUGIN_API RegraderController::getParamStringByValue( ParamID tag, Param
             return kResultTrue;
         }
 
-        // LFO settings are also floating point but in a custom range
+        // bitcrusher LFO setting is also floating point but in a custom range
         // request the plain value from the normalized value
 
         case kLFOBitResolutionId:
-        case kLFOFormantId:
         {
             char text[32];
-            if (( tag == kLFOBitResolutionId || tag == kLFOFormantId ) && valueNormalized == 0 )
+            if (( tag == kLFOBitResolutionId || tag == kLFODecimatorId ) && valueNormalized == 0 )
                 sprintf( text, "%s", "Off" );
             else
                 sprintf( text, "%.2f", normalizedParamToPlain( tag, valueNormalized ));

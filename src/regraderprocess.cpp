@@ -40,9 +40,9 @@ RegraderProcess::RegraderProcess( int amountOfChannels ) {
     }
     _amountOfChannels = amountOfChannels;
 
-    bitCrusher    = new BitCrusher( 8, .5f, .5f );
-    formantFilter = new FormantFilter( 0.f );
-    limiter       = new Limiter( 10.f, 500.f, .6f );
+    bitCrusher = new BitCrusher( 8, .5f, .5f );
+    decimator  = new Decimator( 32, 0.f );
+    limiter    = new Limiter( 10.f, 500.f, .6f );
 }
 
 RegraderProcess::~RegraderProcess() {
@@ -50,7 +50,7 @@ RegraderProcess::~RegraderProcess() {
     delete _delayBuffer;
     delete _tempBuffer;
     delete bitCrusher;
-    delete formantFilter;
+    delete decimator;
     delete limiter;
 }
 
@@ -67,9 +67,9 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
     float dryMix = 1.0f - _delayMix;
 
-    // formant filter LFO properties
-    float initialFormantLFOOffset = formantFilter->hasLFO ? formantFilter->lfo->getAccumulator() : 0.f;
-    float orgFormantVowel         = formantFilter->getVowel();
+    // decimators LFO is controlled from the outside, cache properties here
+    bool hasDecimator = ( decimator->getRate() > 0.f );
+    float initialDecimatorLFOOffset = decimator->getAccumulator();
 
     for ( int32 c = 0; c < numInChannels; ++c )
     {
@@ -107,13 +107,12 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
         // when processing each new channel restore to the same LFO offset to get the same movement ;)
 
-        if ( formantFilter->hasLFO && c > 0 )
+        if ( hasDecimator && c > 0 )
         {
-            formantFilter->lfo->setAccumulator( initialFormantLFOOffset );
-            formantFilter->setVowel( orgFormantVowel );
+            decimator->setAccumulator( initialDecimatorLFOOffset );
         }
 
-        formantFilter->process( channelTempBuffer, bufferSize );
+        decimator->process( channelTempBuffer, bufferSize );
         bitCrusher->process( channelTempBuffer, bufferSize );
 
         // mix the input buffer into the output (dry mix)

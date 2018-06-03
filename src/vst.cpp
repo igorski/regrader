@@ -47,9 +47,8 @@ Regrader::Regrader()
 , fBitResolution( 1.f )
 , fLFOBitResolution( .0f )
 , fLFOBitResolutionDepth( .75f )
-, fFormant( 0.f )
-, fLFOFormant( 0.f )
-, fLFOFormantDepth( .75f )
+, fDecimator( 1.f )
+, fLFODecimator( 0.f )
 , regraderProcess( 0 )
 , outputGainOld( 0.f )
 , currentProcessMode( -1 ) // -1 means not initialized
@@ -59,7 +58,7 @@ Regrader::Regrader()
 }
 
 //------------------------------------------------------------------------
-Regrader::~Regrader ()
+Regrader::~Regrader()
 {
     // free all allocated resources
     delete regraderProcess;
@@ -167,19 +166,14 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
                             fLFOBitResolutionDepth = ( float ) value;
                         break;
 
-                    case kFormantId:
+                    case kDecimatorId:
                         if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
-                            fFormant = ( float ) value;
+                            fDecimator = ( float ) value;
                         break;
 
-                    case kLFOFormantId:
+                    case kLFODecimatorId:
                         if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
-                            fLFOFormant = ( float ) value;
-                        break;
-
-                    case kLFOFormantDepthId:
-                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
-                            fLFOFormantDepth = ( float ) value;
+                            fLFODecimator = ( float ) value;
                         break;
                 }
             }
@@ -221,8 +215,8 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
     regraderProcess->setDelayMix( fDelayMix );
     regraderProcess->bitCrusher->setAmount( fBitResolution );
     regraderProcess->bitCrusher->setLFO( fLFOBitResolution, fLFOBitResolutionDepth );
-    regraderProcess->formantFilter->setVowel( fFormant );
-    regraderProcess->formantFilter->setLFO( fLFOFormant, fLFOFormantDepth );
+    regraderProcess->decimator->setBits( ( int )( fDecimator * 32.f ));
+    regraderProcess->decimator->setRate( fLFODecimator );
     // e.o. updates
 
     // process the incoming sound!
@@ -291,16 +285,12 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
     if ( state->read( &savedLFOBitResolutionDepth, sizeof ( float )) != kResultOk )
         return kResultFalse;
 
-    float savedFormant = 0.f;
-    if ( state->read( &savedFormant, sizeof ( float )) != kResultOk )
+    float savedDecimator = 0.f;
+    if ( state->read( &savedDecimator, sizeof ( float )) != kResultOk )
         return kResultFalse;
 
-    float savedLFOFormant = 1.f;
-    if ( state->read( &savedLFOFormant, sizeof ( float )) != kResultOk )
-        return kResultFalse;
-
-    float savedLFOFormantDepth = 1.f;
-    if ( state->read( &savedLFOFormantDepth, sizeof ( float )) != kResultOk )
+    float savedLFODecimator = 1.f;
+    if ( state->read( &savedLFODecimator, sizeof ( float )) != kResultOk )
         return kResultFalse;
 
 #if BYTEORDER == kBigEndian
@@ -310,9 +300,8 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
     SWAP_32( savedBitResolution )
     SWAP_32( savedLFOBitResolution )
     SWAP_32( savedLFOBitResolutionDepth )
-    SWAP_32( savedFormant )
-    SWAP_32( savedLFOFormant )
-    SWAP_32( savedLFOFormantDepth )
+    SWAP_32( savedDecimator )
+    SWAP_32( savedLFODecimator )
 #endif
 
     fDelayTime             = savedDelayTime;
@@ -321,9 +310,8 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
     fBitResolution         = savedBitResolution;
     fLFOBitResolution      = savedLFOBitResolution;
     fLFOBitResolutionDepth = savedLFOBitResolutionDepth;
-    fFormant               = savedFormant;
-    fLFOFormant            = savedLFOFormant;
-    fLFOFormantDepth       = savedLFOFormantDepth;
+    fDecimator             = savedDecimator;
+    fLFODecimator          = savedLFODecimator;
 
     // Example of using the IStreamAttributes interface
     FUnknownPtr<IStreamAttributes> stream (state);
@@ -369,9 +357,8 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
     float toSaveBitResolution         = fBitResolution;
     float toSaveLFOBitResolution      = fLFOBitResolution;
     float toSaveLFOBitResolutionDepth = fLFOBitResolutionDepth;
-    float toSaveFormant               = fFormant;
-    float toSaveLFOFormant            = fLFOFormant;
-    float toSaveLFOFormantDepth       = fLFOFormantDepth;
+    float toSaveDecimator             = fDecimator;
+    float toSaveLFODecimator          = fLFODecimator;
 
 #if BYTEORDER == kBigEndian
     SWAP_32( toSaveDelayTime )
@@ -380,9 +367,8 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
     SWAP_32( toSaveBitResolution )
     SWAP_32( toSaveLFOBitResolution )
     SWAP_32( toSaveLFOBitResolutionDepth )
-    SWAP_32( toSaveFormant )
-    SWAP_32( toSaveLFOFormant )
-    SWAP_32( toSaveLFOFormantDepth )
+    SWAP_32( toSaveDecimator )
+    SWAP_32( toSaveLFODecimator )
 #endif
 
     state->write( &toSaveDelayTime,             sizeof( float ));
@@ -391,9 +377,8 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
     state->write( &toSaveBitResolution,         sizeof( float ));
     state->write( &toSaveLFOBitResolution,      sizeof( float ));
     state->write( &toSaveLFOBitResolutionDepth, sizeof( float ));
-    state->write( &toSaveFormant,               sizeof( float ));
-    state->write( &toSaveLFOFormant,            sizeof( float ));
-    state->write( &toSaveLFOFormantDepth,       sizeof( float ));
+    state->write( &toSaveDecimator,             sizeof( float ));
+    state->write( &toSaveLFODecimator,          sizeof( float ));
 
     return kResultOk;
 }
