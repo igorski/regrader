@@ -51,6 +51,10 @@ class RegraderProcess {
         void setDelayFeedback( float value );
         void setDelayMix( float value );
 
+        // synchronize the delays tempo with the host
+        // tempo is in BPM, time signature provided as: timeSigNumerator / timeSigDenominator (e.g. 3/4)
+        void setTempo( double tempo, int32 timeSigNumerator, int32 timeSigDenominator );
+
         BitCrusher* bitCrusher;
         Decimator* decimator;
         Limiter* limiter;
@@ -60,6 +64,10 @@ class RegraderProcess {
 
         bool bitCrusherPostMix;
         bool decimatorPostMix;
+
+        // whether delay time is synced to hosts tempo
+
+        bool syncDelayToHost;
 
     private:
         AudioBuffer* _delayBuffer; // holds delay memory
@@ -72,12 +80,20 @@ class RegraderProcess {
         float _delayFeedback;
         int _amountOfChannels;
 
+        double _tempo;
+        int32 _timeSigNumerator;
+        int32 _timeSigDenominator;
+
         // use a clone of the input buffer on which we can
         // perform pre-delay mix processing (we need to keep
         // the original in buffer intact for dry/wet mix purposes)
 
         void cloneInBuffer( float** inBuffer, int numInChannels, int bufferSize );
         AudioBuffer* _cloneInBuffer;
+
+        // syncs current delay time to musically pleasing intervals synced to host tempo and time signature
+
+        void syncDelayTime();
 
 };
 }

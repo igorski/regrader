@@ -47,6 +47,13 @@ RegraderProcess::RegraderProcess( int amountOfChannels ) {
     bitCrusherPostMix = false;
     decimatorPostMix  = false;
 
+    // these will be synced to host, see vst.cpp. here we default to 120 BPM in 4/4 time
+    _tempo              = 120.0;
+    _timeSigNumerator   = 4;
+    _timeSigDenominator = 4;
+
+    syncDelayToHost     = true;
+
     // will be lazily created in the process function
     _cloneInBuffer = 0;
 }
@@ -158,7 +165,13 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
 void RegraderProcess::setDelayTime( float value )
 {
+    if ( _delayTime == value )
+        return;
+
     _delayTime = ( int ) round( VST::cap( value ) * _maxTime );
+
+    if ( syncDelayToHost )
+        syncDelayTime();
 
     for ( int i = 0; i < _amountOfChannels; ++i ) {
         if ( _delayIndices[ i ] >= _delayTime )
@@ -175,6 +188,32 @@ void RegraderProcess::setDelayFeedback( float value )
 {
     _delayFeedback = value;
 }
+
+void RegraderProcess::setTempo( double tempo, int32 timeSigNumerator, int32 timeSigDenominator )
+{
+    if ( _tempo == tempo && _timeSigNumerator == timeSigNumerator && _timeSigDenominator == timeSigDenominator )
+        return;
+
+    if ( syncDelayToHost ) {
+
+        // if delay is synced to host tempo, keep delay time
+        // relative to new tempo
+
+        float currentFullMeasureDuration = ( 60.f / _tempo ) * _timeSigDenominator;
+        float currentDelaySubdivision    = currentFullMeasureDuration / _delayTime;
+
+        // calculate new delay time (note we're using passed arguments as values)
+
+        float newFullMeasureDuration = ( 60.f / tempo ) * timeSigDenominator;
+        _delayTime = newFullMeasureDuration / currentDelaySubdivision;
+    }
+
+    _timeSigNumerator   = timeSigNumerator;
+    _timeSigDenominator = timeSigDenominator;
+    _tempo              = tempo;
+}
+
+/* protected methods */
 
 void RegraderProcess::cloneInBuffer( float** inBuffer, int numInChannels, int bufferSize )
 {
@@ -196,6 +235,19 @@ void RegraderProcess::cloneInBuffer( float** inBuffer, int numInChannels, int bu
             outChannelBuffer[ i ] = inChannelBuffer[ i ];
         }
     }
+}
+
+void RegraderProcess::syncDelayTime()
+{
+    // duration of a full measure in buffer seconds
+
+    float fullMeasure = ( 60.f / _tempo ) * _timeSigDenominator;
+
+    // we allow syncing to up to 32nd note resolution
+
+    int subdivision = 32;
+
+    _delayTime = VST::roundTo( _delayTime, fullMeasure / subdivision );
 }
 
 }

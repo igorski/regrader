@@ -2,6 +2,7 @@
 #define __GLOBAL_HEADER__
 
 #include <algorithm>
+#include <cmath>
 #include "pluginterfaces/base/fplatform.h"
 #include "pluginterfaces/base/funknown.h"
 
@@ -32,11 +33,25 @@ namespace VST {
         return std::min( 1.f, std::max( 0.f, value ));
     }
 
-    // conenience method to ensure a sample is in the valid -1.f - +1.f range
+    // convenience method to ensure a sample is in the valid -1.f - +1.f range
 
     inline float capSample( float value )
     {
         return std::min( 1.f, std::max( -1.f, value ));
+    }
+
+    // convenience method to round given number value to the nearest
+    // multiple of valueToRoundTo
+    // e.g. roundTo( 236.32, 10 ) == 240 and roundTo( 236.32, 5 ) == 235
+
+    inline float roundTo( float value, float valueToRoundTo )
+    {
+        float resto = fmod( value, valueToRoundTo );
+
+        if ( resto <= ( valueToRoundTo / 2 ))
+            return value - resto;
+
+        return value + valueToRoundTo - resto;
     }
 
     // convenience method to scale given value and its expected maxValue against

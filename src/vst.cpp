@@ -195,10 +195,12 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
     }
 
     // according to docs: processing context (optional, but most welcome)
-//
-//    if ( data.processContext != nullptr ) {
-//        regrader->init(( int ) data.processContext->sampleRate, data.processContext->tempo );
-//    }
+
+    if ( data.processContext != nullptr ) {
+        regraderProcess->setTempo(
+            data.processContext->tempo, data.processContext->timeSigNumerator, data.processContext->timeSigDenominator
+        );
+    }
 
     //---2) Read input events-------------
 //    IEventList* eventList = data.inputEvents;
