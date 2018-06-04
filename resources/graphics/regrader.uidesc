@@ -6,111 +6,110 @@
         <color name="Focus" rgba="#279bffff"/>
     </colors>
     <template
-        maxSize="788, 250" minSize="788, 250" size="788, 250" name="view" opacity="1" origin="0, 0"
+        maxSize="933, 300" minSize="933, 300" size="933, 300" name="view" opacity="1" origin="0, 0"
         background-color="~ BlackCColor" background-color-draw-style="filled and stroked" bitmap="background"
         class="CViewContainer"  mouse-enabled="true"  transparent="false">
 
         <!-- Delay module -->
         <!-- delay time slider -->
-        <view control-tag="Unit1::DelayTime" origin="130, 126" size="126, 18" class="CSlider"
+        <view control-tag="Unit1::DelayTime" origin="155, 111" size="134, 21" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
             bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
             draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
-            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="1" min-value="0"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0" max-value="1" min-value="0"
             mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
-        <!-- delay host sync -->
-        <view control-tag="Unit1::DelayHostSync" origin="15, 214" size="145, 25" autosize-to-fit="false" class="CCheckBox"
-              background-offset="0, 0" boxfill-color="~ WhiteCColor"  autosize="bottom"
-              boxframe-color="~ BlackCColor" checkmark-color="~ BlackCColor"
-              default-value="0" draw-crossbox="true" font="~ NormalFontSmall" font-color="Light Grey" frame-width="1"
-              max-value="1" min-value="0" mouse-enabled="true" opacity="1" round-rect-radius="0"
-              title="Sync delay to host tempo" transparent="false"
-              wants-focus="true" wheel-inc-value="0.1"/>
-
         <!-- delay feedback slider -->
-        <view control-tag="Unit1::DelayFeedback" origin="130, 150" size="126, 18" class="CSlider"
+        <view control-tag="Unit1::DelayFeedback" origin="155, 135" size="134, 21" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
             bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
             draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
-            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="1" min-value="0"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0" max-value="1" min-value="0"
             mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
         <!-- delay mix slider -->
-        <view control-tag="Unit1::DelayMix" origin="130, 174" size="126, 18" class="CSlider"
+        <view control-tag="Unit1::DelayMix" origin="155, 159" size="134, 21" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
             bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
             draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
-            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="1" min-value="0"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0" max-value="1" min-value="0"
             mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
-        <!-- BitCrusher module -->
-        <!-- bit resolution slider -->
-        <view control-tag="Unit1::BitResolution" origin="130, 198" size="126, 18" class="CSlider"
-            background-offset="0, 0" bitmap="slider_background"
-            bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
-            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
-            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="1" min-value="0"
-            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
-            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
-
-        <!-- Pre/post delay mix -->
-        <view control-tag="Unit1::BitCrusherChain" origin="15, 174" size="145, 25" autosize-to-fit="false" class="CCheckBox"
-              background-offset="0, 0" boxfill-color="~ WhiteCColor"  autosize="bottom"
+        <!-- delay host sync -->
+        <view control-tag="Unit1::DelayHostSync" origin="154, 182" size="145, 25" autosize-to-fit="false" class="CCheckBox"
+              background-offset="0, 0" boxfill-color="~ GreenCColor"  autosize="bottom"
               boxframe-color="~ BlackCColor" checkmark-color="~ BlackCColor"
               default-value="0" draw-crossbox="true" font="~ NormalFontSmall" font-color="Light Grey" frame-width="1"
               max-value="1" min-value="0" mouse-enabled="true" opacity="1" round-rect-radius="0"
-              title="BitCrusher post delay mix" transparent="false"
-              wants-focus="true" wheel-inc-value="0.1"/>
+              title="" transparent="false" wants-focus="true" wheel-inc-value="0.1"/>
+
+
+        <!-- BitCrusher module -->
+        <!-- bit resolution slider -->
+        <view control-tag="Unit1::BitResolution" origin="463, 111" size="134, 21" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0" max-value="1" min-value="0"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
         <!-- LFO rate slider -->
-        <view control-tag="Unit1::LFOBitResolution" origin="402, 174" size="126, 18" class="CSlider"
+        <view control-tag="Unit1::LFOBitResolution" origin="463, 135" size="134, 21" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
             bitmap-offset="0, 0" default-value="0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
             draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
-            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="10" min-value="0"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0" max-value="10" min-value="0"
             mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
         <!-- LFO depth slider -->
-        <view control-tag="Unit1::LFOBitResolutionDepth" origin="402, 198" size="126, 18" class="CSlider"
+        <view control-tag="Unit1::LFOBitResolutionDepth" origin="463, 159" size="134, 21" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
             bitmap-offset="0, 0" default-value="0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
             draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
-            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="10" min-value="0"
-            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
-            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
-
-        <!-- Decimator module -->
-        <!-- bit slider -->
-        <view control-tag="Unit1::Decimator" origin="630, 198" size="126, 18" class="CSlider"
-            background-offset="0, 0" bitmap="slider_background"
-            bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
-            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
-            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="1" min-value="0"
-            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
-            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
-
-        <!-- LFO rate slider -->
-        <view control-tag="Unit1::LFODecimator" origin="602, 174" size="126, 18" class="CSlider"
-            background-offset="0, 0" bitmap="slider_background"
-            bitmap-offset="0, 0" default-value="0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
-            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
-            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 4" max-value="1" min-value="0"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0" max-value="10" min-value="0"
             mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
         <!-- Pre/post delay mix -->
-        <view control-tag="Unit1::DecimatorChain" origin="15, 194" size="145, 25" autosize-to-fit="false" class="CCheckBox"
-              background-offset="0, 0" boxfill-color="~ WhiteCColor"  autosize="bottom"
+        <view control-tag="Unit1::BitCrusherChain" origin="462, 182" size="145, 25" autosize-to-fit="false" class="CCheckBox"
+              background-offset="0, 0" boxfill-color="~ GreenCColor"  autosize="bottom"
               boxframe-color="~ BlackCColor" checkmark-color="~ BlackCColor"
               default-value="0" draw-crossbox="true" font="~ NormalFontSmall" font-color="Light Grey" frame-width="1"
               max-value="1" min-value="0" mouse-enabled="true" opacity="1" round-rect-radius="0"
-              title="Decimator pre/post delay mix" transparent="false"
-              wants-focus="true" wheel-inc-value="0.1"/>
+              title="" transparent="false" wants-focus="true" wheel-inc-value="0.1"/>
+
+
+        <!-- Decimator module -->
+        <!-- bit slider -->
+        <view control-tag="Unit1::Decimator" origin="771, 111" size="134, 21" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0" max-value="1" min-value="0"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
+
+        <!-- LFO rate slider -->
+        <view control-tag="Unit1::LFODecimator" origin="771, 135" size="134, 21" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0" max-value="1" min-value="0"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
+
+        <!-- Pre/post delay mix -->
+        <view control-tag="Unit1::DecimatorChain" origin="770, 158" size="145, 25" autosize-to-fit="false" class="CCheckBox"
+              background-offset="0, 0" boxfill-color="~ GreenCColor"  autosize="bottom"
+              boxframe-color="~ BlackCColor" checkmark-color="~ BlackCColor"
+              default-value="0" draw-crossbox="true" font="~ NormalFontSmall" font-color="Light Grey" frame-width="1"
+              max-value="1" min-value="0" mouse-enabled="true" opacity="1" round-rect-radius="0"
+              title="" transparent="false" wants-focus="true" wheel-inc-value="0.1"/>
 
     </template>
     <variables/>
