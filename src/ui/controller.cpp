@@ -83,6 +83,10 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     );
     parameters.addParameter( delayTimeParam );
 
+    parameters.addParameter(
+        USTRING("Delay host sync"), 0, 1, 0, ParameterInfo::kCanAutomate, kDelayHostSyncId
+    );
+
     RangeParameter* delayFeedbackParam = new RangeParameter(
         USTRING( "Delay feedback" ), kDelayFeedbackId, USTRING( "0 - 1" ),
         0.f, 1.f, 0.f,
@@ -168,6 +172,10 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
         if ( state->read( &savedDelayTime, sizeof( float )) != kResultOk )
             return kResultFalse;
 
+        float savedDelayHostSync = 1.f;
+        if ( state->read( &savedDelayHostSync, sizeof( float )) != kResultOk )
+            return kResultFalse;
+
         float savedDelayFeedback = 1.f;
         if ( state->read( &savedDelayFeedback, sizeof( float )) != kResultOk )
             return kResultFalse;
@@ -206,6 +214,7 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
 
 #if BYTEORDER == kBigEndian
     SWAP_32( savedDelayTime )
+    SWAP_32( savedDelayHostSync )
     SWAP_32( savedDelayFeedback )
     SWAP_32( savedDelayMix )
     SWAP_32( savedBitResolution )
@@ -217,6 +226,7 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
     SWAP_32( savedLFODecimator )
 #endif
         setParamNormalized( kDelayTimeId,             savedDelayTime );
+        setParamNormalized( kDelayHostSyncId,         savedDelayHostSync );
         setParamNormalized( kDelayFeedbackId,         savedDelayFeedback );
         setParamNormalized( kDelayMixId,              savedDelayMix );
         setParamNormalized( kBitResolutionId,         savedBitResolution );
@@ -328,6 +338,7 @@ tresult PLUGIN_API RegraderController::getParamStringByValue( ParamID tag, Param
         // simply read the normalized value which is in the same range
 
         case kDelayTimeId:
+        case kDelayHostSyncId:
         case kDelayFeedbackId:
         case kDelayMixId:
         case kBitResolutionId:
@@ -338,7 +349,16 @@ tresult PLUGIN_API RegraderController::getParamStringByValue( ParamID tag, Param
         case kLFODecimatorId:
         {
             char text[32];
-            sprintf( text, "%.2f", ( float ) valueNormalized );
+
+            if (( tag == kDelayHostSyncId )) {
+                sprintf( text, "%s", ( valueNormalized == 0 ) ? "Off" : "On" );
+            }
+            else if (( tag == kBitResolutionChainId || tag == kDecimatorChainId )) {
+                sprintf( text, "%s", ( valueNormalized == 0 ) ? "Pre-delay mix" : "Post-delay mix" );
+            }
+            else {
+                sprintf( text, "%.2f", ( float ) valueNormalized );
+            }
             Steinberg::UString( string, 128 ).fromAscii( text );
 
             return kResultTrue;

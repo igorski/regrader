@@ -89,6 +89,7 @@ class Regrader : public AudioEffect
         // (normalized) RangeParameter values
 
         float fDelayTime;
+        float fDelayHostSync;
         float fDelayFeedback;
         float fDelayMix;
 

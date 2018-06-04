@@ -20,6 +20,15 @@
             mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
+        <!-- delay host sync -->
+        <view control-tag="Unit1::DelayHostSync" origin="15, 214" size="145, 25" autosize-to-fit="false" class="CCheckBox"
+              background-offset="0, 0" boxfill-color="~ WhiteCColor"  autosize="bottom"
+              boxframe-color="~ BlackCColor" checkmark-color="~ BlackCColor"
+              default-value="0" draw-crossbox="true" font="~ NormalFontSmall" font-color="Light Grey" frame-width="1"
+              max-value="1" min-value="0" mouse-enabled="true" opacity="1" round-rect-radius="0"
+              title="Sync delay to host tempo" transparent="false"
+              wants-focus="true" wheel-inc-value="0.1"/>
+
         <!-- delay feedback slider -->
         <view control-tag="Unit1::DelayFeedback" origin="130, 150" size="126, 18" class="CSlider"
             background-offset="0, 0" bitmap="slider_background"
@@ -95,7 +104,7 @@
             transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
 
         <!-- Pre/post delay mix -->
-        <view control-tag="Unit1::DecimatorChain" origin="15, 174" size="145, 25" autosize-to-fit="false" class="CCheckBox"
+        <view control-tag="Unit1::DecimatorChain" origin="15, 194" size="145, 25" autosize-to-fit="false" class="CCheckBox"
               background-offset="0, 0" boxfill-color="~ WhiteCColor"  autosize="bottom"
               boxframe-color="~ BlackCColor" checkmark-color="~ BlackCColor"
               default-value="0" draw-crossbox="true" font="~ NormalFontSmall" font-color="Light Grey" frame-width="1"
@@ -135,15 +144,16 @@
     <control-tags>
         <control-tag name="UI::SendMessage"              tag="1000"/>
         <control-tag name="Unit1::DelayTime"             tag="0"/>
-        <control-tag name="Unit1::DelayFeedback"         tag="1"/>
-        <control-tag name="Unit1::DelayMix"              tag="2"/>
-        <control-tag name="Unit1::BitResolution"         tag="3"/>
-        <control-tag name="Unit1::BitResolutionChain"    tag="4"/>
-        <control-tag name="Unit1::LFOBitResolution"      tag="5"/>
-        <control-tag name="Unit1::LFOBitResolutionDepth" tag="6"/>
-        <control-tag name="Unit1::Decimator"             tag="7"/>
-        <control-tag name="Unit1::DecimatorChain"        tag="8"/>
-        <control-tag name="Unit1::LFODecimator"          tag="9"/>
+        <control-tag name="Unit1::DelayHostSync"         tag="1"/>
+        <control-tag name="Unit1::DelayFeedback"         tag="2"/>
+        <control-tag name="Unit1::DelayMix"              tag="3"/>
+        <control-tag name="Unit1::BitResolution"         tag="4"/>
+        <control-tag name="Unit1::BitResolutionChain"    tag="5"/>
+        <control-tag name="Unit1::LFOBitResolution"      tag="6"/>
+        <control-tag name="Unit1::LFOBitResolutionDepth" tag="7"/>
+        <control-tag name="Unit1::Decimator"             tag="8"/>
+        <control-tag name="Unit1::DecimatorChain"        tag="9"/>
+        <control-tag name="Unit1::LFODecimator"          tag="10"/>
 
     </control-tags>
 </vstgui-ui-description>

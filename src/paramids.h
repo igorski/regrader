@@ -28,6 +28,7 @@ enum
     // ids for all visual parameters
 
     kDelayTimeId = 0,         // delay time
+    kDelayHostSyncId,         // delay host sync
     kDelayFeedbackId,         // delay feedback
     kDelayMixId,              // delay mix
 

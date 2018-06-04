@@ -42,15 +42,16 @@ namespace Vst {
 //------------------------------------------------------------------------
 Regrader::Regrader()
 : fDelayTime( 0.025f )
+, fDelayHostSync( 1.f )
 , fDelayFeedback( 0.2f )
 , fDelayMix( .5f )
 , fBitResolution( 1.f )
-, fBitResolutionChain( 0.f )
+, fBitResolutionChain( 1.f )
 , fLFOBitResolution( .0f )
 , fLFOBitResolutionDepth( .75f )
 , fDecimator( 1.f )
 , fLFODecimator( 0.f )
-, fDecimatorChain( 1.f )
+, fDecimatorChain( 0.f )
 , regraderProcess( 0 )
 , outputGainOld( 0.f )
 , currentProcessMode( -1 ) // -1 means not initialized
@@ -142,6 +143,11 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
                     case kDelayTimeId:
                         if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
                             fDelayTime = ( float ) value;
+                        break;
+
+                    case kDelayHostSyncId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            fDelayHostSync = (( float ) value ) > .5;
                         break;
 
                     case kDelayFeedbackId:
@@ -270,6 +276,10 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
     if ( state->read( &savedDelayTime, sizeof ( float )) != kResultOk )
         return kResultFalse;
 
+    float savedDelayHostSync = 0.f;
+    if ( state->read( &savedDelayHostSync, sizeof ( float )) != kResultOk )
+        return kResultFalse;
+
     float savedDelayFeedback = 0.f;
     if ( state->read( &savedDelayFeedback, sizeof ( float )) != kResultOk )
         return kResultFalse;
@@ -308,6 +318,7 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
 
 #if BYTEORDER == kBigEndian
     SWAP_32( savedDelayTime )
+    SWAP_32( savedDelayHostSync )
     SWAP_32( savedDelayFeedback )
     SWAP_32( savedDelayMix )
     SWAP_32( savedBitResolution )
@@ -320,6 +331,7 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
 #endif
 
     fDelayTime             = savedDelayTime;
+    fDelayHostSync         = savedDelayHostSync;
     fDelayFeedback         = savedDelayFeedback;
     fDelayMix              = savedDelayMix;
     fBitResolution         = savedBitResolution;
@@ -369,6 +381,7 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
     // here we need to save the model
 
     float toSaveDelayTime             = fDelayTime;
+    float toSavedDelayHostSync        = fDelayHostSync;
     float toSaveDelayFeedback         = fDelayFeedback;
     float toSaveDelayMix              = fDelayMix;
     float toSaveBitResolution         = fBitResolution;
@@ -381,6 +394,7 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
 
 #if BYTEORDER == kBigEndian
     SWAP_32( toSaveDelayTime )
+    SWAP_32( toSavedDelayHostSync )
     SWAP_32( toSaveDelayFeedback )
     SWAP_32( toSaveDelayMix )
     SWAP_32( toSaveBitResolution )
@@ -393,6 +407,7 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
 #endif
 
     state->write( &toSaveDelayTime,             sizeof( float ));
+    state->write( &toSavedDelayHostSync,        sizeof( float ));
     state->write( &toSaveDelayFeedback,         sizeof( float ));
     state->write( &toSaveDelayMix,              sizeof( float ));
     state->write( &toSaveBitResolution,         sizeof( float ));
@@ -515,11 +530,12 @@ tresult PLUGIN_API Regrader::notify( IMessage* message )
 void Regrader::syncModel()
 {
     regraderProcess->setDelayTime( fDelayTime );
+    regraderProcess->syncDelayToHost = fDelayHostSync;
     regraderProcess->setDelayFeedback( fDelayFeedback );
     regraderProcess->setDelayMix( fDelayMix );
 
-    regraderProcess->bitCrusherPostMix = ( fBitResolutionChain > 0.5f );
-    regraderProcess->decimatorPostMix  = ( fDecimatorChain > 0.5f );
+    regraderProcess->bitCrusherPostMix = fBitResolutionChain;
+    regraderProcess->decimatorPostMix  = fDecimatorChain;
 
     regraderProcess->bitCrusher->setAmount( fBitResolution );
     regraderProcess->bitCrusher->setLFO( fLFOBitResolution, fLFOBitResolutionDepth );
