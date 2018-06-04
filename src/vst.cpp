@@ -147,7 +147,7 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
 
                     case kDelayHostSyncId:
                         if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
-                            fDelayHostSync = (( float ) value ) > .5;
+                            fDelayHostSync = ( float ) value;
                         break;
 
                     case kDelayFeedbackId:
@@ -530,12 +530,12 @@ tresult PLUGIN_API Regrader::notify( IMessage* message )
 void Regrader::syncModel()
 {
     regraderProcess->setDelayTime( fDelayTime );
-    regraderProcess->syncDelayToHost = fDelayHostSync;
+    regraderProcess->syncDelayToHost = Igorski::VST::toBool( fDelayHostSync );
     regraderProcess->setDelayFeedback( fDelayFeedback );
     regraderProcess->setDelayMix( fDelayMix );
 
-    regraderProcess->bitCrusherPostMix = fBitResolutionChain;
-    regraderProcess->decimatorPostMix  = fDecimatorChain;
+    regraderProcess->bitCrusherPostMix = Igorski::VST::toBool( fBitResolutionChain );
+    regraderProcess->decimatorPostMix  = Igorski::VST::toBool( fDecimatorChain );
 
     regraderProcess->bitCrusher->setAmount( fBitResolution );
     regraderProcess->bitCrusher->setLFO( fLFOBitResolution, fLFOBitResolutionDepth );

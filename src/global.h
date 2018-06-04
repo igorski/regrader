@@ -62,6 +62,13 @@ namespace VST {
         float ratio = maxCompareValue / maxValue;
         return ( float ) ( std::min( maxValue, value ) * ratio );
     }
+
+    // cast a floating point value to a boolean true/false
+
+    inline bool toBool( float value )
+    {
+        return value >= .5;
+    }
 }
 }
 
