@@ -84,7 +84,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     parameters.addParameter( delayTimeParam );
 
     parameters.addParameter(
-        USTRING("Delay host sync"), 0, 1, 0, ParameterInfo::kCanAutomate, kDelayHostSyncId
+        USTRING( "Delay host sync" ), 0, 1, 0, ParameterInfo::kCanAutomate, kDelayHostSyncId
     );
 
     RangeParameter* delayFeedbackParam = new RangeParameter(
@@ -111,7 +111,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     parameters.addParameter( bitParam );
 
     parameters.addParameter(
-        USTRING("BitCrusher chain"), 0, 1, 0, ParameterInfo::kCanAutomate, kBitResolutionChainId
+        USTRING( "BitCrusher chain" ), 0, 1, 0, ParameterInfo::kCanAutomate, kBitResolutionChainId
     );
 
     RangeParameter* bitLfoRateParam = new RangeParameter(
@@ -138,7 +138,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     parameters.addParameter( decimatorParam );
 
     parameters.addParameter(
-        USTRING("Decimator chain"), 0, 1, 0, ParameterInfo::kCanAutomate, kDecimatorChainId
+        USTRING( "Decimator chain" ), 0, 1, 0, ParameterInfo::kCanAutomate, kDecimatorChainId
     );
 
     RangeParameter* decimatorLFOParam = new RangeParameter(
@@ -151,7 +151,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     // Filter controls
 
     parameters.addParameter(
-        USTRING("Filter chain"), 0, 1, 0, ParameterInfo::kCanAutomate, kFilterChainId
+        USTRING( "Filter chain" ), 0, 1, 0, ParameterInfo::kCanAutomate, kFilterChainId
     );
 
     RangeParameter* filterCutoffParam = new RangeParameter(
@@ -182,6 +182,39 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     );
     parameters.addParameter( filterLFODepthParam );
 
+    // Flanger controls
+
+    RangeParameter* flangerLFORateParam = new RangeParameter(
+        USTRING( "Flanger LFO rate" ), kFlangerRateId, USTRING( "Hz" ),
+        0.f, 10.f, 0.f,
+        0, ParameterInfo::kCanAutomate, unitId
+    );
+    parameters.addParameter( flangerLFORateParam );
+
+    RangeParameter* flangerWidthParam = new RangeParameter(
+        USTRING( "Flanger width" ), kFlangerWidthId, USTRING( "%" ),
+        0.f, 1.f, 0.f,
+        0, ParameterInfo::kCanAutomate, unitId
+    );
+    parameters.addParameter( flangerWidthParam );
+
+    RangeParameter* flangerFeedbackParam = new RangeParameter(
+        USTRING( "Flanger feedback" ), kFlangerFeedbackId, USTRING( "%" ),
+        0.f, 1.f, 0.f,
+        0, ParameterInfo::kCanAutomate, unitId
+     );
+    parameters.addParameter( flangerFeedbackParam );
+
+    RangeParameter* flangerDelayParam = new RangeParameter(
+        USTRING( "Flanger delay" ), kFlangerDelayId, USTRING( "%" ),
+        0.1f, 1.f, 0.1f,
+        0, ParameterInfo::kCanAutomate, unitId
+    );
+    parameters.addParameter( flangerDelayParam );
+
+    parameters.addParameter(
+        USTRING( "Flanger chain" ), 0, 1, 0, ParameterInfo::kCanAutomate, kFlangerChainId
+    );
     // initialization
 
     String str( "REGRADER" );
@@ -222,7 +255,7 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
         if ( state->read( &savedBitResolution, sizeof( float )) != kResultOk )
             return kResultFalse;
 
-        float savedBitResolutionChain = 0;
+        float savedBitResolutionChain = 0.f;
         if ( state->read( &savedBitResolutionChain, sizeof( float )) != kResultOk )
             return kResultFalse;
 
@@ -246,7 +279,7 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
         if ( state->read( &savedLFODecimator, sizeof( float )) != kResultOk )
             return kResultFalse;
 
-        float savedFilterChain = 0;
+        float savedFilterChain = 0.f;
         if ( state->read( &savedFilterChain, sizeof( float )) != kResultOk )
             return kResultFalse;
 
@@ -266,6 +299,26 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
         if ( state->read( &savedLFOFilterDepth, sizeof( float )) != kResultOk )
             return kResultFalse;
 
+        float savedFlangerChain = 0.f;
+        if ( state->read( &savedFlangerChain, sizeof( float )) != kResultOk )
+            return kResultFalse;
+
+        float savedFlangerRate = 1.f;
+        if ( state->read( &savedFlangerRate, sizeof( float )) != kResultOk )
+            return kResultFalse;
+
+        float savedFlangerWidth = 1.f;
+        if ( state->read( &savedFlangerWidth, sizeof( float )) != kResultOk )
+            return kResultFalse;
+
+        float savedFlangerFeedback = 1.f;
+        if ( state->read( &savedFlangerFeedback, sizeof( float )) != kResultOk )
+            return kResultFalse;
+
+        float savedFlangerDelay = 1.f;
+        if ( state->read( &savedFlangerDelay, sizeof( float )) != kResultOk )
+            return kResultFalse;
+
 #if BYTEORDER == kBigEndian
     SWAP_32( savedDelayTime )
     SWAP_32( savedDelayHostSync )
@@ -283,6 +336,11 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
     SWAP_32( savedFilterResonance )
     SWAP_32( savedLFOFilter )
     SWAP_32( savedLFOFilterDepth )
+    SWAP_32( savedFlangerChain )
+    SWAP_32( savedFlangerRate )
+    SWAP_32( savedFlangerWidth )
+    SWAP_32( savedFlangerFeedback )
+    SWAP_32( savedFlangerDelay )
 #endif
         setParamNormalized( kDelayTimeId,             savedDelayTime );
         setParamNormalized( kDelayHostSyncId,         savedDelayHostSync );
@@ -300,6 +358,11 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
         setParamNormalized( kFilterResonanceId,       savedFilterResonance );
         setParamNormalized( kLFOFilterId,             savedLFOFilter );
         setParamNormalized( kLFOFilterDepthId,        savedLFOFilterDepth );
+        setParamNormalized( kFlangerChainId,          savedFlangerChain );
+        setParamNormalized( kFlangerRateId,           savedFlangerRate );
+        setParamNormalized( kFlangerWidthId,          savedFlangerWidth );
+        setParamNormalized( kFlangerFeedbackId,       savedFlangerFeedback );
+        setParamNormalized( kFlangerDelayId,          savedFlangerDelay );
 
         state->seek( sizeof ( float ), IBStream::kIBSeekCur );
     }
@@ -413,6 +476,10 @@ tresult PLUGIN_API RegraderController::getParamStringByValue( ParamID tag, Param
         case kLFODecimatorId:
         case kFilterChainId:
         case kLFOFilterDepthId:
+        case kFlangerChainId:
+        case kFlangerWidthId:
+        case kFlangerFeedbackId:
+        case kFlangerDelayId:
         {
             char text[32];
 
@@ -437,6 +504,7 @@ tresult PLUGIN_API RegraderController::getParamStringByValue( ParamID tag, Param
         case kFilterCutoffId:
         case kFilterResonanceId:
         case kLFOFilterId:
+        case kFlangerRateId:
         {
             char text[32];
             if (( tag == kLFOBitResolutionId || tag == kLFODecimatorId ) && valueNormalized == 0 )

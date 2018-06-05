@@ -43,11 +43,13 @@ RegraderProcess::RegraderProcess( int amountOfChannels ) {
     bitCrusher = new BitCrusher( 8, .5f, .5f );
     decimator  = new Decimator( 32, 0.f );
     filter     = new Filter();
+    flanger    = new Flanger( 0.1f, 0.5f, .75f, .1f, 1.f );
     limiter    = new Limiter( 10.f, 500.f, .6f );
 
     bitCrusherPostMix = false;
     decimatorPostMix  = false;
     filterPostMix     = true;
+    flangerPostMix    = true;
 
     // these will be synced to host, see vst.cpp. here we default to 120 BPM in 4/4 time
     _tempo              = 120.0;
@@ -68,6 +70,7 @@ RegraderProcess::~RegraderProcess() {
     delete bitCrusher;
     delete decimator;
     delete filter;
+    delete flanger;
     delete limiter;
 }
 
@@ -87,9 +90,11 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
     // effect LFO is controlled from the outside, cache properties here
     bool hasDecimatorLFO = ( decimator->getRate() > 0.f );
     bool hasFilterLFO    = ( filter->lfo->getRate() > 0.f );
+    bool hasFlanger      = ( flanger->getRate() > 0.f || flanger->getWidth() > 0.f );
     float initialDecimatorLFOOffset = decimator->getAccumulator();
     float initialFilterLFOOffset    = filter->lfo->getAccumulator();
     float initialFilterCutoff       = filter->getCurrentCutoff();
+    float initialFlangerSweep       = flanger->getSweep();
 
     // clone in buffer for pre-mix processing
     cloneInBuffer( inBuffer, numInChannels, bufferSize );
@@ -111,6 +116,9 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
         if ( hasFilterLFO && c > 0 )
             filter->resetFilter( initialFilterLFOOffset, initialFilterCutoff );
 
+        if ( hasFlanger && c > 0 )
+            flanger->setSweep( initialFlangerSweep );
+
         // PRE MIX processing
 
         if ( !bitCrusherPostMix )
@@ -121,6 +129,9 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
         if ( !filterPostMix )
             filter->process( channelInCloneBuffer, bufferSize, c );
+
+        if ( hasFlanger && !flangerPostMix )
+            flanger->process( channelInCloneBuffer, bufferSize, c );
 
         // DELAY processing applied onto the temp buffer
 
@@ -159,6 +170,9 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
         if ( bitCrusherPostMix )
             bitCrusher->process( channelTempBuffer, bufferSize );
+
+        if ( hasFlanger && flangerPostMix )
+            flanger->process( channelTempBuffer, bufferSize, c );
 
         // mix the input buffer into the output (dry mix)
 

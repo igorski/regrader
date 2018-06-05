@@ -189,7 +189,7 @@ void Filter::resetFilter( float accumulatorOffset, float cutOff )
 
 void Filter::calculateParameters()
 {
-    _c  = 1.f / tan( 3.141592653589793f * _tempCutoff / VST::SAMPLE_RATE );
+    _c  = 1.f / tan( VST::PI * _tempCutoff / VST::SAMPLE_RATE );
     _a1 = 1.f / ( 1.f + _resonance * _c + _c * _c );
     _a2 = 2.f * _a1;
     _a3 = _a1;

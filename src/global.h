@@ -17,6 +17,9 @@ namespace VST {
     static float SAMPLE_RATE = 44100.f;
     static int BUFFER_SIZE   = 8192;
 
+    static const float PI     = 3.141592653589793f;
+    static const float TWO_PI = PI * 2.f;
+
     // maximum and minimum filter frequency ranges
     // also see regrader.uidesc to update the controls to match
 

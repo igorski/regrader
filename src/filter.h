@@ -28,67 +28,66 @@
 #include <math.h>
 
 namespace Igorski {
+class Filter {
 
-    class Filter {
+    public:
+        Filter();
+        ~Filter();
 
-        public:
-            Filter();
-            ~Filter();
+        void  setCutoff( float frequency );
+        float getCutoff();
+        void  setResonance( float resonance );
+        float getResonance();
+        void setDepth( float depth );
+        float getDepth();
+        void setLFO( bool enabled );
 
-            void  setCutoff( float frequency );
-            float getCutoff();
-            void  setResonance( float resonance );
-            float getResonance();
-            void setDepth( float depth );
-            float getDepth();
-            void setLFO( bool enabled );
+        void calculateParameters();
 
-            void calculateParameters();
+        // update Filter properties, the values here are in normalized 0 - 1 range
+        void updateProperties( float cutoffPercentage, float resonancePercentage, float LFORatePercentage, float fLFODepth );
 
-            // update Filter properties, the values here are in normalized 0 - 1 range
-            void updateProperties( float cutoffPercentage, float resonancePercentage, float LFORatePercentage, float fLFODepth );
+        // apply filter to incoming sampleBuffer contents
+        void process( float* sampleBuffer, int bufferSize, int c );
 
-            // apply filter to incoming sampleBuffer contents
-            void process( float* sampleBuffer, int bufferSize, int c );
+        LFO* lfo;
 
-            LFO* lfo;
+        // the cutoff can travel if the filter is modulated by the LFO
+        // this method retrieves the current cutoff value
 
-            // the cutoff can travel if the filter is modulated by the LFO
-            // this method retrieves the current cutoff value
+        float getCurrentCutoff();
 
-            float getCurrentCutoff();
+        // resets the filter to use given cutoff and to set
+        // the LFO to given accumulator
 
-            // resets the filter to use given cutoff and to set
-            // the LFO to given accumulator
+        void resetFilter( float accumulatorOffset, float cutOff );
 
-            void resetFilter( float accumulatorOffset, float cutOff );
+    private:
+        float _cutoff;
+        float _tempCutoff;
+        float _resonance;
+        float _depth;
+        float _lfoMin;
+        float _lfoMax;
+        float _lfoRange;
+        bool  _hasLFO;
 
-        private:
-            float _cutoff;
-            float _tempCutoff;
-            float _resonance;
-            float _depth;
-            float _lfoMin;
-            float _lfoMax;
-            float _lfoRange;
-            bool  _hasLFO;
+        // used internally
 
-            // used internally
+        float _a1;
+        float _a2;
+        float _a3;
+        float _b1;
+        float _b2;
+        float _c;
 
-            float _a1;
-            float _a2;
-            float _a3;
-            float _b1;
-            float _b2;
-            float _c;
+        float* _in1;
+        float* _in2;
+        float* _out1;
+        float* _out2;
 
-            float* _in1;
-            float* _in2;
-            float* _out1;
-            float* _out2;
-
-            void cacheLFOProperties();
-    };
+        void cacheLFOProperties();
+};
 }
 
 #endif

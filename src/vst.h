@@ -108,6 +108,12 @@ class Regrader : public AudioEffect
         float fLFOFilter;
         float fLFOFilterDepth;
 
+        float fFlangerChain;
+        float fFlangerRate;
+        float fFlangerWidth;
+        float fFlangerFeedback;
+        float fFlangerDelay;
+
         float outputGainOld; // for visualizing output gain in DAW
 
         int32 currentProcessMode;

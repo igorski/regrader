@@ -108,8 +108,12 @@ set(regrader_sources
     src/decimator.cpp
     src/filter.h
     src/filter.cpp
+    src/flanger.h
+    src/flanger.cpp
     src/lfo.h
     src/lfo.cpp
+    src/lowpassfilter.h
+    src/lowpassfilter.cpp
     src/limiter.h
     src/limiter.cpp
     src/paramids.h

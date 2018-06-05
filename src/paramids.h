@@ -47,6 +47,12 @@ enum
     kLFOFilterId,             // filter LFO rate
     kLFOFilterDepthId,        // depth for filter LFO
 
+    kFlangerChainId,          // flanger pre/post delay mix
+    kFlangerRateId,           // flanger LFO rate
+    kFlangerWidthId,          // flanger width
+    kFlangerFeedbackId,       // flanger feedback
+    kFlangerDelayId,          // flanger delay
+
     kVuPPMId                  // for the Vu value return to host
 };
 

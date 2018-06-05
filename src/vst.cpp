@@ -56,7 +56,12 @@ Regrader::Regrader()
 , fFilterCutoff( .5f )
 , fFilterResonance( 1.f )
 , fLFOFilter( 0.f )
-, fLFOFilterDepth( 1.f )
+, fLFOFilterDepth( 0.5f )
+, fFlangerChain( 0.f )
+, fFlangerRate( 0.f )
+, fFlangerWidth( 0.f )
+, fFlangerFeedback( 0.f )
+, fFlangerDelay( 0.f )
 , regraderProcess( 0 )
 , outputGainOld( 0.f )
 , currentProcessMode( -1 ) // -1 means not initialized
@@ -87,10 +92,6 @@ tresult PLUGIN_API Regrader::initialize( FUnknown* context )
 
     //---create Event In/Out buses (1 bus with only 1 channel)------
     addEventInput( STR16( "Event In" ), 1 );
-
-    // TODO: creating a bunch of extra channels for no apparent reason?
-    regraderProcess = new Igorski::RegraderProcess( 6 );
-    syncModel();
 
     return kResultOk;
 }
@@ -223,6 +224,31 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
                     case kLFOFilterDepthId:
                         if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
                             fLFOFilterDepth = ( float ) value;
+                        break;
+
+                    case kFlangerChainId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            fFlangerChain = ( float ) value;
+                        break;
+
+                    case kFlangerRateId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            fFlangerRate = ( float ) value;
+                        break;
+
+                    case kFlangerWidthId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            fFlangerWidth = ( float ) value;
+                        break;
+
+                    case kFlangerFeedbackId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            fFlangerFeedback = ( float ) value;
+                        break;
+
+                    case kFlangerDelayId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            fFlangerDelay = ( float ) value;
                         break;
                 }
                 syncModel();
@@ -366,6 +392,26 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
     if ( state->read( &savedLFOFilter, sizeof ( float )) != kResultOk )
         return kResultFalse;
 
+    float savedFlangerChain = 0.f;
+    if ( state->read( &savedFlangerChain, sizeof ( float )) != kResultOk )
+        return kResultFalse;
+
+    float savedFlangerRate = 1.f;
+    if ( state->read( &savedFlangerRate, sizeof ( float )) != kResultOk )
+        return kResultFalse;
+
+    float savedFlangerWidth = 1.f;
+    if ( state->read( &savedFlangerWidth, sizeof ( float )) != kResultOk )
+        return kResultFalse;
+
+    float savedFlangerFeedback = 1.f;
+    if ( state->read( &savedFlangerFeedback, sizeof ( float )) != kResultOk )
+        return kResultFalse;
+
+    float savedFlangerDelay = 1.f;
+    if ( state->read( &savedFlangerDelay, sizeof ( float )) != kResultOk )
+        return kResultFalse;
+
 #if BYTEORDER == kBigEndian
     SWAP_32( savedDelayTime )
     SWAP_32( savedDelayHostSync )
@@ -383,6 +429,11 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
     SWAP_32( savedFilterResonance )
     SWAP_32( savedLFOFilter )
     SWAP_32( savedLFOFilterDepth )
+    SWAP_32( savedFlangerChain )
+    SWAP_32( savedFlangerRate )
+    SWAP_32( savedFlangerWidth )
+    SWAP_32( savedFlangerFeedback )
+    SWAP_32( savedFlangerDelay )
 #endif
 
     fDelayTime             = savedDelayTime;
@@ -401,6 +452,11 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
     fFilterResonance       = savedFilterResonance;
     fLFOFilter             = savedLFOFilter;
     fLFOFilterDepth        = savedLFOFilterDepth;
+    fFlangerChain          = savedFlangerChain;
+    fFlangerRate           = savedFlangerRate;
+    fFlangerWidth          = savedFlangerWidth;
+    fFlangerFeedback       = savedFlangerFeedback;
+    fFlangerDelay          = savedFlangerDelay;
 
     // Example of using the IStreamAttributes interface
     FUnknownPtr<IStreamAttributes> stream (state);
@@ -456,6 +512,11 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
     float toSaveFilterResonance       = fFilterResonance;
     float toSaveLFOFilter             = fLFOFilter;
     float toSaveLFOFilterDepth        = fLFOFilterDepth;
+    float toSaveFlangerChain          = fFlangerChain;
+    float toSaveFlangerRate           = fFlangerRate;
+    float toSaveFlangerWidth          = fFlangerWidth;
+    float toSaveFlangerFeedback       = fFlangerFeedback;
+    float toSaveFlangerDelay          = fFlangerDelay;
 
 #if BYTEORDER == kBigEndian
     SWAP_32( toSaveDelayTime )
@@ -474,6 +535,11 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
     SWAP_32( toSaveFilterResonance )
     SWAP_32( toSaveLFOFilter )
     SWAP_32( toSaveLFOFilterDepth )
+    SWAP_32( toSaveFlangerChain )
+    SWAP_32( toSaveFlangerRate )
+    SWAP_32( toSaveFlangerWidth )
+    SWAP_32( toSaveFlangerFeedback )
+    SWAP_32( toSaveFlangerDelay )
 #endif
 
     state->write( &toSaveDelayTime,             sizeof( float ));
@@ -492,6 +558,11 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
     state->write( &toSaveFilterResonance,       sizeof( float ));
     state->write( &toSaveLFOFilter,             sizeof( float ));
     state->write( &toSaveLFOFilterDepth,        sizeof( float ));
+    state->write( &toSaveFlangerChain,          sizeof( float ));
+    state->write( &toSaveFlangerRate,           sizeof( float ));
+    state->write( &toSaveFlangerWidth,          sizeof( float ));
+    state->write( &toSaveFlangerFeedback,       sizeof( float ));
+    state->write( &toSaveFlangerDelay,          sizeof( float ));
 
     return kResultOk;
 }
@@ -505,6 +576,10 @@ tresult PLUGIN_API Regrader::setupProcessing( ProcessSetup& newSetup )
     currentProcessMode = newSetup.processMode;
 
     Igorski::VST::SAMPLE_RATE = newSetup.sampleRate;
+
+    // TODO: creating a bunch of extra channels for no apparent reason?
+    regraderProcess = new Igorski::RegraderProcess( 6 );
+    syncModel();
 
     return AudioEffect::setupProcessing( newSetup );
 }
@@ -612,12 +687,18 @@ void Regrader::syncModel()
     regraderProcess->bitCrusherPostMix = Igorski::VST::toBool( fBitResolutionChain );
     regraderProcess->decimatorPostMix  = Igorski::VST::toBool( fDecimatorChain );
     regraderProcess->filterPostMix     = Igorski::VST::toBool( fFilterChain );
+    regraderProcess->flangerPostMix    = Igorski::VST::toBool( fFlangerChain );
 
     regraderProcess->bitCrusher->setAmount( fBitResolution );
     regraderProcess->bitCrusher->setLFO( fLFOBitResolution, fLFOBitResolutionDepth );
     regraderProcess->decimator->setBits( ( int )( fDecimator * 32.f ));
     regraderProcess->decimator->setRate( fLFODecimator );
     regraderProcess->filter->updateProperties( fFilterCutoff, fFilterResonance, fLFOFilter, fLFOFilterDepth );
+
+    regraderProcess->flanger->setRate( fFlangerRate );
+    regraderProcess->flanger->setWidth( fFlangerWidth );
+    regraderProcess->flanger->setFeedback( fFlangerFeedback );
+    regraderProcess->flanger->setDelay( fFlangerDelay );
 }
 
 //------------------------------------------------------------------------
