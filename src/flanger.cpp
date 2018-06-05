@@ -28,44 +28,50 @@ namespace Igorski {
 
 /* constructor / destructor */
 
-Flanger::Flanger( float rate, float width, float feedback, float delay, float mix ) {
+Flanger::Flanger( int amountOfChannels ) {
 
     FLANGER_BUFFER_SIZE = ( int ) (( float ) VST::SAMPLE_RATE / 5.0f );
     SAMPLE_MULTIPLIER   = ( float ) VST::SAMPLE_RATE * 0.01f;
 
-    _writePointer    = 0;
-    _feedbackPhase   =
-    _lastSampleLeft  =
-    _sweepSamples    =
-    _lastSampleRight = 0.0f;
-    _mixLeftWet      =
-    _mixRightWet     =
-    _mixLeftDry      =
-    _mixRightDry     = 1.0f;
+    _writePointer         =
+    _writePointerStored   = 0;
+    _feedbackPhase        =
+    _sweepSamples         = 0.0f;
+    _mixLeftWet           =
+    _mixRightWet          =
+    _mixLeftDry           =
+    _mixRightDry          = 1.0f;
 
-    _buf1 = new float[ FLANGER_BUFFER_SIZE ];
-    _buf2 = new float[ FLANGER_BUFFER_SIZE ];
+    for ( int i = 0; i < amountOfChannels; ++i ) {
 
-    // fill buffers with silence
-    memset( _buf1, 0, FLANGER_BUFFER_SIZE * sizeof( float ));
-    memset( _buf2, 0, FLANGER_BUFFER_SIZE * sizeof( float ));
+        // create delay buffers to write the flanger delay into
+
+        float* buffer = new float[ FLANGER_BUFFER_SIZE ];
+        memset( buffer, 0, FLANGER_BUFFER_SIZE * sizeof( float ));
+        _buffers.push_back( buffer );
+
+        _lastChannelSamples.push_back( 0.f );
+    }
 
     _delayFilter = new LowPassFilter( 20.0f );
     _mixFilter   = new LowPassFilter( 20.0f );
 
-    setRate( rate );
-    setWidth( width );
-    setFeedback( feedback );
-    setDelay( delay );
-    setMix( mix );
+    setRate( 0.1f );
+    setWidth( 0.5f );
+    setFeedback( 0.75f );
+    setDelay( .1f  );
+    setMix( 1.f );
 }
 
 Flanger::~Flanger()
 {
-    delete _buf1;
-    delete _buf2;
     delete _delayFilter;
     delete _mixFilter;
+
+    while ( _buffers.size() > 0 ) {
+        delete _buffers.back();
+        _buffers.pop_back();
+    }
 }
 
 /* public methods */
@@ -137,19 +143,11 @@ void Flanger::setMix( float value )
 
 void Flanger::process( float* sampleBuffer, int bufferSize, int c )
 {
-    // Flanger is currently stereo effect only
-    if ( c > 1 )
-        return;
+    float* delayBuffer = _buffers.at( c );
+    int maxWriteIndex = FLANGER_BUFFER_SIZE - 1;
 
-    int maxWriteIndex   = FLANGER_BUFFER_SIZE - 1;
-    bool isRightChannel = ( c > 0 );
-
-    float delay, mix, delaySamples, left, right, w1, w2, ep;
+    float delay, mix, delaySamples, sample, w1, w2, ep;
     int ep1, ep2;
-
-    if ( !isRightChannel ) {
-        store();
-    }
 
     for ( int i = 0; i < bufferSize; i++ )
     {
@@ -184,19 +182,10 @@ void Flanger::process( float* sampleBuffer, int bufferSize, int c )
 
         // process input channels and write output back into the buffer
 
-        if ( isRightChannel ) {
-
-            right = sampleBuffer[ i ];
-            _buf2[ _writePointer ] = right + _feedback * _feedbackPhase * _lastSampleRight;
-            _lastSampleRight = _buf2[ ep1 ] * w1 + _buf2[ ep2 ] * w2;
-            sampleBuffer[ i ] = VST::capSample( _mixRightDry * right + _mixRightWet * mix * _lastSampleRight );
-        }
-        else {
-            left = sampleBuffer[ i ];
-            _buf1[ _writePointer ] = left + _feedback * _feedbackPhase * _lastSampleLeft;
-            _lastSampleLeft = _buf1[ ep1 ] * w1 + _buf1[ ep2 ] * w2;
-            sampleBuffer[ i ] = VST::capSample( _mixLeftDry * left + _mixLeftWet * mix * _lastSampleLeft );
-        }
+        sample = sampleBuffer[ i ];
+        delayBuffer[ _writePointer ] = sample + _feedback * _feedbackPhase * _lastChannelSamples.at( c );
+        _lastChannelSamples.at( c ) = delayBuffer[ ep1 ] * w1 + delayBuffer[ ep2 ] * w2;
+        sampleBuffer[ i ] = VST::capSample( _mixLeftDry * sample + _mixLeftWet * mix * _lastChannelSamples.at( c ));
 
         // process sweep
 
@@ -213,34 +202,22 @@ void Flanger::process( float* sampleBuffer, int bufferSize, int c )
                 _step = -_step;
         }
     }
-
-    if ( !isRightChannel ) {
-        reset();
-    }
 }
 
 void Flanger::store()
 {
     _writePointerStored = _writePointer;
+    _sweepStored = _sweep;
     _delayFilter->store();
-     _mixFilter->store();
+    _mixFilter->store();
 }
 
-void Flanger::reset()
+void Flanger::restore()
 {
     _writePointer = _writePointerStored;
-    _delayFilter->reset();
-    _mixFilter->reset();
-}
-
-float Flanger::getSweep()
-{
-    return _sweep;
-}
-
-void Flanger::setSweep( float value )
-{
-    _sweep = value;
+    _sweep = _sweepStored;
+    _delayFilter->restore();
+    _mixFilter->restore();
 }
 
 /* protected methods */

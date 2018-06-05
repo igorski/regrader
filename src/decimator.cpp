@@ -64,14 +64,14 @@ void Decimator::setRate( float value )
     _rate = VST::cap( value );
 }
 
-float Decimator::getAccumulator()
+void Decimator::store()
 {
-    return _accumulator;
+    _accumulatorStored = _accumulator;
 }
 
-void Decimator::setAccumulator( float value )
+void Decimator::restore()
 {
-    _accumulator = VST::cap( value );
+    _accumulator = _accumulatorStored;
 }
 
 /* public methods */

@@ -43,19 +43,21 @@ class Decimator {
         float getRate();
         void setRate( float value );
 
-        // accumulators are used to retrieve a sample from the wave table
-        // in other words: track the progress of the oscillator against its range
-
-        float getAccumulator();
-        void setAccumulator( float offset );
-
         void process( float* sampleBuffer, int bufferSize );
+
+        // store/restore the processor properties
+        // this ensures that multi channel processing for a
+        // single buffer uses all properties across all channels
+
+        void store();
+        void restore();
 
     private:
         int _bits;
         long _m;
         float _rate;
         float _accumulator;
+        float _accumulatorStored;
 };
 }
 

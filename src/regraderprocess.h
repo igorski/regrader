@@ -76,8 +76,9 @@ class RegraderProcess {
         bool syncDelayToHost;
 
     private:
-        AudioBuffer* _delayBuffer; // holds delay memory
-        AudioBuffer* _tempBuffer;  // used during process cycle for applying effects onto delay mix
+        AudioBuffer* _delayBuffer;   // contains the delay memory
+        AudioBuffer* _preMixBuffer;  // buffer used for the pre-delay effect mixing
+        AudioBuffer* _postMixBuffer; // buffer used for the post-delay effect mixing
 
         int* _delayIndices;
         int _delayTime;
@@ -95,7 +96,6 @@ class RegraderProcess {
         // the original in buffer intact for dry/wet mix purposes)
 
         void cloneInBuffer( float** inBuffer, int numInChannels, int bufferSize );
-        AudioBuffer* _cloneInBuffer;
 
         // syncs current delay time to musically pleasing intervals synced to host tempo and time signature
 

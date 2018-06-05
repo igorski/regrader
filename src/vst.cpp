@@ -458,6 +458,8 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
     fFlangerFeedback       = savedFlangerFeedback;
     fFlangerDelay          = savedFlangerDelay;
 
+    syncModel();
+
     // Example of using the IStreamAttributes interface
     FUnknownPtr<IStreamAttributes> stream (state);
     if ( stream )

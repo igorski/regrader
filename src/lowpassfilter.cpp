@@ -68,7 +68,7 @@ void LowPassFilter::store()
     orgy2 = y2;
 }
 
-void LowPassFilter::reset()
+void LowPassFilter::restore()
 {
     x1 = orgx1;
     x2 = orgx2;

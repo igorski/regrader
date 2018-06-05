@@ -32,7 +32,7 @@ RegraderProcess::RegraderProcess( int amountOfChannels ) {
     _delayFeedback = .1f;
 
     _delayBuffer  = new AudioBuffer( amountOfChannels, _maxTime );
-    _tempBuffer   = new AudioBuffer( amountOfChannels, _maxTime / 10 );
+    _postMixBuffer   = new AudioBuffer( amountOfChannels, _maxTime / 10 );
     _delayIndices = new int[ amountOfChannels ];
 
     for ( int i = 0; i < amountOfChannels; ++i ) {
@@ -43,7 +43,7 @@ RegraderProcess::RegraderProcess( int amountOfChannels ) {
     bitCrusher = new BitCrusher( 8, .5f, .5f );
     decimator  = new Decimator( 32, 0.f );
     filter     = new Filter();
-    flanger    = new Flanger( 0.1f, 0.5f, .75f, .1f, 1.f );
+    flanger    = new Flanger( amountOfChannels );
     limiter    = new Limiter( 10.f, 500.f, .6f );
 
     bitCrusherPostMix = false;
@@ -59,14 +59,14 @@ RegraderProcess::RegraderProcess( int amountOfChannels ) {
     syncDelayToHost     = true;
 
     // will be lazily created in the process function
-    _cloneInBuffer = 0;
+    _preMixBuffer = 0;
 }
 
 RegraderProcess::~RegraderProcess() {
     delete[] _delayIndices;
     delete _delayBuffer;
-    delete _tempBuffer;
-    delete _cloneInBuffer;
+    delete _postMixBuffer;
+    delete _preMixBuffer;
     delete bitCrusher;
     delete decimator;
     delete filter;
@@ -87,51 +87,44 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
     float dryMix = 1.0f - _delayMix;
 
-    // effect LFO is controlled from the outside, cache properties here
-    bool hasDecimatorLFO = ( decimator->getRate() > 0.f );
-    bool hasFilterLFO    = ( filter->lfo->getRate() > 0.f );
-    bool hasFlanger      = ( flanger->getRate() > 0.f || flanger->getWidth() > 0.f );
-    float initialDecimatorLFOOffset = decimator->getAccumulator();
-    float initialFilterLFOOffset    = filter->lfo->getAccumulator();
-    float initialFilterCutoff       = filter->getCurrentCutoff();
-    float initialFlangerSweep       = flanger->getSweep();
+    // only apply flanger if it has a positive rate or width
 
-    // clone in buffer for pre-mix processing
+    bool hasFlanger = ( flanger->getRate() > 0.f || flanger->getWidth() > 0.f );
+
+    // clone in buffer contents into the pre-mix buffer
     cloneInBuffer( inBuffer, numInChannels, bufferSize );
 
     for ( int32 c = 0; c < numInChannels; ++c )
     {
-        float* channelInBuffer    = inBuffer[ c ];
-        float* channelInCloneBuffer = _cloneInBuffer->getBufferForChannel( c );
-        float* channelOutBuffer   = outBuffer[ c ];
-        float* channelTempBuffer  = _tempBuffer->getBufferForChannel( c );
-        float* channelDelayBuffer = _delayBuffer->getBufferForChannel( c );
+        float* channelInBuffer      = inBuffer[ c ];
+        float* channelOutBuffer     = outBuffer[ c ];
+        float* channelPreMixBuffer  = _preMixBuffer->getBufferForChannel( c );
+        float* channelDelayBuffer   = _delayBuffer->getBufferForChannel( c );
+        float* channelPostMixBuffer = _postMixBuffer->getBufferForChannel( c );
+
         delayIndex = _delayIndices[ c ];
 
-        // when processing each new channel restore to the same LFO offset to get the same movement ;)
+        // prepare effects for each individual channel
 
-        if ( hasDecimatorLFO && c > 0 )
-            decimator->setAccumulator( initialDecimatorLFOOffset );
-
-        if ( hasFilterLFO && c > 0 )
-            filter->resetFilter( initialFilterLFOOffset, initialFilterCutoff );
-
-        if ( hasFlanger && c > 0 )
-            flanger->setSweep( initialFlangerSweep );
+        if ( c == 0 ) {
+            decimator->store();
+            filter->store();
+            flanger->store();
+        }
 
         // PRE MIX processing
 
         if ( !bitCrusherPostMix )
-            bitCrusher->process( channelInCloneBuffer, bufferSize );
+            bitCrusher->process( channelPreMixBuffer, bufferSize );
 
         if ( !decimatorPostMix )
-            decimator->process( channelInCloneBuffer, bufferSize );
+            decimator->process( channelPreMixBuffer, bufferSize );
 
         if ( !filterPostMix )
-            filter->process( channelInCloneBuffer, bufferSize, c );
+            filter->process( channelPreMixBuffer, bufferSize, c );
 
         if ( hasFlanger && !flangerPostMix )
-            flanger->process( channelInCloneBuffer, bufferSize, c );
+            flanger->process( channelPreMixBuffer, bufferSize, c );
 
         // DELAY processing applied onto the temp buffer
 
@@ -147,15 +140,16 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
             // ( for feedback purposes ) and append the current incoming sample to it
 
             delaySample = channelDelayBuffer[ readIndex ];
-            channelDelayBuffer[ delayIndex ] = channelInCloneBuffer[ i ] + delaySample * _delayFeedback;
+            channelDelayBuffer[ delayIndex ] = channelPreMixBuffer[ i ] + delaySample * _delayFeedback;
 
             if ( ++delayIndex == _delayTime ) {
                 delayIndex = 0;
             }
 
             // write the delay sample into the temp buffer
-            channelTempBuffer[ i ] = delaySample;
+            channelPostMixBuffer[ i ] = delaySample;
         }
+
         // update last index for this channel
         _delayIndices[ c ] = delayIndex;
 
@@ -163,26 +157,34 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
         // apply the post mix effect processing on the temp buffer
 
         if ( decimatorPostMix )
-            decimator->process( channelTempBuffer, bufferSize );
-
-        if ( filterPostMix )
-            filter->process( channelTempBuffer, bufferSize, c );
+            decimator->process( channelPostMixBuffer, bufferSize );
 
         if ( bitCrusherPostMix )
-            bitCrusher->process( channelTempBuffer, bufferSize );
+            bitCrusher->process( channelPostMixBuffer, bufferSize );
+
+        if ( filterPostMix )
+            filter->process( channelPostMixBuffer, bufferSize, c );
 
         if ( hasFlanger && flangerPostMix )
-            flanger->process( channelTempBuffer, bufferSize, c );
+            flanger->process( channelPostMixBuffer, bufferSize, c );
 
         // mix the input buffer into the output (dry mix)
 
         for ( i = 0; i < bufferSize; ++i ) {
 
             // wet mix (e.g. the effected delay signal)
-            channelOutBuffer[ i ] = channelTempBuffer[ i ] * _delayMix;
+            channelOutBuffer[ i ] = channelPostMixBuffer[ i ] * _delayMix;
 
             // dry mix (e.g. mix in the input signal)
             channelOutBuffer[ i ] += ( channelInBuffer[ i ] * dryMix );
+        }
+
+        // prepare effects for the next channel
+
+        if ( c < numInChannels - 1 ) {
+            decimator->restore();
+            filter->restore();
+            flanger->restore();
         }
     }
 
@@ -249,16 +251,16 @@ void RegraderProcess::cloneInBuffer( float** inBuffer, int numInChannels, int bu
     // if clone buffer wasn't created yet or the buffer size has changed
     // delete existing buffer and create new to match properties
 
-    if ( _cloneInBuffer == 0 || _cloneInBuffer->bufferSize != bufferSize ) {
-        delete _cloneInBuffer;
-        _cloneInBuffer = new AudioBuffer( numInChannels, bufferSize );
+    if ( _preMixBuffer == 0 || _preMixBuffer->bufferSize != bufferSize ) {
+        delete _preMixBuffer;
+        _preMixBuffer = new AudioBuffer( numInChannels, bufferSize );
     }
 
     // clone the in buffer contents
 
     for ( int c = 0; c < numInChannels; ++c ) {
         float* inChannelBuffer  = inBuffer[ c ];
-        float* outChannelBuffer = _cloneInBuffer->getBufferForChannel( c );
+        float* outChannelBuffer = _preMixBuffer->getBufferForChannel( c );
 
         for ( int i = 0; i < bufferSize; ++i ) {
             outChannelBuffer[ i ] = inChannelBuffer[ i ];

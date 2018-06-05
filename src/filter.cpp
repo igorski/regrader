@@ -175,15 +175,16 @@ void Filter::setLFO( bool enabled )
     }
 }
 
-float Filter::getCurrentCutoff()
+void Filter::store()
 {
-    return _tempCutoff;
+    _accumulatorStored = lfo->getAccumulator();
+    _tempCutoffStored  = _tempCutoff;
 }
 
-void Filter::resetFilter( float accumulatorOffset, float cutOff )
+void Filter::restore()
 {
-    lfo->setAccumulator( accumulatorOffset );
-    _tempCutoff = cutOff;
+    lfo->setAccumulator( _accumulatorStored );
+    _tempCutoff = _tempCutoffStored;
     calculateParameters();
 }
 

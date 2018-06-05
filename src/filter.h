@@ -52,15 +52,12 @@ class Filter {
 
         LFO* lfo;
 
-        // the cutoff can travel if the filter is modulated by the LFO
-        // this method retrieves the current cutoff value
+        // store/restore the processor properties
+        // this ensures that multi channel processing for a
+        // single buffer uses all properties across all channels
 
-        float getCurrentCutoff();
-
-        // resets the filter to use given cutoff and to set
-        // the LFO to given accumulator
-
-        void resetFilter( float accumulatorOffset, float cutOff );
+        void store();
+        void restore();
 
     private:
         float _cutoff;
@@ -73,6 +70,9 @@ class Filter {
         bool  _hasLFO;
 
         // used internally
+
+        float _accumulatorStored;
+        float _tempCutoffStored;
 
         float _a1;
         float _a2;

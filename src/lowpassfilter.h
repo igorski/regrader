@@ -36,8 +36,12 @@ class LowPassFilter
         float getCutoff();
         void setCutoff( float value);
 
+        // store/restore the processor properties
+        // this ensures that multi channel processing for a
+        // single buffer uses all properties across all channels
+
         void store();
-        void reset();
+        void restore();
 
         float processSingle( float sample );
 

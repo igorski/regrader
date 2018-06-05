@@ -25,6 +25,7 @@
 #define __FLANGER_H_INCLUDED__
 
 #include "lowpassfilter.h"
+#include <vector>
 
 // Adaptation of modf() by Dennis Cronin
 // this macro breaks a double into integer and fractional components i and f respectively.
@@ -42,9 +43,7 @@ namespace Igorski {
 class Flanger
 {
     public:
-
-        // all arguments are in the 0 - 1 range
-        Flanger( float rate, float width, float feedback, float delay, float mix );
+        Flanger( int amountOfChannels );
         ~Flanger();
 
         float getRate();
@@ -60,11 +59,12 @@ class Flanger
 
         void process( float* sampleBuffer, int bufferSize, int c );
 
-        float getSweep();
-        void setSweep( float value );
+        // store/restore the processor properties
+        // this ensures that multi channel processing for a
+        // single buffer uses all properties across all channels
 
         void store();
-        void reset();
+        void restore();
 
     protected:
 
@@ -77,17 +77,18 @@ class Flanger
         float _sweepSamples;
         float _maxSweepSamples;
         int _writePointer;
-        int _writePointerStored;
         float _step;
         float _sweep;
-        float* _buf1;
-        float* _buf2;
+
+        int _writePointerStored;
+        float _sweepStored;
+
+        std::vector<float*> _buffers;
+        std::vector<float>  _lastChannelSamples;
 
         LowPassFilter* _delayFilter;
         LowPassFilter* _mixFilter;
 
-        float _lastSampleLeft;
-        float _lastSampleRight;
         float _mixLeftWet;
         float _mixLeftDry;
         float _mixRightWet;
