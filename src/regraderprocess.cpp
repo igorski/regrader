@@ -139,11 +139,11 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
         // POST MIX processing
         // apply the post mix effect processing on the temp buffer
 
-        if ( bitCrusherPostMix )
-            bitCrusher->process( channelTempBuffer, bufferSize );
-
         if ( decimatorPostMix )
             decimator->process( channelTempBuffer, bufferSize );
+
+        if ( bitCrusherPostMix )
+            bitCrusher->process( channelTempBuffer, bufferSize );
 
         // mix the input buffer into the output (dry mix)
 
