@@ -101,7 +101,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     );
     parameters.addParameter( delayMixParam );
 
-    // bit crusher controls
+    // BitCrusher controls
 
     RangeParameter* bitParam = new RangeParameter(
         USTRING( "Bit resolution" ), kBitResolutionId, USTRING( "0 - 16" ),
@@ -128,7 +128,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     );
     parameters.addParameter( bitLfoDepthParam );
 
-    // decimator controls
+    // Decimator controls
 
     RangeParameter* decimatorParam = new RangeParameter(
         USTRING( "Decimator resolution" ), kDecimatorId, USTRING( "1 - 32" ),
@@ -141,12 +141,46 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
         USTRING("Decimator chain"), 0, 1, 0, ParameterInfo::kCanAutomate, kDecimatorChainId
     );
 
-    RangeParameter* decimatorLfoRateParam = new RangeParameter(
+    RangeParameter* decimatorLFOParam = new RangeParameter(
         USTRING( "Decimator rate" ), kLFODecimatorId, USTRING( "%" ),
         0.f, 1.f, 0.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
-    parameters.addParameter( decimatorLfoRateParam );
+    parameters.addParameter( decimatorLFOParam );
+
+    // Filter controls
+
+    parameters.addParameter(
+        USTRING("Filter chain"), 0, 1, 0, ParameterInfo::kCanAutomate, kFilterChainId
+    );
+
+    RangeParameter* filterCutoffParam = new RangeParameter(
+        USTRING( "Filter cutoff" ), kFilterCutoffId, USTRING( "Hz" ),
+        Igorski::VST::FILTER_MIN_FREQ, Igorski::VST::FILTER_MAX_FREQ, Igorski::VST::FILTER_MIN_FREQ,
+        0, ParameterInfo::kCanAutomate, unitId
+    );
+    parameters.addParameter( filterCutoffParam );
+
+    RangeParameter* filterResonanceParam = new RangeParameter(
+        USTRING( "Filter resonance" ), kFilterResonanceId, USTRING( "dB" ),
+         Igorski::VST::FILTER_MIN_RESONANCE, Igorski::VST::FILTER_MAX_RESONANCE, Igorski::VST::FILTER_MIN_RESONANCE,
+        0, ParameterInfo::kCanAutomate, unitId
+     );
+    parameters.addParameter( filterResonanceParam );
+
+    RangeParameter* filterLFORateParam = new RangeParameter(
+        USTRING( "Filter LFO rate" ), kLFOFilterId, USTRING( "Hz" ),
+        Igorski::VST::MIN_LFO_RATE(), Igorski::VST::MAX_LFO_RATE(), Igorski::VST::MIN_LFO_RATE(),
+        0, ParameterInfo::kCanAutomate, unitId
+    );
+    parameters.addParameter( filterLFORateParam );
+
+    RangeParameter* filterLFODepthParam = new RangeParameter(
+        USTRING( "Filter LFO depth" ), kLFOFilterDepthId, USTRING( "%" ),
+        0.f, 1.f, 0.f,
+        0, ParameterInfo::kCanAutomate, unitId
+    );
+    parameters.addParameter( filterLFODepthParam );
 
     // initialization
 
@@ -212,6 +246,26 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
         if ( state->read( &savedLFODecimator, sizeof( float )) != kResultOk )
             return kResultFalse;
 
+        float savedFilterChain = 0;
+        if ( state->read( &savedFilterChain, sizeof( float )) != kResultOk )
+            return kResultFalse;
+
+        float savedFilterCutoff = Igorski::VST::FILTER_MAX_FREQ;
+        if ( state->read( &savedFilterCutoff, sizeof( float )) != kResultOk )
+            return kResultFalse;
+
+        float savedFilterResonance = Igorski::VST::FILTER_MAX_RESONANCE;
+        if ( state->read( &savedFilterResonance, sizeof( float )) != kResultOk )
+            return kResultFalse;
+
+        float savedLFOFilter = Igorski::VST::MIN_LFO_RATE();
+        if ( state->read( &savedLFOFilter, sizeof( float )) != kResultOk )
+            return kResultFalse;
+
+        float savedLFOFilterDepth = 1.f;
+        if ( state->read( &savedLFOFilterDepth, sizeof( float )) != kResultOk )
+            return kResultFalse;
+
 #if BYTEORDER == kBigEndian
     SWAP_32( savedDelayTime )
     SWAP_32( savedDelayHostSync )
@@ -224,6 +278,11 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
     SWAP_32( savedDecimator )
     SWAP_32( savedDecimatorChain )
     SWAP_32( savedLFODecimator )
+    SWAP_32( savedFilterChain )
+    SWAP_32( savedFilterCutoff )
+    SWAP_32( savedFilterResonance )
+    SWAP_32( savedLFOFilter )
+    SWAP_32( savedLFOFilterDepth )
 #endif
         setParamNormalized( kDelayTimeId,             savedDelayTime );
         setParamNormalized( kDelayHostSyncId,         savedDelayHostSync );
@@ -236,6 +295,11 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
         setParamNormalized( kDecimatorId,             savedDecimator );
         setParamNormalized( kDecimatorChainId,        savedDecimatorChain );
         setParamNormalized( kLFODecimatorId,          savedLFODecimator );
+        setParamNormalized( kFilterChainId,           savedFilterChain );
+        setParamNormalized( kFilterCutoffId,          savedFilterCutoff );
+        setParamNormalized( kFilterResonanceId,       savedFilterResonance );
+        setParamNormalized( kLFOFilterId,             savedLFOFilter );
+        setParamNormalized( kLFOFilterDepthId,        savedLFOFilterDepth );
 
         state->seek( sizeof ( float ), IBStream::kIBSeekCur );
     }
@@ -347,13 +411,15 @@ tresult PLUGIN_API RegraderController::getParamStringByValue( ParamID tag, Param
         case kDecimatorId:
         case kDecimatorChainId:
         case kLFODecimatorId:
+        case kFilterChainId:
+        case kLFOFilterDepthId:
         {
             char text[32];
 
             if (( tag == kDelayHostSyncId )) {
                 sprintf( text, "%s", ( valueNormalized == 0 ) ? "Off" : "On" );
             }
-            else if (( tag == kBitResolutionChainId || tag == kDecimatorChainId )) {
+            else if (( tag == kBitResolutionChainId || tag == kDecimatorChainId || tag == kFilterChainId )) {
                 sprintf( text, "%s", ( valueNormalized == 0 ) ? "Pre-delay mix" : "Post-delay mix" );
             }
             else {
@@ -368,6 +434,9 @@ tresult PLUGIN_API RegraderController::getParamStringByValue( ParamID tag, Param
         // request the plain value from the normalized value
 
         case kLFOBitResolutionId:
+        case kFilterCutoffId:
+        case kFilterResonanceId:
+        case kLFOFilterId:
         {
             char text[32];
             if (( tag == kLFOBitResolutionId || tag == kLFODecimatorId ) && valueNormalized == 0 )

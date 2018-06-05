@@ -102,6 +102,12 @@ class Regrader : public AudioEffect
         float fDecimatorChain;
         float fLFODecimator;
 
+        float fFilterChain;
+        float fFilterCutoff;
+        float fFilterResonance;
+        float fLFOFilter;
+        float fLFOFilterDepth;
+
         float outputGainOld; // for visualizing output gain in DAW
 
         int32 currentProcessMode;

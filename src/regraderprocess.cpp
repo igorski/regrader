@@ -42,10 +42,12 @@ RegraderProcess::RegraderProcess( int amountOfChannels ) {
 
     bitCrusher = new BitCrusher( 8, .5f, .5f );
     decimator  = new Decimator( 32, 0.f );
+    filter     = new Filter();
     limiter    = new Limiter( 10.f, 500.f, .6f );
 
     bitCrusherPostMix = false;
     decimatorPostMix  = false;
+    filterPostMix     = true;
 
     // these will be synced to host, see vst.cpp. here we default to 120 BPM in 4/4 time
     _tempo              = 120.0;
@@ -62,10 +64,11 @@ RegraderProcess::~RegraderProcess() {
     delete[] _delayIndices;
     delete _delayBuffer;
     delete _tempBuffer;
+    delete _cloneInBuffer;
     delete bitCrusher;
     delete decimator;
+    delete filter;
     delete limiter;
-    delete _cloneInBuffer;
 }
 
 /* public methods */
@@ -81,9 +84,12 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
     float dryMix = 1.0f - _delayMix;
 
-    // decimators LFO is controlled from the outside, cache properties here
-    bool hasDecimator = ( decimator->getRate() > 0.f );
+    // effect LFO is controlled from the outside, cache properties here
+    bool hasDecimatorLFO = ( decimator->getRate() > 0.f );
+    bool hasFilterLFO    = ( filter->lfo->getRate() > 0.f );
     float initialDecimatorLFOOffset = decimator->getAccumulator();
+    float initialFilterLFOOffset    = filter->lfo->getAccumulator();
+    float initialFilterCutoff       = filter->getCurrentCutoff();
 
     // clone in buffer for pre-mix processing
     cloneInBuffer( inBuffer, numInChannels, bufferSize );
@@ -99,8 +105,11 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
         // when processing each new channel restore to the same LFO offset to get the same movement ;)
 
-        if ( hasDecimator && c > 0 )
+        if ( hasDecimatorLFO && c > 0 )
             decimator->setAccumulator( initialDecimatorLFOOffset );
+
+        if ( hasFilterLFO && c > 0 )
+            filter->resetFilter( initialFilterLFOOffset, initialFilterCutoff );
 
         // PRE MIX processing
 
@@ -109,6 +118,9 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
         if ( !decimatorPostMix )
             decimator->process( channelInCloneBuffer, bufferSize );
+
+        if ( !filterPostMix )
+            filter->process( channelInCloneBuffer, bufferSize, c );
 
         // DELAY processing applied onto the temp buffer
 
@@ -141,6 +153,9 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
         if ( decimatorPostMix )
             decimator->process( channelTempBuffer, bufferSize );
+
+        if ( filterPostMix )
+            filter->process( channelTempBuffer, bufferSize, c );
 
         if ( bitCrusherPostMix )
             bitCrusher->process( channelTempBuffer, bufferSize );

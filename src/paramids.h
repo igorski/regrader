@@ -25,7 +25,7 @@
 
 enum
 {
-    // ids for all visual parameters
+    // ids for all visual controls
 
     kDelayTimeId = 0,         // delay time
     kDelayHostSyncId,         // delay host sync
@@ -40,6 +40,12 @@ enum
     kDecimatorId,             // decimator
     kDecimatorChainId,        // decimator pre/post delay mix
     kLFODecimatorId,          // decimator LFO rate
+
+    kFilterChainId,           // filter pre/post delay mix
+    kFilterCutoffId,          // filter cutoff
+    kFilterResonanceId,       // filter resonance
+    kLFOFilterId,             // filter LFO rate
+    kLFOFilterDepthId,        // depth for filter LFO
 
     kVuPPMId                  // for the Vu value return to host
 };

@@ -17,6 +17,14 @@ namespace VST {
     static float SAMPLE_RATE = 44100.f;
     static int BUFFER_SIZE   = 8192;
 
+    // maximum and minimum filter frequency ranges
+    // also see regrader.uidesc to update the controls to match
+
+    static const float FILTER_MIN_FREQ      = 30.0f;
+    static const float FILTER_MAX_FREQ      = 22050.f;
+    static const float FILTER_MIN_RESONANCE = 0.1f;
+    static const float FILTER_MAX_RESONANCE = 0.7071067811865476f; //sqrt( 2.f ) / 2.f;
+
     // maximum and minimum rate of oscillation in Hz
     // also see regrader.uidesc to update the controls to match
 

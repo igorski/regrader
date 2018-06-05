@@ -52,6 +52,11 @@ Regrader::Regrader()
 , fDecimator( 1.f )
 , fLFODecimator( 0.f )
 , fDecimatorChain( 0.f )
+, fFilterChain( 1.f )
+, fFilterCutoff( .5f )
+, fFilterResonance( 1.f )
+, fLFOFilter( 0.f )
+, fLFOFilterDepth( 1.f )
 , regraderProcess( 0 )
 , outputGainOld( 0.f )
 , currentProcessMode( -1 ) // -1 means not initialized
@@ -194,6 +199,31 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
                         if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
                             fLFODecimator = ( float ) value;
                         break;
+
+                    case kFilterChainId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            fFilterChain = ( float ) value;
+                        break;
+
+                    case kFilterCutoffId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            fFilterCutoff = ( float ) value;
+                        break;
+
+                    case kFilterResonanceId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            fFilterResonance = ( float ) value;
+                        break;
+
+                    case kLFOFilterId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            fLFOFilter = ( float ) value;
+                        break;
+
+                    case kLFOFilterDepthId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            fLFOFilterDepth = ( float ) value;
+                        break;
                 }
                 syncModel();
             }
@@ -316,6 +346,26 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
     if ( state->read( &savedLFODecimator, sizeof ( float )) != kResultOk )
         return kResultFalse;
 
+    float savedFilterChain = 0.f;
+    if ( state->read( &savedFilterChain, sizeof ( float )) != kResultOk )
+        return kResultFalse;
+
+    float savedFilterCutoff = 1.f;
+    if ( state->read( &savedFilterCutoff, sizeof ( float )) != kResultOk )
+        return kResultFalse;
+
+    float savedFilterResonance = 1.f;
+    if ( state->read( &savedFilterResonance, sizeof ( float )) != kResultOk )
+        return kResultFalse;
+
+    float savedLFOFilter = 1.f;
+    if ( state->read( &savedLFOFilter, sizeof ( float )) != kResultOk )
+        return kResultFalse;
+
+    float savedLFOFilterDepth = 1.f;
+    if ( state->read( &savedLFOFilter, sizeof ( float )) != kResultOk )
+        return kResultFalse;
+
 #if BYTEORDER == kBigEndian
     SWAP_32( savedDelayTime )
     SWAP_32( savedDelayHostSync )
@@ -328,6 +378,11 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
     SWAP_32( savedDecimator )
     SWAP_32( savedDecimatorChain )
     SWAP_32( savedLFODecimator )
+    SWAP_32( savedFilterChain )
+    SWAP_32( savedFilterCutoff )
+    SWAP_32( savedFilterResonance )
+    SWAP_32( savedLFOFilter )
+    SWAP_32( savedLFOFilterDepth )
 #endif
 
     fDelayTime             = savedDelayTime;
@@ -341,6 +396,11 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
     fDecimator             = savedDecimator;
     fDecimatorChain        = savedDecimatorChain;
     fLFODecimator          = savedLFODecimator;
+    fFilterChain           = savedFilterChain;
+    fFilterCutoff          = savedFilterCutoff;
+    fFilterResonance       = savedFilterResonance;
+    fLFOFilter             = savedLFOFilter;
+    fLFOFilterDepth        = savedLFOFilterDepth;
 
     // Example of using the IStreamAttributes interface
     FUnknownPtr<IStreamAttributes> stream (state);
@@ -391,6 +451,11 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
     float toSaveDecimator             = fDecimator;
     float toSaveDecimatorChain        = fDecimatorChain;
     float toSaveLFODecimator          = fLFODecimator;
+    float toSaveFilterChain           = fFilterChain;
+    float toSaveFilterCutoff          = fFilterCutoff;
+    float toSaveFilterResonance       = fFilterResonance;
+    float toSaveLFOFilter             = fLFOFilter;
+    float toSaveLFOFilterDepth        = fLFOFilterDepth;
 
 #if BYTEORDER == kBigEndian
     SWAP_32( toSaveDelayTime )
@@ -404,6 +469,11 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
     SWAP_32( toSaveDecimator )
     SWAP_32( toSaveDecimatorChain )
     SWAP_32( toSaveLFODecimator )
+    SWAP_32( toSaveFilterChain )
+    SWAP_32( toSaveFilterCutoff )
+    SWAP_32( toSaveFilterResonance )
+    SWAP_32( toSaveLFOFilter )
+    SWAP_32( toSaveLFOFilterDepth )
 #endif
 
     state->write( &toSaveDelayTime,             sizeof( float ));
@@ -417,6 +487,11 @@ tresult PLUGIN_API Regrader::getState( IBStream* state )
     state->write( &toSaveDecimator,             sizeof( float ));
     state->write( &toSaveDecimatorChain,        sizeof( float ));
     state->write( &toSaveLFODecimator,          sizeof( float ));
+    state->write( &toSaveFilterChain,           sizeof( float ));
+    state->write( &toSaveFilterCutoff,          sizeof( float ));
+    state->write( &toSaveFilterResonance,       sizeof( float ));
+    state->write( &toSaveLFOFilter,             sizeof( float ));
+    state->write( &toSaveLFOFilterDepth,        sizeof( float ));
 
     return kResultOk;
 }
@@ -536,11 +611,13 @@ void Regrader::syncModel()
 
     regraderProcess->bitCrusherPostMix = Igorski::VST::toBool( fBitResolutionChain );
     regraderProcess->decimatorPostMix  = Igorski::VST::toBool( fDecimatorChain );
+    regraderProcess->filterPostMix     = Igorski::VST::toBool( fFilterChain );
 
     regraderProcess->bitCrusher->setAmount( fBitResolution );
     regraderProcess->bitCrusher->setLFO( fLFOBitResolution, fLFOBitResolutionDepth );
     regraderProcess->decimator->setBits( ( int )( fDecimator * 32.f ));
     regraderProcess->decimator->setRate( fLFODecimator );
+    regraderProcess->filter->updateProperties( fFilterCutoff, fFilterResonance, fLFOFilter, fLFOFilterDepth );
 }
 
 //------------------------------------------------------------------------

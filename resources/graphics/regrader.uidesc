@@ -6,7 +6,7 @@
         <color name="Focus" rgba="#279bffff"/>
     </colors>
     <template
-        maxSize="933, 300" minSize="933, 300" size="933, 300" name="view" opacity="1" origin="0, 0"
+        maxSize="933, 501" minSize="933, 501" size="933, 501" name="view" opacity="1" origin="0, 0"
         background-color="~ BlackCColor" background-color-draw-style="filled and stroked" bitmap="background"
         class="CViewContainer"  mouse-enabled="true"  transparent="false">
 
@@ -111,6 +111,52 @@
               max-value="1" min-value="0" mouse-enabled="true" opacity="1" round-rect-radius="0"
               title="" transparent="false" wants-focus="true" wheel-inc-value="0.1"/>
 
+
+        <!-- Filter module -->
+        <!-- filter cutoff slider -->
+        <view control-tag="Unit1::FilterCutoff" origin="155, 311" size="134, 21" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0" max-value="1" min-value="0"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
+
+        <!-- filter resonance slider -->
+        <view control-tag="Unit1::FilterResonance" origin="155, 335" size="134, 21" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0" max-value="1" min-value="0"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
+
+        <!-- filter LFO speed slider -->
+        <view control-tag="Unit1::LFOFilter" origin="155, 359" size="134, 21" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0" max-value="1" min-value="0"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
+
+        <!-- filter LFO depth slider -->
+        <view control-tag="Unit1::LFOFilterDepth" origin="155, 383" size="134, 21" class="CSlider"
+            background-offset="0, 0" bitmap="slider_background"
+            bitmap-offset="0, 0" default-value="0.5" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+            draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+            draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0" max-value="1" min-value="0"
+            mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+            transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10" />
+
+        <!-- Pre/post delay mix -->
+        <view control-tag="Unit1::FilterChain" origin="154, 406" size="145, 25" autosize-to-fit="false" class="CCheckBox"
+              background-offset="0, 0" boxfill-color="~ GreenCColor"  autosize="bottom"
+              boxframe-color="~ BlackCColor" checkmark-color="~ BlackCColor"
+              default-value="0" draw-crossbox="true" font="~ NormalFontSmall" font-color="Light Grey" frame-width="1"
+              max-value="1" min-value="0" mouse-enabled="true" opacity="1" round-rect-radius="0"
+              title="" transparent="false" wants-focus="true" wheel-inc-value="0.1"/>
+
     </template>
     <variables/>
     <custom>
@@ -153,6 +199,11 @@
         <control-tag name="Unit1::Decimator"             tag="8"/>
         <control-tag name="Unit1::DecimatorChain"        tag="9"/>
         <control-tag name="Unit1::LFODecimator"          tag="10"/>
+        <control-tag name="Unit1::FilterChain"           tag="11"/>
+        <control-tag name="Unit1::FilterCutoff"          tag="12"/>
+        <control-tag name="Unit1::FilterResonance"       tag="13"/>
+        <control-tag name="Unit1::LFOFilter"             tag="14"/>
+        <control-tag name="Unit1::LFOFilterDepth"        tag="15"/>
 
     </control-tags>
 </vstgui-ui-description>

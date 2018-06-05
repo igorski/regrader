@@ -102,10 +102,12 @@ set(regrader_sources
     src/global.h
     src/audiobuffer.h
     src/audiobuffer.cpp
-    src/decimator.h
-    src/decimator.cpp
     src/bitcrusher.h
     src/bitcrusher.cpp
+    src/decimator.h
+    src/decimator.cpp
+    src/filter.h
+    src/filter.cpp
     src/lfo.h
     src/lfo.cpp
     src/limiter.h

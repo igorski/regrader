@@ -27,6 +27,7 @@
 #include "audiobuffer.h"
 #include "bitcrusher.h"
 #include "decimator.h"
+#include "filter.h"
 #include "limiter.h"
 
 using namespace Steinberg;
@@ -57,6 +58,7 @@ class RegraderProcess {
 
         BitCrusher* bitCrusher;
         Decimator* decimator;
+        Filter* filter;
         Limiter* limiter;
 
         // whether effects are applied onto the input delay signal or onto
@@ -64,6 +66,7 @@ class RegraderProcess {
 
         bool bitCrusherPostMix;
         bool decimatorPostMix;
+        bool filterPostMix;
 
         // whether delay time is synced to hosts tempo
 
