@@ -40,9 +40,9 @@ namespace VST {
 namespace Steinberg {
 namespace Vst {
 
-    static const FUID RegraderProcessorUID( 0x84E8DE5F, 0x92554F53, 0x96FAE413, 0x3C935A18 );
-    static const FUID RegraderWithSideChainProcessorUID( 0x41347FD6, 0xFED64094, 0xAFBB12B7, 0xDBA1D441);
-    static const FUID RegraderControllerUID( 0xD39D5B65, 0xD7AF42FA, 0x843F4AC8, 0x41EB04F0 );
+    static const FUID RegraderProcessorUID( 0x9A615AD3, 0xFFF74B54, 0xA6AFDDE5, 0xD9995465 );
+    static const FUID RegraderWithSideChainProcessorUID( 0x31C358F3, 0x528F457D, 0xBA31BDFB, 0x70A7A2DA );
+    static const FUID RegraderControllerUID( 0xF99D622B, 0xCF48474A, 0xB7E202CD, 0x66D160D9 );
 
 //------------------------------------------------------------------------
 } // namespace Vst

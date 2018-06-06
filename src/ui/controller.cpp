@@ -66,7 +66,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     unitInfo.id = 1;
     unitInfo.parentUnitId = kRootUnitId;    // attached to the root unit
 
-    Steinberg::UString( unitInfo.name, USTRINGSIZE( unitInfo.name )).assign( USTRING( "ADSR" ));
+    Steinberg::UString( unitInfo.name, USTRINGSIZE( unitInfo.name )).assign( USTRING( "REGRADER" ));
 
     unitInfo.programListId = kNoProgramListId;
 
