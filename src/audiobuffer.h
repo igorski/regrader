@@ -45,7 +45,7 @@ class AudioBuffer
         int mergeBuffers( AudioBuffer* aBuffer, int aReadOffset, int aWriteOffset, float aMixVolume );
         void silenceBuffers();
         void adjustBufferVolumes( float volume );
-        void applyMonoSource();
+        bool isSilent();
         AudioBuffer* clone();
 
     protected:

@@ -85,9 +85,9 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
     int maxReadIndex = std::min( _delayTime, _delayBuffer->bufferSize );
 
     // clear existing output buffer contents
-
-    for ( i = 0; i < numOutChannels; i++ )
-        memset( outBuffer[ i ], 0, sampleFramesSize );
+    // NOT necessary: we overwrite the output buffer contents by assignment
+    //for ( i = 0; i < numOutChannels; i++ )
+    //    memset( outBuffer[ i ], 0, sampleFramesSize );
 
     // prepare the mix buffers and clone the incoming buffer contents into the pre-mix buffer
 

@@ -122,22 +122,18 @@ void AudioBuffer::adjustBufferVolumes( float amp )
     }
 }
 
-/**
- * copy contents of the mono (first) buffer
- * onto the remaining buffers
- */
-void AudioBuffer::applyMonoSource()
+bool AudioBuffer::isSilent()
 {
-    if ( amountOfChannels == 1 )
-        return;
-
-    float* monoBuffer = getBufferForChannel( 0 );
-
-    for ( int i = 1; i < amountOfChannels; ++i )
+    for ( int i = 0; i < amountOfChannels; ++i )
     {
-        float* targetBuffer = getBufferForChannel( i );
-        memcpy( targetBuffer, monoBuffer, bufferSize * sizeof( float ));
+        float* buffer = getBufferForChannel( i );
+        for ( int j = 0; j < bufferSize; ++j )
+        {
+            if ( buffer[ j ] != 0.f )
+                return false;
+        }
     }
+    return true;
 }
 
 AudioBuffer* AudioBuffer::clone()

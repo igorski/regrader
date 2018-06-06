@@ -67,7 +67,7 @@ Regrader::Regrader()
 , outputGainOld( 0.f )
 , currentProcessMode( -1 ) // -1 means not initialized
 {
-    // register its editor class (the same as used in entry.cpp)
+    // register its editor class (the same as used in vstentry.cpp)
     setControllerClass( RegraderControllerUID );
 }
 
@@ -301,7 +301,7 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
 
     //---4) Write output parameter changes-----------
     IParameterChanges* outParamChanges = data.outputParameterChanges;
-    // a new value of VuMeter will be send to the host
+    // a new value of VuMeter will be sent to the host
     // (the host will send it back in sync to our controller for updating our editor)
     if ( outParamChanges && outputGainOld != outputGain ) {
         int32 index = 0;
@@ -580,6 +580,11 @@ tresult PLUGIN_API Regrader::setupProcessing( ProcessSetup& newSetup )
 
     Igorski::VST::SAMPLE_RATE = newSetup.sampleRate;
 
+    // spotted to fire multiple times for VST2.4...
+
+    if ( regraderProcess != 0 )
+        delete regraderProcess;
+
     // TODO: creating a bunch of extra channels for no apparent reason?
     regraderProcess = new Igorski::RegraderProcess( 6 );
     syncModel();
@@ -601,7 +606,7 @@ tresult PLUGIN_API Regrader::setBusArrangements( SpeakerArrangement* inputs,  in
             if ( bus )
             {
                 // check if we are Mono => Mono, if not we need to recreate the buses
-                if ( bus->getArrangement () != inputs[0])
+                if ( bus->getArrangement() != inputs[0])
                 {
                     removeAudioBusses();
                     addAudioInput ( STR16( "Mono In" ),  inputs[0] );
@@ -613,13 +618,13 @@ tresult PLUGIN_API Regrader::setBusArrangements( SpeakerArrangement* inputs,  in
         // the host wants something else than Mono => Mono, in this case we are always Stereo => Stereo
         else
         {
-            AudioBus* bus = FCast<AudioBus> (audioInputs.at (0));
+            AudioBus* bus = FCast<AudioBus>( audioInputs.at(0));
             if ( bus )
             {
                 tresult result = kResultFalse;
 
                 // the host wants 2->2 (could be LsRs -> LsRs)
-                if ( SpeakerArr::getChannelCount (inputs[0]) == 2 && SpeakerArr::getChannelCount( outputs[0]) == 2 )
+                if ( SpeakerArr::getChannelCount(inputs[0]) == 2 && SpeakerArr::getChannelCount( outputs[0]) == 2 )
                 {
                     removeAudioBusses();
                     addAudioInput  ( STR16( "Stereo In"),  inputs[0] );
@@ -627,14 +632,13 @@ tresult PLUGIN_API Regrader::setBusArrangements( SpeakerArrangement* inputs,  in
                     result = kResultTrue;
                 }
                 // the host want something different than 1->1 or 2->2 : in this case we want stereo
-                else if ( bus->getArrangement () != SpeakerArr::kStereo )
+                else if ( bus->getArrangement() != SpeakerArr::kStereo )
                 {
                     removeAudioBusses();
                     addAudioInput ( STR16( "Stereo In"),  SpeakerArr::kStereo );
                     addAudioOutput( STR16( "Stereo Out"), SpeakerArr::kStereo );
                     result = kResultFalse;
                 }
-
                 return result;
             }
         }
