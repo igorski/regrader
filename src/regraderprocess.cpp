@@ -21,18 +21,17 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include "regraderprocess.h"
+#include "calc.h"
 #include <math.h>
 
 namespace Igorski {
 
 RegraderProcess::RegraderProcess( int amountOfChannels ) {
-    _maxTime       = ( int ) round(( Igorski::VST::SAMPLE_RATE / 1000 ) * MAX_DELAY_TIME );
     _delayTime     = 0;
     _delayMix      = .5f;
     _delayFeedback = .1f;
 
-    _delayBuffer  = new AudioBuffer( amountOfChannels, _maxTime );
-    _postMixBuffer   = new AudioBuffer( amountOfChannels, _maxTime / 10 );
+    _delayBuffer  = new AudioBuffer( amountOfChannels, Calc::millisecondsToBuffer( MAX_DELAY_TIME ));
     _delayIndices = new int[ amountOfChannels ];
 
     for ( int i = 0; i < amountOfChannels; ++i ) {
@@ -59,7 +58,8 @@ RegraderProcess::RegraderProcess( int amountOfChannels ) {
     syncDelayToHost     = true;
 
     // will be lazily created in the process function
-    _preMixBuffer = 0;
+    _preMixBuffer  = 0;
+    _postMixBuffer = 0;
 }
 
 RegraderProcess::~RegraderProcess() {
@@ -91,9 +91,9 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
     bool hasFlanger = ( flanger->getRate() > 0.f || flanger->getWidth() > 0.f );
 
-    // clone the incoming buffer contents into the pre-mix buffer
+    // prepare the mix buffers and clone the incoming buffer contents into the pre-mix buffer
 
-    cloneInBuffer( inBuffer, numInChannels, bufferSize );
+    prepareMixBuffers( inBuffer, numInChannels, bufferSize );
 
     for ( int32 c = 0; c < numInChannels; ++c )
     {
@@ -202,7 +202,14 @@ void RegraderProcess::setDelayTime( float value )
     if ( _delayTime == value )
         return;
 
-    _delayTime = ( int ) round( VST::cap( value ) * _maxTime );
+    // maximum delay time (in milliseconds) is specified in MAX_DELAY_TIME when using freeform scaling
+    // when the delay is synced to the host, the maximum time is a single measure
+    // at the current tempo and time signature
+
+    float delayMaxInMs = ( syncDelayToHost ) ? (( 60.f / _tempo ) * _timeSigDenominator ) * 1000.f
+        : MAX_DELAY_TIME;
+
+    _delayTime = Calc::millisecondsToBuffer( Calc::cap( value ) * delayMaxInMs );
 
     if ( syncDelayToHost )
         syncDelayTime();
@@ -249,10 +256,10 @@ void RegraderProcess::setTempo( double tempo, int32 timeSigNumerator, int32 time
 
 /* protected methods */
 
-void RegraderProcess::cloneInBuffer( float** inBuffer, int numInChannels, int bufferSize )
+void RegraderProcess::prepareMixBuffers( float** inBuffer, int numInChannels, int bufferSize )
 {
-    // if clone buffer wasn't created yet or the buffer size has changed
-    // delete existing buffer and create new to match properties
+    // if the pre mix buffer wasn't created yet or the buffer size has changed
+    // delete existing buffer and create new one to match properties
 
     if ( _preMixBuffer == 0 || _preMixBuffer->bufferSize != bufferSize ) {
         delete _preMixBuffer;
@@ -269,19 +276,27 @@ void RegraderProcess::cloneInBuffer( float** inBuffer, int numInChannels, int bu
             outChannelBuffer[ i ] = inChannelBuffer[ i ];
         }
     }
+
+    // if the post mix buffer wasn't created yet or the buffer size has changed
+    // delete existing buffer and create new one to match properties
+
+    if ( _postMixBuffer == 0 || _postMixBuffer->bufferSize != bufferSize ) {
+        delete _postMixBuffer;
+        _postMixBuffer = new AudioBuffer( numInChannels, bufferSize );
+    }
 }
 
 void RegraderProcess::syncDelayTime()
 {
-    // duration of a full measure in buffer seconds
+    // duration of a full measure in samples
 
-    float fullMeasure = ( 60.f / _tempo ) * _timeSigDenominator;
+    int fullMeasureSamples = Calc::secondsToBuffer(( 60.f / _tempo ) * _timeSigDenominator );
 
     // we allow syncing to up to 32nd note resolution
 
     int subdivision = 32;
 
-    _delayTime = VST::roundTo( _delayTime, fullMeasure / subdivision );
+    _delayTime = Calc::roundTo( _delayTime, fullMeasureSamples / subdivision );
 }
 
 }

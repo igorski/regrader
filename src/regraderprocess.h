@@ -37,7 +37,10 @@ namespace Igorski {
 class RegraderProcess {
 
     // max delay time (in milliseconds)
-    const int MAX_DELAY_TIME = 10000;
+    // this is used when host sync is disabled
+    // otherwise max delay time equals a full measure
+
+    const float MAX_DELAY_TIME = 5000.f;
 
     public:
         RegraderProcess( int amountOfChannels );
@@ -81,8 +84,8 @@ class RegraderProcess {
         AudioBuffer* _postMixBuffer; // buffer used for the post-delay effect mixing
 
         int* _delayIndices;
-        int _delayTime;
-        int _maxTime;
+
+        int _delayTime; // delay time is represented internally as buffer samples
         float _delayMix;
         float _delayFeedback;
         int _amountOfChannels;
@@ -91,11 +94,11 @@ class RegraderProcess {
         int32 _timeSigNumerator;
         int32 _timeSigDenominator;
 
-        // use a clone of the input buffer on which we can
-        // perform pre-delay mix processing (we need to keep
-        // the original in buffer intact for dry/wet mix purposes)
+        // ensures the pre- and post mix buffers match the appropriate amount of channels
+        // and buffer size. this also clones the contents of given in buffer into the pre-mix buffer
+        // the buffers are pooled so this can be called upon each process cycle without allocation overhead
 
-        void cloneInBuffer( float** inBuffer, int numInChannels, int bufferSize );
+        void prepareMixBuffers( float** inBuffer, int numInChannels, int bufferSize );
 
         // syncs current delay time to musically pleasing intervals synced to host tempo and time signature
 

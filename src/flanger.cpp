@@ -23,6 +23,7 @@
  */
 #include "flanger.h"
 #include "global.h"
+#include "calc.h"
 
 namespace Igorski {
 
@@ -185,7 +186,7 @@ void Flanger::process( float* sampleBuffer, int bufferSize, int c )
         sample = sampleBuffer[ i ];
         delayBuffer[ _writePointer ] = sample + _feedback * _feedbackPhase * _lastChannelSamples.at( c );
         _lastChannelSamples.at( c ) = delayBuffer[ ep1 ] * w1 + delayBuffer[ ep2 ] * w2;
-        sampleBuffer[ i ] = VST::capSample( _mixLeftDry * sample + _mixLeftWet * mix * _lastChannelSamples.at( c ));
+        sampleBuffer[ i ] = Calc::capSample( _mixLeftDry * sample + _mixLeftWet * mix * _lastChannelSamples.at( c ));
 
         // process sweep
 

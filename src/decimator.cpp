@@ -21,6 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include "decimator.h"
+#include "calc.h"
 #include <math.h>
 
 namespace Igorski {
@@ -61,7 +62,7 @@ float Decimator::getRate()
 
 void Decimator::setRate( float value )
 {
-    _rate = VST::cap( value );
+    _rate = Calc::cap( value );
 }
 
 void Decimator::store()

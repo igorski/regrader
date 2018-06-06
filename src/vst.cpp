@@ -23,6 +23,7 @@
 #include "global.h"
 #include "vst.h"
 #include "paramids.h"
+#include "calc.h"
 
 #include "public.sdk/source/vst/vstaudioprocessoralgo.h"
 
@@ -41,7 +42,7 @@ namespace Vst {
 // Regrader Implementation
 //------------------------------------------------------------------------
 Regrader::Regrader()
-: fDelayTime( 0.025f )
+: fDelayTime( 0.125f )
 , fDelayHostSync( 1.f )
 , fDelayFeedback( 0.2f )
 , fDelayMix( .5f )
@@ -681,15 +682,15 @@ tresult PLUGIN_API Regrader::notify( IMessage* message )
 
 void Regrader::syncModel()
 {
+    regraderProcess->syncDelayToHost = Igorski::Calc::toBool( fDelayHostSync );
     regraderProcess->setDelayTime( fDelayTime );
-    regraderProcess->syncDelayToHost = Igorski::VST::toBool( fDelayHostSync );
     regraderProcess->setDelayFeedback( fDelayFeedback );
     regraderProcess->setDelayMix( fDelayMix );
 
-    regraderProcess->bitCrusherPostMix = Igorski::VST::toBool( fBitResolutionChain );
-    regraderProcess->decimatorPostMix  = Igorski::VST::toBool( fDecimatorChain );
-    regraderProcess->filterPostMix     = Igorski::VST::toBool( fFilterChain );
-    regraderProcess->flangerPostMix    = Igorski::VST::toBool( fFlangerChain );
+    regraderProcess->bitCrusherPostMix = Igorski::Calc::toBool( fBitResolutionChain );
+    regraderProcess->decimatorPostMix  = Igorski::Calc::toBool( fDecimatorChain );
+    regraderProcess->filterPostMix     = Igorski::Calc::toBool( fFilterChain );
+    regraderProcess->flangerPostMix    = Igorski::Calc::toBool( fFlangerChain );
 
     regraderProcess->bitCrusher->setAmount( fBitResolution );
     regraderProcess->bitCrusher->setLFO( fLFOBitResolution, fLFOBitResolutionDepth );

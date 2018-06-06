@@ -22,6 +22,7 @@
  */
 #include "bitcrusher.h"
 #include "global.h"
+#include "calc.h"
 #include <limits.h>
 #include <math.h>
 
@@ -121,12 +122,12 @@ void BitCrusher::setAmount( float value )
 
 void BitCrusher::setInputMix( float value )
 {
-    _inputMix = VST::cap( value );
+    _inputMix = Calc::cap( value );
 }
 
 void BitCrusher::setOutputMix( float value )
 {
-    _outputMix = VST::cap( value );
+    _outputMix = Calc::cap( value );
 }
 
 /* private methods */
@@ -141,7 +142,7 @@ void BitCrusher::cacheLFO()
 void BitCrusher::calcBits()
 {
     // scale float to 1 - 16 bit range
-    _bits = ( int ) floor( VST::scale( _tempAmount, 1, 15 )) + 1;
+    _bits = ( int ) floor( Calc::scale( _tempAmount, 1, 15 )) + 1;
 }
 
 }

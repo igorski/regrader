@@ -22,6 +22,7 @@
  */
 #include "lowpassfilter.h"
 #include "global.h"
+#include <cmath>
 
 namespace Igorski {
 
