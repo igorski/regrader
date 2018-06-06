@@ -36,7 +36,7 @@ class Limiter
         Limiter( float attackMs, float releaseMs, float thresholdDb );
         ~Limiter();
 
-        void process( float** outputBuffer, int bufferSize, bool isMonoSource );
+        void process( float** outputBuffer, int bufferSize, int numOutChannels );
 
         void setAttack( float attackMs );
         void setRelease( float releaseMs );

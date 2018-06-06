@@ -91,7 +91,8 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
     bool hasFlanger = ( flanger->getRate() > 0.f || flanger->getWidth() > 0.f );
 
-    // clone in buffer contents into the pre-mix buffer
+    // clone the incoming buffer contents into the pre-mix buffer
+
     cloneInBuffer( inBuffer, numInChannels, bufferSize );
 
     for ( int32 c = 0; c < numInChannels; ++c )
@@ -104,7 +105,8 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
         delayIndex = _delayIndices[ c ];
 
-        // prepare effects for each individual channel
+        // when processing the first channel, store the current effects properties
+        // so each subsequent channel is processed using the same processor variables
 
         if ( c == 0 ) {
             decimator->store();
@@ -137,7 +139,7 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
             }
 
             // read the previously delayed samples from the buffer
-            // ( for feedback purposes ) and append the current incoming sample to it
+            // ( for feedback purposes ) and append the processed pre mix buffer sample to it
 
             delaySample = channelDelayBuffer[ readIndex ];
             channelDelayBuffer[ delayIndex ] = channelPreMixBuffer[ i ] + delaySample * _delayFeedback;
@@ -146,15 +148,16 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
                 delayIndex = 0;
             }
 
-            // write the delay sample into the temp buffer
+            // write the delay sample into the post mix buffer
             channelPostMixBuffer[ i ] = delaySample;
         }
 
-        // update last index for this channel
+        // update last delay index for this channel
+
         _delayIndices[ c ] = delayIndex;
 
         // POST MIX processing
-        // apply the post mix effect processing on the temp buffer
+        // apply the post mix effect processing
 
         if ( decimatorPostMix )
             decimator->process( channelPostMixBuffer, bufferSize );
@@ -168,7 +171,7 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
         if ( hasFlanger && flangerPostMix )
             flanger->process( channelPostMixBuffer, bufferSize, c );
 
-        // mix the input buffer into the output (dry mix)
+        // mix the input and processed post mix buffers into the output buffer
 
         for ( i = 0; i < bufferSize; ++i ) {
 
@@ -181,7 +184,7 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
         // prepare effects for the next channel
 
-        if ( c < numInChannels - 1 ) {
+        if ( c < ( numInChannels - 1 )) {
             decimator->restore();
             filter->restore();
             flanger->restore();
@@ -189,7 +192,7 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
     }
 
     // limit the signal as it can get quite hot
-    limiter->process( outBuffer, bufferSize, ( numOutChannels > 1 ));
+    limiter->process( outBuffer, bufferSize, numOutChannels );
 }
 
 /* setters */

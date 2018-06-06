@@ -69,7 +69,7 @@ float Limiter::getLinearGR()
     return gain > 1.f ? 1.f / gain : 1.f;
 }
 
-void Limiter::process( float** outputBuffer, int bufferSize, bool isMonoSource )
+void Limiter::process( float** outputBuffer, int bufferSize, int numOutChannels )
 {
 //    if ( gain > 0.9999f && outputBuffer->isSilent )
 //    {
@@ -85,8 +85,10 @@ void Limiter::process( float** outputBuffer, int bufferSize, bool isMonoSource )
     re = rel;
     tr = trim;
 
+    bool hasRight = ( numOutChannels > 1 );
+
     float* leftBuffer  = outputBuffer[ 0 ];
-    float* rightBuffer = !isMonoSource ? outputBuffer[ 1 ] : 0;
+    float* rightBuffer = hasRight ? outputBuffer[ 1 ] : 0;
         
     if ( pKnee > 0.5 )
     {
@@ -95,9 +97,9 @@ void Limiter::process( float** outputBuffer, int bufferSize, bool isMonoSource )
         for ( int i = 0; i < bufferSize; ++i ) {
 
             ol  = leftBuffer[ i ];
-            or_ = !isMonoSource ? rightBuffer[ i ] : 0;
+            or_ = hasRight ? rightBuffer[ i ] : 0;
 
-            lev = ( float ) ( 1.0 / ( 1.0 + th * fabs( ol + or_ )));
+            lev = ( float ) ( 1.f / ( 1.f + th * fabs( ol + or_ )));
 
             if ( g > lev ) {
                 g = g - at * ( g - lev );
@@ -108,7 +110,7 @@ void Limiter::process( float** outputBuffer, int bufferSize, bool isMonoSource )
 
             leftBuffer[ i ] = ( ol * tr * g );
 
-            if ( !isMonoSource )
+            if ( hasRight )
                 rightBuffer[ i ] = ( or_ * tr * g );
         }
     }
@@ -117,7 +119,7 @@ void Limiter::process( float** outputBuffer, int bufferSize, bool isMonoSource )
         for ( int i = 0; i < bufferSize; ++i ) {
 
             ol  = leftBuffer[ i ];
-            or_ = !isMonoSource ? rightBuffer[ i ] : 0;
+            or_ = hasRight ? rightBuffer[ i ] : 0;
 
             lev = ( float ) ( 0.5 * g * fabs( ol + or_ ));
 
@@ -126,12 +128,12 @@ void Limiter::process( float** outputBuffer, int bufferSize, bool isMonoSource )
             }
             else {
                 // below threshold
-                g = g + ( float )( re * ( 1.0 - g ));
+                g = g + ( float )( re * ( 1.f - g ));
             }
 
             leftBuffer[ i ] = ( ol * tr * g );
 
-            if ( !isMonoSource )
+            if ( hasRight )
                 rightBuffer[ i ] = ( or_ * tr * g );
         }
     }
@@ -157,13 +159,13 @@ void Limiter::recalculate()
 {
     if ( pKnee > 0.5 ) {
         // soft knee
-        thresh = ( float ) pow( 10.0, 1.0 - ( 2.0 * pTresh ));
+        thresh = ( float ) pow( 10.0, 1.f - ( 2.0 * pTresh ));
     }
     else {
         // hard knee
         thresh = ( float ) pow( 10.0, ( 2.0 * pTresh ) - 2.0 );
     }
-    trim = ( float )( pow( 10.0, ( 2.0 * pTrim) - 1.0 ));
+    trim = ( float )( pow( 10.0, ( 2.0 * pTrim) - 1.f ));
     att  = ( float )  pow( 10.0, -2.0 * pAttack );
     rel  = ( float )  pow( 10.0, -2.0 - ( 3.0 * pRelease ));
 }
