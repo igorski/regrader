@@ -36,11 +36,11 @@ using namespace Steinberg;
 namespace Igorski {
 class RegraderProcess {
 
-    // max delay time (in milliseconds)
+    // max delay time in milliseconds
     // this is used when host sync is disabled
     // otherwise max delay time equals a full measure
 
-    const float MAX_DELAY_TIME = 5000.f;
+    const float MAX_DELAY_TIME_MS = 5000.f;
 
     public:
         RegraderProcess( int amountOfChannels );
@@ -85,7 +85,7 @@ class RegraderProcess {
 
         int* _delayIndices;
 
-        int _delayTime; // delay time is represented internally as buffer samples
+        int _delayTime; // delay time is represented internally in buffer samples
         float _delayMix;
         float _delayFeedback;
         int _amountOfChannels;

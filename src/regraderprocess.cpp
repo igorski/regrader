@@ -31,7 +31,7 @@ RegraderProcess::RegraderProcess( int amountOfChannels ) {
     _delayMix      = .5f;
     _delayFeedback = .1f;
 
-    _delayBuffer  = new AudioBuffer( amountOfChannels, Calc::millisecondsToBuffer( MAX_DELAY_TIME ));
+    _delayBuffer  = new AudioBuffer( amountOfChannels, Calc::millisecondsToBuffer( MAX_DELAY_TIME_MS ));
     _delayIndices = new int[ amountOfChannels ];
 
     for ( int i = 0; i < amountOfChannels; ++i ) {
@@ -81,19 +81,21 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
     float delaySample;
     int i, readIndex, delayIndex, channelDelayBufferChannel;
 
+    float dryMix     = 1.f - _delayMix;
+    int maxReadIndex = std::min( _delayTime, _delayBuffer->bufferSize );
+
     // clear existing output buffer contents
+
     for ( i = 0; i < numOutChannels; i++ )
         memset( outBuffer[ i ], 0, sampleFramesSize );
-
-    float dryMix = 1.f - _delayMix;
-
-    // only apply flanger if it has a positive rate or width
-
-    bool hasFlanger = ( flanger->getRate() > 0.f || flanger->getWidth() > 0.f );
 
     // prepare the mix buffers and clone the incoming buffer contents into the pre-mix buffer
 
     prepareMixBuffers( inBuffer, numInChannels, bufferSize );
+
+    // only apply flanger if it has a positive rate or width
+
+    bool hasFlanger = ( flanger->getRate() > 0.f || flanger->getWidth() > 0.f );
 
     for ( int32 c = 0; c < numInChannels; ++c )
     {
@@ -144,7 +146,7 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
             delaySample = channelDelayBuffer[ readIndex ];
             channelDelayBuffer[ delayIndex ] = channelPreMixBuffer[ i ] + delaySample * _delayFeedback;
 
-            if ( ++delayIndex == _delayTime ) {
+            if ( ++delayIndex >= maxReadIndex ) {
                 delayIndex = 0;
             }
 
@@ -199,15 +201,12 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
 void RegraderProcess::setDelayTime( float value )
 {
-    if ( _delayTime == value )
-        return;
-
-    // maximum delay time (in milliseconds) is specified in MAX_DELAY_TIME when using freeform scaling
+    // maximum delay time (in milliseconds) is specified in MAX_DELAY_TIME_MS when using freeform scaling
     // when the delay is synced to the host, the maximum time is a single measure
     // at the current tempo and time signature
 
     float delayMaxInMs = ( syncDelayToHost ) ? (( 60.f / _tempo ) * _timeSigDenominator ) * 1000.f
-        : MAX_DELAY_TIME;
+        : MAX_DELAY_TIME_MS;
 
     _delayTime = Calc::millisecondsToBuffer( Calc::cap( value ) * delayMaxInMs );
 
