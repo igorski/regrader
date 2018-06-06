@@ -85,7 +85,7 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
     for ( i = 0; i < numOutChannels; i++ )
         memset( outBuffer[ i ], 0, sampleFramesSize );
 
-    float dryMix = 1.0f - _delayMix;
+    float dryMix = 1.f - _delayMix;
 
     // only apply flanger if it has a positive rate or width
 

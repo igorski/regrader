@@ -38,7 +38,7 @@ AudioBuffer::AudioBuffer( int aAmountOfChannels, int aBufferSize )
 
     for ( int i = 0; i < amountOfChannels; ++i ) {
         _buffers->at( i ) = new float[ aBufferSize ];
-        memset( _buffers->at( i ), 0, aBufferSize * sizeof( float )); // zero bits should equal 0.0f
+        memset( _buffers->at( i ), 0, aBufferSize * sizeof( float )); // zero bits should equal 0.f
     }
 }
 
@@ -59,7 +59,8 @@ float* AudioBuffer::getBufferForChannel( int aChannelNum )
 
 int AudioBuffer::mergeBuffers( AudioBuffer* aBuffer, int aReadOffset, int aWriteOffset, float aMixVolume )
 {
-    if ( aBuffer == 0 || aWriteOffset >= bufferSize ) return 0;
+    if ( aBuffer == 0 || aWriteOffset >= bufferSize )
+        return 0;
 
     int sourceLength     = aBuffer->bufferSize;
     int maxSourceChannel = aBuffer->amountOfChannels - 1;
@@ -105,7 +106,7 @@ int AudioBuffer::mergeBuffers( AudioBuffer* aBuffer, int aReadOffset, int aWrite
  */
 void AudioBuffer::silenceBuffers()
 {
-    // use mem set to quickly erase existing buffer contents, zero bits should equal 0.0f
+    // use mem set to quickly erase existing buffer contents, zero bits should equal 0.f
     for ( int i = 0; i < amountOfChannels; ++i )
         memset( getBufferForChannel( i ), 0, bufferSize * sizeof( float ));
 }

@@ -26,6 +26,11 @@
 #include "global.h"
 #include <vector>
 
+/**
+ * An AudioBuffer represents multiple channels of audio
+ * each of equal buffer length.
+ * AudioBuffer has convenience methods for cloning, silencing and mixing
+ */
 class AudioBuffer
 {
     public:

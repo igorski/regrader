@@ -36,11 +36,11 @@ Flanger::Flanger( int amountOfChannels ) {
     _writePointer         =
     _writePointerStored   = 0;
     _feedbackPhase        =
-    _sweepSamples         = 0.0f;
+    _sweepSamples         = 0.f;
     _mixLeftWet           =
     _mixRightWet          =
     _mixLeftDry           =
-    _mixRightDry          = 1.0f;
+    _mixRightDry          = 1.f;
 
     for ( int i = 0; i < amountOfChannels; ++i ) {
 
@@ -53,8 +53,8 @@ Flanger::Flanger( int amountOfChannels ) {
         _lastChannelSamples.push_back( 0.f );
     }
 
-    _delayFilter = new LowPassFilter( 20.0f );
-    _mixFilter   = new LowPassFilter( 20.0f );
+    _delayFilter = new LowPassFilter( 20.f );
+    _mixFilter   = new LowPassFilter( 20.f );
 
     setRate( 0.1f );
     setWidth( 0.5f );
