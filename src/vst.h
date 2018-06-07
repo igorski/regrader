@@ -27,8 +27,9 @@
 #include "regraderprocess.h"
 #include "global.h"
 
-namespace Steinberg {
-namespace Vst {
+using namespace Steinberg::Vst;
+
+namespace Igorski {
 
 //------------------------------------------------------------------------
 // Regrader: directly derived from the helper class AudioEffect
@@ -37,7 +38,7 @@ class Regrader : public AudioEffect
 {
     public:
         Regrader ();
-        virtual ~Regrader (); // do not forget virtual here
+        virtual ~Regrader(); // do not forget virtual here
 
         //--- ---------------------------------------------------------------------
         // create function required for Plug-in factory,
@@ -125,8 +126,6 @@ class Regrader : public AudioEffect
         void syncModel();
 };
 
-//------------------------------------------------------------------------
-} // namespace Vst
-} // namespace Steinberg
+}
 
 #endif

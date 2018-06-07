@@ -89,6 +89,7 @@ void Filter::updateProperties( float cutoffPercentage, float resonancePercentage
     _depth = LFODepth;
 
     bool doLFO = LFORatePercentage != 0.f;
+
     if ( !doLFO && _hasLFO ) {
         setLFO( false );
     }

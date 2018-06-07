@@ -28,6 +28,7 @@
 #include "public.sdk/source/main/pluginfactoryvst3.h"
 
 using namespace Steinberg::Vst;
+using namespace Igorski;
 
 //------------------------------------------------------------------------
 //  Module init/exit
@@ -60,7 +61,7 @@ BEGIN_FACTORY_DEF( "igorski.nl",
 
     //---First Plug-in included in this factory-------
     // its kVstAudioEffectClass component
-    DEF_CLASS2( INLINE_UID_FROM_FUID( RegraderProcessorUID ),
+    DEF_CLASS2( INLINE_UID_FROM_FUID( Igorski::VST::RegraderProcessorUID ),
                 PClassInfo::kManyInstances,      // cardinality
                 kVstAudioEffectClass,            // the component category (do not change this)
                 Igorski::VST::NAME,              // plug-in name
@@ -71,7 +72,7 @@ BEGIN_FACTORY_DEF( "igorski.nl",
                 Regrader::createInstance )       // function pointer called when this component should be instantiated
 
     // its kVstComponentControllerClass component
-    DEF_CLASS2( INLINE_UID_FROM_FUID( RegraderControllerUID ),
+    DEF_CLASS2( INLINE_UID_FROM_FUID( Igorski::VST::RegraderControllerUID ),
                 PClassInfo::kManyInstances,   // cardinality
                 kVstComponentControllerClass, // the Controller category (do not change this)
                 "IgorskiVSTController",       // controller name (could be the same as component name)

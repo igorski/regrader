@@ -35,8 +35,7 @@
 
 #include <stdio.h>
 
-namespace Steinberg {
-namespace Vst {
+namespace Igorski {
 
 //------------------------------------------------------------------------
 // Regrader Implementation
@@ -68,7 +67,7 @@ Regrader::Regrader()
 , currentProcessMode( -1 ) // -1 means not initialized
 {
     // register its editor class (the same as used in vstentry.cpp)
-    setControllerClass( RegraderControllerUID );
+    setControllerClass( VST::RegraderControllerUID );
 }
 
 //------------------------------------------------------------------------
@@ -390,7 +389,7 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
         return kResultFalse;
 
     float savedLFOFilterDepth = 1.f;
-    if ( state->read( &savedLFOFilter, sizeof ( float )) != kResultOk )
+    if ( state->read( &savedLFOFilterDepth, sizeof ( float )) != kResultOk )
         return kResultFalse;
 
     float savedFlangerChain = 0.f;
@@ -578,15 +577,15 @@ tresult PLUGIN_API Regrader::setupProcessing( ProcessSetup& newSetup )
     // here we keep a trace of the processing mode (offline,...) for example.
     currentProcessMode = newSetup.processMode;
 
-    Igorski::VST::SAMPLE_RATE = newSetup.sampleRate;
+    VST::SAMPLE_RATE = newSetup.sampleRate;
 
-    // spotted to fire multiple times for VST2.4...
+    // spotted to fire multiple times...
 
     if ( regraderProcess != 0 )
         delete regraderProcess;
 
     // TODO: creating a bunch of extra channels for no apparent reason?
-    regraderProcess = new Igorski::RegraderProcess( 6 );
+    regraderProcess = new RegraderProcess( 6 );
     syncModel();
 
     return AudioEffect::setupProcessing( newSetup );
@@ -686,15 +685,15 @@ tresult PLUGIN_API Regrader::notify( IMessage* message )
 
 void Regrader::syncModel()
 {
-    regraderProcess->syncDelayToHost = Igorski::Calc::toBool( fDelayHostSync );
+    regraderProcess->syncDelayToHost = Calc::toBool( fDelayHostSync );
     regraderProcess->setDelayTime( fDelayTime );
     regraderProcess->setDelayFeedback( fDelayFeedback );
     regraderProcess->setDelayMix( fDelayMix );
 
-    regraderProcess->bitCrusherPostMix = Igorski::Calc::toBool( fBitResolutionChain );
-    regraderProcess->decimatorPostMix  = Igorski::Calc::toBool( fDecimatorChain );
-    regraderProcess->filterPostMix     = Igorski::Calc::toBool( fFilterChain );
-    regraderProcess->flangerPostMix    = Igorski::Calc::toBool( fFlangerChain );
+    regraderProcess->bitCrusherPostMix = Calc::toBool( fBitResolutionChain );
+    regraderProcess->decimatorPostMix  = Calc::toBool( fDecimatorChain );
+    regraderProcess->filterPostMix     = Calc::toBool( fFilterChain );
+    regraderProcess->flangerPostMix    = Calc::toBool( fFlangerChain );
 
     regraderProcess->bitCrusher->setAmount( fBitResolution );
     regraderProcess->bitCrusher->setLFO( fLFOBitResolution, fLFOBitResolutionDepth );
@@ -708,6 +707,4 @@ void Regrader::syncModel()
     regraderProcess->flanger->setDelay( fFlangerDelay );
 }
 
-//------------------------------------------------------------------------
-} // namespace Vst
-} // namespace Steinberg
+}

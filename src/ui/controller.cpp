@@ -66,7 +66,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     unitInfo.id = 1;
     unitInfo.parentUnitId = kRootUnitId;    // attached to the root unit
 
-    Steinberg::UString( unitInfo.name, USTRINGSIZE( unitInfo.name )).assign( USTRING( "" ));
+    Steinberg::UString( unitInfo.name, USTRINGSIZE( unitInfo.name )).assign( USTRING( "Regrader" ));
 
     unitInfo.programListId = kNoProgramListId;
 
@@ -84,7 +84,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     parameters.addParameter( delayTimeParam );
 
     parameters.addParameter(
-        USTRING( "Delay host sync" ), 0, 1, 0, ParameterInfo::kCanAutomate, kDelayHostSyncId
+        USTRING( "Delay host sync" ), 0, 1, 0, ParameterInfo::kCanAutomate, kDelayHostSyncId, unitId
     );
 
     RangeParameter* delayFeedbackParam = new RangeParameter(
@@ -111,7 +111,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     parameters.addParameter( bitParam );
 
     parameters.addParameter(
-        USTRING( "BitCrusher chain" ), 0, 1, 0, ParameterInfo::kCanAutomate, kBitResolutionChainId
+        USTRING( "BitCrusher chain" ), 0, 1, 0, ParameterInfo::kCanAutomate, kBitResolutionChainId, unitId
     );
 
     RangeParameter* bitLfoRateParam = new RangeParameter(
@@ -138,7 +138,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     parameters.addParameter( decimatorParam );
 
     parameters.addParameter(
-        USTRING( "Decimator chain" ), 0, 1, 0, ParameterInfo::kCanAutomate, kDecimatorChainId
+        USTRING( "Decimator chain" ), 0, 1, 0, ParameterInfo::kCanAutomate, kDecimatorChainId, unitId
     );
 
     RangeParameter* decimatorLFOParam = new RangeParameter(
@@ -151,7 +151,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     // Filter controls
 
     parameters.addParameter(
-        USTRING( "Filter chain" ), 0, 1, 0, ParameterInfo::kCanAutomate, kFilterChainId
+        USTRING( "Filter chain" ), 0, 1, 0, ParameterInfo::kCanAutomate, kFilterChainId, unitId
     );
 
     RangeParameter* filterCutoffParam = new RangeParameter(
@@ -213,7 +213,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     parameters.addParameter( flangerDelayParam );
 
     parameters.addParameter(
-        USTRING( "Flanger chain" ), 0, 1, 0, ParameterInfo::kCanAutomate, kFlangerChainId
+        USTRING( "Flanger chain" ), 0, 1, 0, ParameterInfo::kCanAutomate, kFlangerChainId, unitId
     );
     // initialization
 
