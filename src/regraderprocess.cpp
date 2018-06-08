@@ -78,7 +78,7 @@ RegraderProcess::~RegraderProcess() {
 
 void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInChannels, int numOutChannels,
                                int bufferSize, uint32 sampleFramesSize ) {
-    float delaySample;
+    float inSample, delaySample;
     int i, readIndex, delayIndex, channelDelayBufferChannel;
 
     float dryMix     = 1.f - _delayMix;
@@ -177,11 +177,15 @@ void RegraderProcess::process( float** inBuffer, float** outBuffer, int numInCha
 
         for ( i = 0; i < bufferSize; ++i ) {
 
+            // before writing to the out buffer we take a snapshot of the current in sample
+            // value as VST2 in Ableton Live supplies the same buffer for in and out!
+            inSample = channelInBuffer[ i ];
+
             // wet mix (e.g. the effected delay signal)
             channelOutBuffer[ i ] = channelPostMixBuffer[ i ] * _delayMix;
 
             // dry mix (e.g. mix in the input signal)
-            channelOutBuffer[ i ] += ( channelInBuffer[ i ] * dryMix );
+            channelOutBuffer[ i ] += ( inSample * dryMix );
         }
 
         // prepare effects for the next channel

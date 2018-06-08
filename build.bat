@@ -1,5 +1,5 @@
 @echo off
-rm -rf build
+rmdir /Q /S build
 mkdir build
 cd build
 cmake.exe -G"Visual Studio 15 2017 Win64" ..
