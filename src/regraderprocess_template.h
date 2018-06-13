@@ -26,6 +26,10 @@ template <typename SampleType>
 void RegraderProcess::process( SampleType** inBuffer, SampleType** outBuffer, int numInChannels, int numOutChannels,
                                int bufferSize, uint32 sampleFramesSize ) {
 
+    // input and output buffers can be float or double as defined
+    // by the templates SampleType value. Internally we process
+    // audio as floats
+
     SampleType inSample;
     float delaySample;
     int i, readIndex, delayIndex, channelDelayBufferChannel;
@@ -37,7 +41,7 @@ void RegraderProcess::process( SampleType** inBuffer, SampleType** outBuffer, in
 
     prepareMixBuffers( inBuffer, numInChannels, bufferSize );
 
-    // only apply flanger if it has a positive rate or width
+    // only apply flange if the flanger has a positive rate or width
 
     bool hasFlanger = ( flanger->getRate() > 0.f || flanger->getWidth() > 0.f );
 
@@ -141,7 +145,7 @@ void RegraderProcess::process( SampleType** inBuffer, SampleType** outBuffer, in
         }
     }
 
-    // limit the signal as it can get quite hot
+    // limit the output signal as it can get quite hot
     limiter->process<SampleType>( outBuffer, bufferSize, numOutChannels );
 }
 
@@ -157,6 +161,8 @@ void RegraderProcess::prepareMixBuffers( SampleType** inBuffer, int numInChannel
     }
 
     // clone the in buffer contents
+    // note the clone is always cast to float as it is
+    // used for internal processing (see RegraderProcess::process)
 
     for ( int c = 0; c < numInChannels; ++c ) {
         SampleType* inChannelBuffer = ( SampleType* ) inBuffer[ c ];

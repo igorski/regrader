@@ -298,7 +298,7 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
         );
     }
     else {
-        // 32-bit floating point precision, Ableton Live, Bitwig Studio, Fruity Loops...
+        // 32-bit samples, e.g. Ableton Live, Bitwig Studio...
         regraderProcess->process<float>(
             ( float** ) in, ( float** ) out, numInChannels, numOutChannels,
             data.numSamples, sampleFramesSize
