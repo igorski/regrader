@@ -58,6 +58,6 @@ class Limiter
         float thresh, gain, att, rel, trim;
 };
 
-#include "limiter_template.h"
+#include "limiter.tcc"
 
 #endif

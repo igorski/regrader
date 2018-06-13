@@ -110,6 +110,6 @@ class RegraderProcess {
 };
 }
 
-#include "regraderprocess_template.h"
+#include "regraderprocess.tcc"
 
 #endif
