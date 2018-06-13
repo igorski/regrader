@@ -288,10 +288,18 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
 
     // process the incoming sound!
 
-    regraderProcess->process(
-        ( float** ) in, ( float** ) out, numInChannels, numOutChannels,
-        data.numSamples, sampleFramesSize
-    );
+    if ( data.symbolicSampleSize == kSample32 ) {
+        regraderProcess->process<float>(
+            ( float** ) in, ( float** ) out, numInChannels, numOutChannels,
+            data.numSamples, sampleFramesSize
+        );
+    }
+    else {
+        regraderProcess->process<double>(
+            ( double** ) in, ( double** ) out, numInChannels, numOutChannels,
+            data.numSamples, sampleFramesSize
+        );
+    }
 
     // output flags
 
