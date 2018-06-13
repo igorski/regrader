@@ -36,7 +36,8 @@ class Limiter
         Limiter( float attackMs, float releaseMs, float thresholdDb );
         ~Limiter();
 
-        void process( float** outputBuffer, int bufferSize, int numOutChannels );
+        template <typename SampleType>
+        void process( SampleType** outputBuffer, int bufferSize, int numOutChannels );
 
         void setAttack( float attackMs );
         void setRelease( float releaseMs );
@@ -56,5 +57,7 @@ class Limiter
 
         float thresh, gain, att, rel, trim;
 };
+
+#include "limiter_template.h"
 
 #endif
