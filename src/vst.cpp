@@ -291,14 +291,14 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
     bool isDoublePrecision = ( data.symbolicSampleSize == kSample64 );
 
     if ( isDoublePrecision ) {
-        // 64-bit samples, e.g. Reaper
+        // 64-bit samples, e.g. Reaper64
         regraderProcess->process<double>(
             ( double** ) in, ( double** ) out, numInChannels, numOutChannels,
             data.numSamples, sampleFramesSize
         );
     }
     else {
-        // 32-bit samples, e.g. Ableton Live, Bitwig Studio...
+        // 32-bit samples, e.g. Ableton Live, Bitwig Studio... (oddly enough also when 64-bit?)
         regraderProcess->process<float>(
             ( float** ) in, ( float** ) out, numInChannels, numOutChannels,
             data.numSamples, sampleFramesSize
