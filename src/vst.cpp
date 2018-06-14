@@ -288,10 +288,22 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
 
     // process the incoming sound!
 
-    regraderProcess->process(
-        ( float** ) in, ( float** ) out, numInChannels, numOutChannels,
-        data.numSamples, sampleFramesSize
-    );
+    bool isDoublePrecision = ( data.symbolicSampleSize == kSample64 );
+
+    if ( isDoublePrecision ) {
+        // 64-bit samples, e.g. Reaper64
+        regraderProcess->process<double>(
+            ( double** ) in, ( double** ) out, numInChannels, numOutChannels,
+            data.numSamples, sampleFramesSize
+        );
+    }
+    else {
+        // 32-bit samples, e.g. Ableton Live, Bitwig Studio... (oddly enough also when 64-bit?)
+        regraderProcess->process<float>(
+            ( float** ) in, ( float** ) out, numInChannels, numOutChannels,
+            data.numSamples, sampleFramesSize
+        );
+    }
 
     // output flags
 
@@ -302,7 +314,7 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
     IParameterChanges* outParamChanges = data.outputParameterChanges;
     // a new value of VuMeter will be sent to the host
     // (the host will send it back in sync to our controller for updating our editor)
-    if ( outParamChanges && outputGainOld != outputGain ) {
+    if ( !isDoublePrecision && outParamChanges && outputGainOld != outputGain ) {
         int32 index = 0;
         IParamValueQueue* paramQueue = outParamChanges->addParameterData( kVuPPMId, index );
         if ( paramQueue )

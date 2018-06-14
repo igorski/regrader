@@ -47,7 +47,9 @@ class RegraderProcess {
         ~RegraderProcess();
 
         // apply effect to incoming sampleBuffer contents
-        void process( float** inBuffer, float** outBuffer, int numInChannels, int numOutChannels,
+
+        template <typename SampleType>
+        void process( SampleType** inBuffer, SampleType** outBuffer, int numInChannels, int numOutChannels,
             int bufferSize, uint32 sampleFramesSize
         );
 
@@ -98,7 +100,8 @@ class RegraderProcess {
         // and buffer size. this also clones the contents of given in buffer into the pre-mix buffer
         // the buffers are pooled so this can be called upon each process cycle without allocation overhead
 
-        void prepareMixBuffers( float** inBuffer, int numInChannels, int bufferSize );
+        template <typename SampleType>
+        void prepareMixBuffers( SampleType** inBuffer, int numInChannels, int bufferSize );
 
         // syncs current delay time to musically pleasing intervals synced to host tempo and time signature
 
@@ -106,5 +109,7 @@ class RegraderProcess {
 
 };
 }
+
+#include "regraderprocess.tcc"
 
 #endif
