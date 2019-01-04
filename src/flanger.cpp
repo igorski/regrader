@@ -36,7 +36,7 @@ Flanger::Flanger( int amountOfChannels ) {
 
     _writePointer         =
     _writePointerStored   = 0;
-    _feedbackPhase        =
+    _feedbackPhase        = 1.f;
     _sweepSamples         = 0.f;
     _mixLeftWet           =
     _mixRightWet          =
