@@ -1,6 +1,6 @@
 # REGRADER
 
-Regrader is a VST3.0 plug-in which provides a delay effect in which the repeats degrade in
+Regrader is a VST2/3/AU plug-in which provides a delay effect in which the repeats degrade in
 various ways to provide a nice twist on the ears. The delays repeats can be synced to the
 hosts tempo and time signature and be fully automated.
 
@@ -10,13 +10,17 @@ hosts tempo and time signature and be fully automated.
 
 VST3.0 is great and all, but support across DAW's is poor (shout out to Bitwig Studio for being awesome). You can however build this plugin as a VST2.4 plugin and enjoy it on a wider range of host platforms. Simply uncomment the following line in _CMakeLists.txt_:
 
-    set(SMTG_CREATE_VST2_VERSION "Use VST2" ON)
+```
+set(SMTG_CREATE_VST2_VERSION "Use VST2" ON)
+```
 
 And rename the plugin extension from _.vst3_ to _.vst_.
 
 Note: at the moment of writing there is an issue in SDK 3.6.9 where the VST2 plugin wrapper isn't working correctly on macOS. To correct this, add the following line to _"VST3_SDK/public.sdk/source/main/macexport.exp"_ :
 
-    _VSTPluginMain
+```
+_VSTPluginMain
+```
 
 ## Compiling for both 32-bit and 64-bit architectures:
 
@@ -53,12 +57,14 @@ The project has been developed against the VST 3.6.9 Audio Plug-Ins SDK on macOS
 Additionally, the Steinberg VST sources need to be built as well. Following
 Steinbergs guidelines, the target is a _/build_-subfolder of the _/VST3_SDK_-folder, execute the following commands from the Steinberg VST SDK root:
 
-    ./copy_vst2_to_vst3_sdk.sh
-    cd VST3_SDK
-    mkdir build
-    cd build
-    cmake ..
-    cmake --build .
+```
+./copy_vst2_to_vst3_sdk.sh
+cd VST3_SDK
+mkdir build
+cd build
+cmake ..
+cmake --build .
+```
 
 The result being that in _{VSTSDK_PATH}/VST3_SDK/build/lib_ all Steinberg VST libraries are prebuilt. Windows users need to append _--config Release_ to the last cmake (build) call.
 
@@ -69,21 +75,25 @@ as well as copied to your systems VST-plugin folder.
 
 #### Compiling on Unix systems:
 
-    mkdir build
-    cd build
-    cmake ..
-    make .
+```
+mkdir build
+cd build
+cmake ..
+make .
+```
 
 #### Compiling on Windows:
 
 Assuming the Visual Studio Build Tools have been installed:
 
-    mkdir build
-    cd build
-    cmake.exe -G"Visual Studio 15 2017 Win64" ..
-    cmake.exe --build .
+```
+mkdir build
+cd build
+cmake.exe -G"Visual Studio 15 2017 Win64" ..
+cmake.exe --build .
+```
 
-## Running the plugin
+### Running the plugin
 
 You can copy the build output into your system VST(3) folder and run it directly in a
 VST host / DAW of your choice.
@@ -93,3 +103,23 @@ and editor host utilities:
 
     {VSTSDK_PATH}/build/bin/validator  build/VST3/regrader.vst3
     {VSTSDK_PATH}/build/bin/editorhost build/VST3/regrader.vst3
+
+### Build as Audio Unit (macOS only)
+
+This requires:
+
+* Building the AUWrapper Project in the Steinberg SDK folder
+* Creating a Release build of the Xcode project generated in step 1, this creates _VST3_SDK/public.sdk/source/vst/auwrapper/build/lib/Release/libauwrapper.a_
+* In the root of this repository: Ensuring _CMakeLists.txt_ is configured for a VST3 build
+* Running _sh build_au.sh_ running from the repository root.
+
+The subsequent Audio Unit component will be located in _./auwrapper/build/VST3/regrader_au.component_ as well as linked
+in _~/Library/Audio/Plug-Ins/Components/_
+
+```
+/System/Library/Frameworks/AudioToolbox.framework/AudioComponentRegistrar
+```
+
+You can validate the Audio Unit using Apple's _auval_ utility, by running _auval -s aufx dely IGOR_ on the command line. Note that there
+is the curious behaviour that you might need to reboot before the plugin shows up, though you can force a flush of the Audio Unit
+cache at runtime by running _killall -9 AudioComponentRegistrar_.
