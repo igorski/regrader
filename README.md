@@ -24,8 +24,7 @@ _VSTPluginMain
 
 ## Compiling for both 32-bit and 64-bit architectures:
 
-Depending on your host software having 32-bit or 64-bit support, you can best compile for a
-wider range of architectures, to do so replace all invocations of _cmake_ in this README with the following:
+Depending on your host software having 32-bit or 64-bit support, you can best compile for a wider range of architectures, to do so replace all invocations of _cmake_ in this README with the following:
 
 macOS:
 ```
@@ -42,24 +41,15 @@ cmake.exe -G"Visual Studio 15 2017 Win32" ..
 
 ### Environment setup
 
-The project uses [CMake](https://cmake.org) to generate the build system
-after which you can use _make_ to build the application.
+The project uses [CMake](https://cmake.org) to generate the build system after which you can use _make_ to build the application.
 
-Apart from requiring _CMake_ and a _g++_ compiler, the only other dependency is
-the [VST SDK from Steinberg](https://www.steinberg.net/en/company/developers.html).
-You can either update _CMakeLists.txt_ to point to the root of the Steinberg SDK installation
-location (update _"VST3_SDK_ROOT"_) or call the CMake command specifying the value at runtime, like so:
-
-```
-cmake -DVST3_SDK_ROOT=/path/to/VST_SDK/VST3_SDK/ ..
-```
+Apart from requiring _CMake_ and a _g++_ compiler, the only other dependency is the [VST SDK from Steinberg](https://www.steinberg.net/en/company/developers.html).
 
 ## Generating the Makefiles
 
-The project has been developed against the VST 3.6.9 Audio Plug-Ins SDK on macOS and Windows 10 and should work completely via CLI without requiring either XCode or Visual Studio (for both command line/build tools suffice). Linux build system is provided, but is as yet untested.
+The project has been developed against the VST 3.6.9 Audio Plug-Ins SDK on macOS and Windows 10 and should work completely via CLI without requiring either Xcode or Visual Studio (for both command line/build tools suffice). A Linux build system is provided, but is as yet untested.
 
-Additionally, the Steinberg VST sources need to be built as well. Following
-Steinbergs guidelines, the target is a _/build_-subfolder of the _/VST3_SDK_-folder, execute the following commands from the Steinberg VST SDK root:
+Additionally, the Steinberg VST sources need to be built as well. Following Steinbergs guidelines, the target is a _/build_-subfolder of the _/VST3_SDK_-folder. Simply execute the following commands from the Steinberg VST SDK root:
 
 ```
 ./copy_vst2_to_vst3_sdk.sh
@@ -74,15 +64,20 @@ The result being that in _{VST3_SDK_ROOT}/VST3_SDK/build/lib_ all Steinberg VST 
 
 ### Building the Regrader plugin
 
-Run CMake to generate Regrader's Makefile for your environment, after which you can compile the plugin using make. The build output will be stored in _./build/VST3/regrader.vst_
-as well as copied to your systems VST-plugin folder.
+Run CMake to generate Regrader's Makefile for your environment, after which you can compile the plugin using make. The build output will be stored in _./build/VST3/regrader.vst_ as well as copied to your systems VST-plugin folder.
+
+You must provide the path to your custom SDK download location by providing _VST3_SDK_ROOT_ to CMake like so:
+
+```
+cmake -DVST3_SDK_ROOT=/path/to/VST_SDK/VST3_SDK/ ..
+```
 
 #### Compiling on Unix systems:
 
 ```
 mkdir build
 cd build
-cmake ..
+cmake -DVST3_SDK_ROOT=/path/to/VST_SDK/VST3_SDK/ ..
 make .
 ```
 
@@ -93,17 +88,15 @@ Assuming the Visual Studio Build Tools have been installed:
 ```
 mkdir build
 cd build
-cmake.exe -G"Visual Studio 15 2017 Win64" ..
+cmake.exe -G"Visual Studio 15 2017 Win64" -DVST3_SDK_ROOT=/path/to/VST_SDK/VST3_SDK/ ..
 cmake.exe --build .
 ```
 
 ### Running the plugin
 
-You can copy the build output into your system VST(3) folder and run it directly in a
-VST host / DAW of your choice.
+You can copy the build output into your system VST(3) folder and run it directly in a VST host / DAW of your choice.
 
-When debugging, you can also choose to run the plugin against Steinbergs validator
-and editor host utilities:
+When debugging, you can also choose to run the plugin against Steinbergs validator and editor host utilities:
 
     {VST3_SDK_ROOT}/build/bin/validator  build/VST3/regrader.vst3
     {VST3_SDK_ROOT}/build/bin/editorhost build/VST3/regrader.vst3
@@ -123,6 +116,4 @@ VST3_SDK_ROOT=/path/to/VST_SDK/VST3_SDK sh build_au.sh
 The subsequent Audio Unit component will be located in _./build/VST3/regrader_au.component_ as well as linked
 in _~/Library/Audio/Plug-Ins/Components/_
 
-You can validate the Audio Unit using Apple's _auval_ utility, by running _auval -v aufx dely IGOR_ on the command line. Note that there
-is the curious behaviour that you might need to reboot before the plugin shows up, though you can force a flush of the Audio Unit
-cache at runtime by running _killall -9 AudioComponentRegistrar_.
+You can validate the Audio Unit using Apple's _auval_ utility, by running _auval -v aufx dely IGOR_ on the command line. Note that there is the curious behaviour that you might need to reboot before the plugin shows up, though you can force a flush of the Audio Unit cache at runtime by running _killall -9 AudioComponentRegistrar_.
