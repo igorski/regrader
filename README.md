@@ -47,8 +47,12 @@ after which you can use _make_ to build the application.
 
 Apart from requiring _CMake_ and a _g++_ compiler, the only other dependency is
 the [VST SDK from Steinberg](https://www.steinberg.net/en/company/developers.html).
-Update _CMakeLists.txt_ to point to the root of the Steinberg SDK installation
-location (update _"VSTSDK_PATH"_).
+You can either update _CMakeLists.txt_ to point to the root of the Steinberg SDK installation
+location (update _"VST3_SDK_ROOT"_) or call the CMake command specifying the value at runtime, like so:
+
+```
+cmake -DVST3_SDK_ROOT=/path/to/VST_SDK/VST3_SDK/ ..
+```
 
 ## Generating the Makefiles
 
@@ -66,7 +70,7 @@ cmake ..
 cmake --build .
 ```
 
-The result being that in _{VSTSDK_PATH}/VST3_SDK/build/lib_ all Steinberg VST libraries are prebuilt. Windows users need to append _--config Release_ to the last cmake (build) call.
+The result being that in _{VST3_SDK_ROOT}/VST3_SDK/build/lib_ all Steinberg VST libraries are prebuilt. Windows users need to append _--config Release_ to the last cmake (build) call.
 
 ### Building the Regrader plugin
 
@@ -101,25 +105,24 @@ VST host / DAW of your choice.
 When debugging, you can also choose to run the plugin against Steinbergs validator
 and editor host utilities:
 
-    {VSTSDK_PATH}/build/bin/validator  build/VST3/regrader.vst3
-    {VSTSDK_PATH}/build/bin/editorhost build/VST3/regrader.vst3
+    {VST3_SDK_ROOT}/build/bin/validator  build/VST3/regrader.vst3
+    {VST3_SDK_ROOT}/build/bin/editorhost build/VST3/regrader.vst3
 
 ### Build as Audio Unit (macOS only)
 
-This requires:
+Is aided by the excellent [Jamba framework](https://github.com/pongasoft/jamba) by Pongasoft, which wraps around Steinbergs SDK. Execute the following instructions to build Regrader as an Audio Unit:
 
-* Building the AUWrapper Project in the Steinberg SDK folder
-* Creating a Release build of the Xcode project generated in step 1, this creates _VST3_SDK/public.sdk/source/vst/auwrapper/build/lib/Release/libauwrapper.a_
-* In the root of this repository: Ensuring _CMakeLists.txt_ is configured for a VST3 build
-* Running _sh build_au.sh_ running from the repository root.
+* Build the AUWrapper Project in the Steinberg SDK folder
+* Create a Release build of the Xcode project generated in step 1, this creates _VST3_SDK/public.sdk/source/vst/auwrapper/build/lib/Release/libauwrapper.a_
+* Run _sh build_au.sh_ from the repository root, providing the path to _VST3_SDK_ROOT_ as before:
 
-The subsequent Audio Unit component will be located in _./auwrapper/build/VST3/regrader_au.component_ as well as linked
+```
+VST3_SDK_ROOT=/path/to/VST_SDK/VST3_SDK sh build_au.sh
+```
+
+The subsequent Audio Unit component will be located in _./build/VST3/regrader_au.component_ as well as linked
 in _~/Library/Audio/Plug-Ins/Components/_
 
-```
-/System/Library/Frameworks/AudioToolbox.framework/AudioComponentRegistrar
-```
-
-You can validate the Audio Unit using Apple's _auval_ utility, by running _auval -s aufx dely IGOR_ on the command line. Note that there
+You can validate the Audio Unit using Apple's _auval_ utility, by running _auval -v aufx dely IGOR_ on the command line. Note that there
 is the curious behaviour that you might need to reboot before the plugin shows up, though you can force a flush of the Audio Unit
 cache at runtime by running _killall -9 AudioComponentRegistrar_.

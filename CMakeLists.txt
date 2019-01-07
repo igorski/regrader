@@ -2,13 +2,20 @@
 # CMake Project for REGRADER Plugin #
 #####################################
 
-project(REGRADER)
-cmake_minimum_required(VERSION 3.0.0)
-set(CMAKE_COLOR_MAKEFILE ON)
-set(CMAKE_CXX_STANDARD 11)
+# uncomment to build as VST2.4 instead of VST3.0 (provides wider DAW compatibility)
+#set(SMTG_CREATE_VST2_VERSION "Use VST2" ON)
 
-# path to Steinberg VST3 SDK
-set(VSTSDK_PATH "/Library/VST_SDK/VST3_SDK" CACHE PATH "Path to VST3 SDK")
+# uncomment to build Audio Unit (requires macOS and Xcode)
+#option(JAMBA_ENABLE_AUDIO_UNIT "Enable Audio Unit" ON)
+
+#######################
+# DO NOT CHANGE BELOW #
+#######################
+
+project(REGRADER)
+cmake_minimum_required(VERSION 3.12)
+set(CMAKE_COLOR_MAKEFILE ON)
+set(CMAKE_CXX_STANDARD 14)
 
 # compiler flags
 add_definitions(-DNDEBUG)
@@ -45,7 +52,7 @@ endif()
 # Includes
 #-------------------------------------------------------------------------------
 
-list(APPEND CMAKE_MODULE_PATH "${VSTSDK_PATH}/cmake/modules")
+list(APPEND CMAKE_MODULE_PATH "${VST3_SDK_ROOT}/cmake/modules")
 
 include(Global)
 include(AddVST3Library)
@@ -64,32 +71,29 @@ include(AddVST3Options)
 # VST sources #
 ###############
 
-# uncomment to build as VST2.4 instead of VST3.0 (provides wider DAW compatibility)
-#set(SMTG_CREATE_VST2_VERSION "Use VST2" ON)
-
-set(VSTSDK_INCLUDE_DIR ${VSTSDK_PATH})
+set(VSTSDK_INCLUDE_DIR ${VST3_SDK_ROOT})
 set(VSTSDK_PLUGIN_SOURCE
-  ${VSTSDK_PATH}/public.sdk/source/vst/vstaudioeffect.cpp
-  ${VSTSDK_PATH}/public.sdk/source/vst/vstaudioprocessoralgo.h
-  ${VSTSDK_PATH}/public.sdk/source/vst/vsteditcontroller.h
-  ${VSTSDK_PATH}/pluginterfaces/base/ibstream.h
-  ${VSTSDK_PATH}/pluginterfaces/base/ustring.h
-  ${VSTSDK_PATH}/pluginterfaces/vst/ivstevents.h
-  ${VSTSDK_PATH}/pluginterfaces/vst/ivstparameterchanges.h
-  ${VSTSDK_PATH}/pluginterfaces/vst/vstpresetkeys.h
+  ${VST3_SDK_ROOT}/public.sdk/source/vst/vstaudioeffect.cpp
+  ${VST3_SDK_ROOT}/public.sdk/source/vst/vstaudioprocessoralgo.h
+  ${VST3_SDK_ROOT}/public.sdk/source/vst/vsteditcontroller.h
+  ${VST3_SDK_ROOT}/pluginterfaces/base/ibstream.h
+  ${VST3_SDK_ROOT}/pluginterfaces/base/ustring.h
+  ${VST3_SDK_ROOT}/pluginterfaces/vst/ivstevents.h
+  ${VST3_SDK_ROOT}/pluginterfaces/vst/ivstparameterchanges.h
+  ${VST3_SDK_ROOT}/pluginterfaces/vst/vstpresetkeys.h
 )
 
 #if (SMTG_CREATE_VST2_VERSION)
     set(regrader_vst2_sources
-        ${VSTSDK_PATH}/public.sdk/source/common/memorystream.cpp
-        ${VSTSDK_PATH}/public.sdk/source/vst/hosting/eventlist.cpp
-        ${VSTSDK_PATH}/public.sdk/source/vst/hosting/hostclasses.cpp
-        ${VSTSDK_PATH}/public.sdk/source/vst/hosting/parameterchanges.cpp
-        ${VSTSDK_PATH}/public.sdk/source/vst/hosting/processdata.cpp
-        ${VSTSDK_PATH}/public.sdk/source/vst/vst2wrapper/vst2wrapper.cpp
-        ${VSTSDK_PATH}/public.sdk/source/vst/vst2wrapper/vst2wrapper.h
-        ${VSTSDK_PATH}/public.sdk/source/vst2.x/audioeffect.cpp
-        ${VSTSDK_PATH}/public.sdk/source/vst2.x/audioeffectx.cpp
+        ${VST3_SDK_ROOT}/public.sdk/source/common/memorystream.cpp
+        ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/eventlist.cpp
+        ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/hostclasses.cpp
+        ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/parameterchanges.cpp
+        ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/processdata.cpp
+        ${VST3_SDK_ROOT}/public.sdk/source/vst/vst2wrapper/vst2wrapper.cpp
+        ${VST3_SDK_ROOT}/public.sdk/source/vst/vst2wrapper/vst2wrapper.h
+        ${VST3_SDK_ROOT}/public.sdk/source/vst2.x/audioeffect.cpp
+        ${VST3_SDK_ROOT}/public.sdk/source/vst2.x/audioeffectx.cpp
         src/vstentry_vst2.cpp
     )
 #endif()
@@ -135,28 +139,73 @@ if(MAC OR WIN)
 endif()
 
 set(target regrader)
-smtg_add_vst3plugin(${target} ${VSTSDK_PATH} ${regrader_sources})
+
+##############
+# Audio Unit #
+##############
+
+if (JAMBA_ENABLE_AUDIO_UNIT)
+    # To disable download/update, you can set those 2 variables to local folders
+    unset(JAMBA_ROOT_DIR)
+    #set(JAMBA_ROOT_DIR pongasoft/jamba)
+    unset(GOOGLETEST_ROOT_DIR)
+    #set(GOOGLETEST_ROOT_DIR google/googletest)
+
+    include(jamba.cmake)
+
+    set(CPP_SOURCES src)
+
+    configure_file(${CPP_SOURCES}/version.h ${CMAKE_BINARY_DIR}/generated/version.h)
+    include_directories(${CMAKE_BINARY_DIR}/generated/)
+
+    jamba_add_vst3plugin(${target} "${regrader_sources}")
+    target_include_directories(${target} PUBLIC ${VST3_SDK_ROOT}/vstgui4)
+    target_link_libraries(${target} PRIVATE base sdk vstgui_support jamba)
+
+    ###################################################
+    # Resources - add your resources here...
+    ###################################################
+
+    jamba_add_vst3_resource(${target} DATA "regrader.uidesc")
+    jamba_add_vst3_resource(${target} PNG "background.png")
+    jamba_add_vst3_resource(${target} PNG "slider_background.png")
+    jamba_add_vst3_resource(${target} PNG "slider_handle.png")
+    jamba_add_vst3_resource(${target} PNG "slider_handle_2.0x.png")
+
+    # this must be called after you are done calling jamba_add_vst3_resource for all resources
+    jamba_gen_vst3_resources(${target} "Regrader")
+
+    ###################################################
+    # Create archive (.tgz)
+    ###################################################
+#    jamba_create_archive(${target} RegraderAU)
+
+    jamba_dev_scripts(${target})
+
+else()
 
 ###########################
 # STEINBERG VST LIBRARIES #
 ###########################
 
+smtg_add_vst3plugin(${target} ${VST3_SDK_ROOT} ${regrader_sources})
+
 include_directories(${VSTSDK_INCLUDE_DIR})
 target_link_libraries(${target} ${VSTSDK_LIBRARIES})
-target_include_directories(${target} PUBLIC ${VSTSDK_PATH}/vstgui4)
+target_include_directories(${target} PUBLIC ${VST3_SDK_ROOT}/vstgui4)
 if (UNIX)
-	target_link_libraries(${target} PRIVATE ${VSTSDK_PATH}/build/lib/libbase.a)
-	target_link_libraries(${target} PRIVATE ${VSTSDK_PATH}/build/lib/libsdk.a)
-	target_link_libraries(${target} PRIVATE ${VSTSDK_PATH}/build/lib/libvstgui_support.a)
-	target_link_libraries(${target} PRIVATE ${VSTSDK_PATH}/build/lib/libvstgui_uidescription.a)
-	target_link_libraries(${target} PRIVATE ${VSTSDK_PATH}/build/lib/libvstgui.a)
+	target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/libbase.a)
+	target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/libsdk.a)
+	target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/libvstgui_support.a)
+	target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/libvstgui_uidescription.a)
+	target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/libvstgui.a)
 endif()
 if (WIN)
-    target_link_libraries(${target} PRIVATE ${VSTSDK_PATH}/build/lib/Release/base.lib)
-    target_link_libraries(${target} PRIVATE ${VSTSDK_PATH}/build/lib/Release/sdk.lib)
-    target_link_libraries(${target} PRIVATE ${VSTSDK_PATH}/build/lib/Release/vstgui_support.lib)
-    target_link_libraries(${target} PRIVATE ${VSTSDK_PATH}/build/lib/Release/vstgui_uidescription.lib)
-    target_link_libraries(${target} PRIVATE ${VSTSDK_PATH}/build/lib/Release/vstgui.lib)
+    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/base.lib)
+    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/sdk.lib)
+    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/vstgui_support.lib)
+    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/vstgui_uidescription.lib)
+    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/vstgui.lib)
 endif()
 
 ###############################
@@ -182,11 +231,11 @@ ENDIF (APPLE)
 # Resources #
 #############
 
-smtg_add_vst3_resource(${target} "resources/graphics/regrader.uidesc")
-smtg_add_vst3_resource(${target} "resources/graphics/background.png")
-smtg_add_vst3_resource(${target} "resources/graphics/slider_background.png")
-smtg_add_vst3_resource(${target} "resources/graphics/slider_handle.png")
-smtg_add_vst3_resource(${target} "resources/graphics/slider_handle_2.0x.png")
+smtg_add_vst3_resource(${target} "resource/regrader.uidesc")
+smtg_add_vst3_resource(${target} "resource/background.png")
+smtg_add_vst3_resource(${target} "resource/slider_background.png")
+smtg_add_vst3_resource(${target} "resource/slider_handle.png")
+smtg_add_vst3_resource(${target} "resource/slider_handle_2.0x.png")
 
 #########################
 # Set bundle properties #
@@ -196,7 +245,7 @@ set_target_properties(regrader PROPERTIES
   BUNDLE true
   BUNDLE_EXTENSION "vst3"
   XCODE_ATTRIBUTE_WRAPPER_EXTENSION "vst3"
-  MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/resources/osx/Info.plist"
+  MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/mac/Info.plist"
   MACOSX_BUNDLE_BUNDLE_NAME "Regrader"
   MACOSX_BUNDLE_GUI_IDENTIFIER "nl.igorski.regrader"
   MACOSX_BUNDLE_ICON_FILE ""
@@ -205,9 +254,9 @@ set_target_properties(regrader PROPERTIES
 )
 
 if(MAC)
-    smtg_set_bundle(${target} INFOPLIST "${CMAKE_CURRENT_SOURCE_DIR}/resources/osx/Info.plist" PREPROCESS)
+    smtg_set_bundle(${target} INFOPLIST "${CMAKE_CURRENT_SOURCE_DIR}/mac/Info.plist" PREPROCESS)
 elseif(WIN)
-    target_sources(${target} PRIVATE resources/graphics/regrader.rc)
+    target_sources(${target} PRIVATE resource/regrader.rc)
 endif()
 
 if (SMTG_CREATE_VST2_VERSION)
@@ -219,6 +268,8 @@ if (SMTG_CREATE_VST2_VERSION)
     if (WIN)
         add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     endif()
+endif()
+
 endif()
 
 ####################
