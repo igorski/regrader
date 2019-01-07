@@ -1,8 +1,6 @@
 #ifndef __VERSION_HEADER__
 #define __VERSION_HEADER__
 
-#include "pluginterfaces/base/fplatform.h"
-
 #define MAJOR_VERSION_STR "1"
 #define MAJOR_VERSION_INT 1
 
@@ -23,9 +21,9 @@
 
 #define stringOriginalFilename  "regrader.vst3"
 #if PLATFORM_64
-#define stringFileDescription   "Regrader VST3-SDK (64Bit)"
+#define stringFileDescription   "Regrader plugin (64Bit)"
 #else
-#define stringFileDescription   "Regrader VST3-SDK"
+#define stringFileDescription   "Regrader plugin"
 #endif
 #define stringCompanyName       "igorski.nl\0"
 #define stringLegalCopyright    "� 2018 igorski.nl"

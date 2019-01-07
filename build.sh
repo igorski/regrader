@@ -7,5 +7,10 @@ mkdir build
 cd build
 echo "Building project"
 echo "----------------"
-cmake "-DCMAKE_OSX_ARCHITECTURES=x86_64;i386" ..
+
+if [ -n "${VST3_SDK_ROOT}" ]; then
+  DVST3_SDK_ROOT="-DVST3_SDK_ROOT=${VST3_SDK_ROOT}"
+fi
+
+cmake "-DCMAKE_OSX_ARCHITECTURES=x86_64" ${DVST3_SDK_ROOT} ..
 make
