@@ -8,7 +8,7 @@
 #define kAudioUnitBundleIdentifier	nl.igorski.vst.regrader.audiounit
 
 /* Version Number (needs to be in hex) */
-#define kAudioUnitVersion			0xFFFFFFFF
+#define kAudioUnitVersion			0x00010000
 
 /* Company Name + Effect Name */
 #define kAUPluginName 				igorski: Regrader
