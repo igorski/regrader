@@ -175,18 +175,13 @@ if (JAMBA_ENABLE_AUDIO_UNIT)
     # this must be called after you are done calling jamba_add_vst3_resource for all resources
     jamba_gen_vst3_resources(${target} "Regrader")
 
-    ###################################################
-    # Create archive (.tgz)
-    ###################################################
-#    jamba_create_archive(${target} RegraderAU)
-
     jamba_dev_scripts(${target})
 
 else()
 
-###########################
-# STEINBERG VST LIBRARIES #
-###########################
+#######
+# VST #
+#######
 
 smtg_add_vst3plugin(${target} ${VST3_SDK_ROOT} ${regrader_sources})
 
@@ -208,9 +203,7 @@ if (WIN)
     target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/vstgui.lib)
 endif()
 
-###############################
-# PLATFORM SPECIFIC LIBRARIES #
-###############################
+# macOS specific libraries
 
 IF (APPLE)
     if(XCODE)
@@ -225,33 +218,26 @@ IF (APPLE)
         find_library(EXPAT Expat)
         target_link_libraries(${target} PRIVATE ${COREFOUNDATION_FRAMEWORK} ${COCOA_FRAMEWORK} ${OPENGL_FRAMEWORK} ${ACCELERATE_FRAMEWORK} ${QUARTZCORE_FRAMEWORK} ${CARBON_FRAMEWORK} ${EXPAT})
     endif()
+    set_target_properties(regrader PROPERTIES
+        BUNDLE true
+        BUNDLE_EXTENSION "vst3"
+        XCODE_ATTRIBUTE_WRAPPER_EXTENSION "vst3"
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/mac/Info.plist"
+        MACOSX_BUNDLE_BUNDLE_NAME "Regrader"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "nl.igorski.regrader"
+        MACOSX_BUNDLE_ICON_FILE ""
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0.3"
+        MACOSX_BUNDLE_COPYRIGHT "igorski.nl © 2018"
+    )
 ENDIF (APPLE)
 
-#############
-# Resources #
-#############
+# Resources
 
 smtg_add_vst3_resource(${target} "resource/regrader.uidesc")
 smtg_add_vst3_resource(${target} "resource/background.png")
 smtg_add_vst3_resource(${target} "resource/slider_background.png")
 smtg_add_vst3_resource(${target} "resource/slider_handle.png")
 smtg_add_vst3_resource(${target} "resource/slider_handle_2.0x.png")
-
-#########################
-# Set bundle properties #
-#########################
-
-set_target_properties(regrader PROPERTIES
-  BUNDLE true
-  BUNDLE_EXTENSION "vst3"
-  XCODE_ATTRIBUTE_WRAPPER_EXTENSION "vst3"
-  MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/mac/Info.plist"
-  MACOSX_BUNDLE_BUNDLE_NAME "Regrader"
-  MACOSX_BUNDLE_GUI_IDENTIFIER "nl.igorski.regrader"
-  MACOSX_BUNDLE_ICON_FILE ""
-  MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0.3"
-  MACOSX_BUNDLE_COPYRIGHT "igorski.nl © 2018"
-)
 
 if(MAC)
     smtg_set_bundle(${target} INFOPLIST "${CMAKE_CURRENT_SOURCE_DIR}/mac/Info.plist" PREPROCESS)
@@ -272,9 +258,9 @@ endif()
 
 endif()
 
-####################
-# Set Install Path #
-####################
+######################
+# Installation paths #
+######################
 
 if(APPLE)
   install(TARGETS regrader

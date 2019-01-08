@@ -62,12 +62,15 @@ Regrader::Regrader()
 , fFlangerWidth( 0.f )
 , fFlangerFeedback( 0.f )
 , fFlangerDelay( 0.f )
-, regraderProcess( 0 )
+, regraderProcess( nullptr )
 , outputGainOld( 0.f )
 , currentProcessMode( -1 ) // -1 means not initialized
 {
     // register its editor class (the same as used in vstentry.cpp)
     setControllerClass( VST::RegraderControllerUID );
+
+    // should be created on setupProcessing, this however doesn't fire for Audio Unit using auval?
+    regraderProcess = new RegraderProcess( 2 );
 }
 
 //------------------------------------------------------------------------
@@ -272,7 +275,7 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
     //---3) Process Audio---------------------
     //-------------------------------------
 
-    if ( data.numInputs == 0 || data.numOutputs == 0 || regraderProcess == 0 )
+    if ( data.numInputs == 0 || data.numOutputs == 0 )
     {
         // nothing to do
         return kResultOk;
@@ -593,11 +596,13 @@ tresult PLUGIN_API Regrader::setupProcessing( ProcessSetup& newSetup )
 
     // spotted to fire multiple times...
 
-    if ( regraderProcess != 0 )
+    if ( regraderProcess != nullptr )
         delete regraderProcess;
 
     // TODO: creating a bunch of extra channels for no apparent reason?
+    // get the correct channel amount and don't allocate more than necessary...
     regraderProcess = new RegraderProcess( 6 );
+
     syncModel();
 
     return AudioEffect::setupProcessing( newSetup );

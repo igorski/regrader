@@ -54,12 +54,14 @@ class RegraderProcess {
         );
 
         // set delay time (in milliseconds)
+
         void setDelayTime( float value );
         void setDelayFeedback( float value );
         void setDelayMix( float value );
 
         // synchronize the delays tempo with the host
         // tempo is in BPM, time signature provided as: timeSigNumerator / timeSigDenominator (e.g. 3/4)
+
         void setTempo( double tempo, int32 timeSigNumerator, int32 timeSigDenominator );
 
         BitCrusher* bitCrusher;
