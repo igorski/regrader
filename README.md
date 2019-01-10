@@ -116,7 +116,7 @@ Is aided by the excellent [Jamba framework](https://github.com/pongasoft/jamba) 
 VST3_SDK_ROOT=/path/to/VST_SDK/VST3_SDK sh build_au.sh
 ```
 
-The subsequent Audio Unit component will be located in _./build/VST3/regrader_au.component_ as well as linked
+The subsequent Audio Unit component will be located in _./build/VST3/regrader.component_ as well as linked
 in _~/Library/Audio/Plug-Ins/Components/_
 
 You can validate the Audio Unit using Apple's _auval_ utility, by running _auval -v aufx dely IGOR_ on the command line. Note that there is the curious behaviour that you might need to reboot before the plugin shows up, though you can force a flush of the Audio Unit cache at runtime by running _killall -9 AudioComponentRegistrar_.
