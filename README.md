@@ -26,12 +26,15 @@ _VSTPluginMain
 
 Depending on your host software having 32-bit or 64-bit support, you can best compile for a wider range of architectures, to do so replace all invocations of _cmake_ in this README with the following:
 
-macOS:
+### macOS:
 ```
 cmake "-DCMAKE_OSX_ARCHITECTURES=x86_64;i386" ..
 ```
 
-Windows:
+Note: while i386 is considered deprecated in macOS, though you'd be surprised to find out how many people are
+running a 32-bit version of a DAW in this day and age...
+
+### Windows:
 ```
 cmake.exe -G"Visual Studio 15 2017 Win64" ..
 cmake.exe -G"Visual Studio 15 2017 Win32" ..
@@ -47,16 +50,16 @@ Apart from requiring _CMake_ and a _g++_ compiler, the only other dependency is 
 
 ## Generating the Makefiles
 
-The project has been developed against the VST 3.6.9 Audio Plug-Ins SDK on macOS and Windows 10 and should work completely via CLI without requiring either Xcode or Visual Studio (for both command line/build tools suffice). A Linux build system is provided, but is as yet untested.
+The project has been developed against the [VST3 SDK version 3.6.9](https://download.steinberg.net/sdk_downloads/vstsdk369_01_03_2018_build_132.zip) on macOS and Windows 10 and should work completely via CLI without requiring either Xcode or Visual Studio (for both command line/build tools suffice). Linux build system is provided, but is as yet untested.
 
-Additionally, the Steinberg VST sources need to be built as well. Following Steinbergs guidelines, the target is a _/build_-subfolder of the _/VST3_SDK_-folder. Simply execute the following commands from the Steinberg VST SDK root:
+Additionally, the Steinberg VST sources need to be built as well. Following Steinbergs guidelines, the target is a _/build_-subfolder of the _/VST3_SDK_-folder, execute the following commands from the Steinberg VST SDK root:
 
 ```
 ./copy_vst2_to_vst3_sdk.sh
 cd VST3_SDK
 mkdir build
 cd build
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build .
 ```
 
@@ -103,7 +106,7 @@ When debugging, you can also choose to run the plugin against Steinbergs validat
 
 ### Build as Audio Unit (macOS only)
 
-Is aided by the excellent [Jamba framework](https://github.com/pongasoft/jamba) by Pongasoft, which wraps around Steinbergs SDK. Execute the following instructions to build Regrader as an Audio Unit:
+Is aided by the excellent [Jamba framework](https://github.com/pongasoft/jamba) by Pongasoft, which provides a toolchain around Steinbergs SDK. Execute the following instructions to build Regrader as an Audio Unit:
 
 * Build the AUWrapper Project in the Steinberg SDK folder
 * Create a Release build of the Xcode project generated in step 1, this creates _VST3_SDK/public.sdk/source/vst/auwrapper/build/lib/Release/libauwrapper.a_
