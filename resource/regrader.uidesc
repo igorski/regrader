@@ -241,7 +241,7 @@
         <control-tag name="Unit1::DelayFeedback"         tag="2"/>
         <control-tag name="Unit1::DelayMix"              tag="3"/>
         <control-tag name="Unit1::BitResolution"         tag="4"/>
-        <control-tag name="Unit1::BitResolutionChain"    tag="5"/>
+        <control-tag name="Unit1::BitCrusherChain"       tag="5"/>
         <control-tag name="Unit1::LFOBitResolution"      tag="6"/>
         <control-tag name="Unit1::LFOBitResolutionDepth" tag="7"/>
         <control-tag name="Unit1::Decimator"             tag="8"/>
