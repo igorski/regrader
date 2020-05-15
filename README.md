@@ -16,8 +16,6 @@ set(SMTG_CREATE_VST2_VERSION "Use VST2" ON)
 
 And rename the plugin extension from _.vst3_ to _.vst_.
 
-Note: at the moment of writing there is an issue in SDK 3.6.9 where the VST2 plugin wrapper isn't working correctly on macOS. To correct this, add the following line to _"VST3_SDK/public.sdk/source/main/macexport.exp"_ :
-
 ```
 _VSTPluginMain
 ```
@@ -50,7 +48,7 @@ Apart from requiring _CMake_ and a _g++_ compiler, the only other dependency is 
 
 ## Generating the Makefiles
 
-The project has been developed against the [VST3 SDK version 3.6.9](https://download.steinberg.net/sdk_downloads/vstsdk369_01_03_2018_build_132.zip) on macOS and Windows 10 and should work completely via CLI without requiring either Xcode or Visual Studio (for both command line/build tools suffice). Linux build system is provided, but is as yet untested.
+The project has been developed against the [VST3 SDK version 3.6.14](https://www.steinberg.net/vst3sdk) on macOS and Windows 10 and should work completely via CLI without requiring either Xcode or Visual Studio (for both command line/build tools suffice). Linux build system is provided, but is as yet untested.
 
 Additionally, the Steinberg VST sources need to be built as well. Following Steinbergs guidelines, the target is a _/build_-subfolder of the _/VST3_SDK_-folder, execute the following commands from the Steinberg VST SDK root:
 

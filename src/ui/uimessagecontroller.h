@@ -34,7 +34,7 @@ namespace Vst {
 // RegraderUIMessageController
 //------------------------------------------------------------------------
 template <typename ControllerType>
-class RegraderUIMessageController : public VSTGUI::IController, public VSTGUI::IViewListenerAdapter
+class RegraderUIMessageController : public VSTGUI::IController, public VSTGUI::ViewListenerAdapter
 {
     public:
         enum Tags

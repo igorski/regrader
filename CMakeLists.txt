@@ -183,25 +183,29 @@ else()
 # VST #
 #######
 
-smtg_add_vst3plugin(${target} ${VST3_SDK_ROOT} ${regrader_sources})
+smtg_add_vst3plugin(${target} ${regrader_sources})
 
 include_directories(${VSTSDK_INCLUDE_DIR})
 target_link_libraries(${target} ${VSTSDK_LIBRARIES})
 target_include_directories(${target} PUBLIC ${VST3_SDK_ROOT}/vstgui4)
+
 if (UNIX)
-    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/libbase.a)
-    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/libsdk.a)
-    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/libvstgui_support.a)
-    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/libvstgui_uidescription.a)
-    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/libvstgui.a)
+    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/libbase.a)
+    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/libpluginterfaces.a)
+    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/libsdk.a)
+    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/libvstgui_support.a)
+    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/libvstgui_uidescription.a)
+    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/libvstgui.a)
 endif()
 if (WIN)
     target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/base.lib)
+    target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/pluginterfaces.lib)
     target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/sdk.lib)
     target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/vstgui_support.lib)
     target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/vstgui_uidescription.lib)
     target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/vstgui.lib)
 endif()
+
 
 # macOS specific libraries
 
@@ -218,6 +222,12 @@ IF (APPLE)
         find_library(EXPAT Expat)
         target_link_libraries(${target} PRIVATE ${COREFOUNDATION_FRAMEWORK} ${COCOA_FRAMEWORK} ${OPENGL_FRAMEWORK} ${ACCELERATE_FRAMEWORK} ${QUARTZCORE_FRAMEWORK} ${CARBON_FRAMEWORK} ${EXPAT})
     endif()
+    target_sources(${target} PRIVATE
+        ${VSTGUI_ROOT}/vstgui4/vstgui/vstgui_uidescription.cpp
+        ${VSTGUI_ROOT}/vstgui4/vstgui/vstgui_ios.mm
+        ${VSTGUI_ROOT}/vstgui4/vstgui/plugin-bindings/vst3editor.cpp
+        ${SDK_ROOT}/public.sdk/source/vst/vstguieditor.cpp
+    )
     set_target_properties(regrader PROPERTIES
         BUNDLE true
         BUNDLE_EXTENSION "vst3"
