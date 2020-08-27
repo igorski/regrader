@@ -144,11 +144,25 @@ set(target regrader)
 ##############
 
 if (JAMBA_ENABLE_AUDIO_UNIT)
-    # To disable download/update, you can set those 2 variables to local folders
-    unset(JAMBA_ROOT_DIR)
-    #set(JAMBA_ROOT_DIR pongasoft/jamba)
-    unset(GOOGLETEST_ROOT_DIR)
-    #set(GOOGLETEST_ROOT_DIR google/googletest)
+    set(JAMBA_TEST_CASES_DIR "${JAMBA_ROOT}/test/cpp")
+    set(JAMBA_TEST_CASES_SOURCES
+        ${JAMBA_TEST_CASES_DIR}/pongasoft/Utils/Collection/test-CircularBuffer.cpp
+        ${JAMBA_TEST_CASES_DIR}/pongasoft/Utils/Concurrent/test-concurrent.cpp
+        ${JAMBA_TEST_CASES_DIR}/pongasoft/Utils/Concurrent/test-concurrent_lockfree.cpp
+        ${JAMBA_TEST_CASES_DIR}/pongasoft/Utils/test-Lerp.cpp
+        ${JAMBA_TEST_CASES_DIR}/pongasoft/Utils/test-StringUtils.cpp
+        ${JAMBA_TEST_CASES_DIR}/pongasoft/VST/GUI/Params/test-GUIParameters.cpp
+        ${JAMBA_TEST_CASES_DIR}/pongasoft/VST/GUI/Params/test-ParamAware.cpp
+        ${JAMBA_TEST_CASES_DIR}/pongasoft/VST/GUI/Views/test-CustomViewCreator.cpp
+        ${JAMBA_TEST_CASES_DIR}/pongasoft/VST/GUI/Views/test-SelfContainedViewListener.cpp
+        ${JAMBA_TEST_CASES_DIR}/pongasoft/VST/test-AudioBuffers.cpp
+        ${JAMBA_TEST_CASES_DIR}/pongasoft/VST/test-AudioUtils.cpp
+        ${JAMBA_TEST_CASES_DIR}/pongasoft/VST/test-ParamConverters.cpp
+        ${JAMBA_TEST_CASES_DIR}/pongasoft/VST/test-SampleRateBasedClock.cpp
+        ${JAMBA_TEST_CASES_DIR}/pongasoft/VST/Utils/test-Utils.cpp
+        ${JAMBA_TEST_CASES_DIR}/pongasoft/VST/Utils/test-FastWriteMemoryStream.cpp
+        ${JAMBA_TEST_CASES_DIR}/pongasoft/VST/Utils/test-ReadOnlyMemoryStream.cpp
+    )
 
     include(jamba.cmake)
 
@@ -171,7 +185,8 @@ if (JAMBA_ENABLE_AUDIO_UNIT)
         VST_SOURCES         "${regrader_sources}"
         UIDESC              "resource/regrader.uidesc"
         RESOURCES           "${vst_resources}"
-        TEST_CASE_SOURCES   ""
+        TEST_CASE_SOURCES   "${JAMBA_TEST_CASES_SOURCES}"
+        TEST_LINK_LIBRARIES "jamba"
     )
 
 else()
