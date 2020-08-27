@@ -2,7 +2,10 @@
 
 Regrader is a VST2/3/AU plug-in which provides a delay effect in which the repeats degrade in
 various ways to provide a nice twist on the ears. The delays repeats can be synced to the
-hosts tempo and time signature and be fully automated.
+host tempo and time signature and be fully automated.
+
+For inspiration, it is used pretty much all over the [Imago](https://songwhip.com/drosophelia/imago) album by Drosophelia or
+[read what others say](https://bedroomproducersblog.com/2018/06/08/free-regrader-lo-fi-delay/).
 
 ## On compatibility
 
@@ -29,8 +32,7 @@ Depending on your host software having 32-bit or 64-bit support, you can best co
 cmake "-DCMAKE_OSX_ARCHITECTURES=x86_64;i386" ..
 ```
 
-Note: while i386 is considered deprecated in macOS, though you'd be surprised to find out how many people are
-running a 32-bit version of a DAW in this day and age...
+Note: while i386 is considered deprecated in macOS, you'd be surprised to find out how many people are running a 32-bit version of a DAW in this day and age...
 
 ### Windows:
 ```
@@ -48,7 +50,7 @@ Apart from requiring _CMake_ and a _g++_ compiler, the only other dependency is 
 
 ## Generating the Makefiles
 
-The project has been developed against the [VST3 SDK version 3.6.14](https://www.steinberg.net/vst3sdk) on macOS and Windows 10 and should work completely via CLI without requiring either Xcode or Visual Studio (for both command line/build tools suffice). Linux build system is provided, but is as yet untested.
+The project has been developed against the [VST3 SDK version 3.7.0](https://www.steinberg.net/vst3sdk) on macOS and Windows 10 and should work completely via CLI without requiring either Xcode or Visual Studio (for both command line/build tools suffice). Linux build system is provided, but is as yet untested.
 
 Additionally, the Steinberg VST sources need to be built as well. Following Steinbergs guidelines, the target is a _/build_-subfolder of the _/VST3_SDK_-folder, execute the following commands from the Steinberg VST SDK root:
 
