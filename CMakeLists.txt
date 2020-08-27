@@ -24,6 +24,8 @@ if(MSVC)
     add_definitions(/D _CRT_SECURE_NO_WARNINGS)
 endif()
 
+set(VST3_SDK_ROOT "/Library/VST_SDK/VST3_SDK")
+
 ###############
 # Unix builds #
 ###############
@@ -40,6 +42,7 @@ if(UNIX)
        set(CMAKE_OSX_SYSROOT macosx10.10)
        set(CMAKE_OSX_DEPLOYMENT_TARGET "10.10")
     else()
+        set(LINUX true)
         add_definitions( -D__cdecl= )
         set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wno-multichar")
@@ -240,9 +243,40 @@ endif()
 
 # Steinberg SDK
 
+if (LINUX)
+    target_sources (${target} PRIVATE
+	${VST3_SDK_ROOT}/public.sdk/source/main/linuxmain.cpp
+	${VST3_SDK_ROOT}/vstgui4/vstgui/plugin-bindings/vst3editor.cpp
+    )
+    set(VSTGUI_LTO_COMPILER_FLAGS "-O3 -flto")
+    set(VSTGUI_LTO_LINKER_FLAGS "")
+    find_package(X11 REQUIRED)
+    find_package(Freetype REQUIRED)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(LIBXCB REQUIRED xcb)
+    pkg_check_modules(LIBXCB_UTIL REQUIRED xcb-util)
+    pkg_check_modules(LIBXCB_CURSOR REQUIRED xcb-cursor)
+    pkg_check_modules(LIBXCB_KEYSYMS REQUIRED xcb-keysyms)
+    pkg_check_modules(LIBXCB_XKB REQUIRED xcb-xkb)
+    pkg_check_modules(LIBXKB_COMMON REQUIRED xkbcommon)
+    pkg_check_modules(LIBXKB_COMMON_X11 REQUIRED xkbcommon-x11)
+    set(LINUX_LIBRARIES
+        ${X11_LIBRARIES}
+        ${FREETYPE_LIBRARIES}
+        ${LIBXCB_LIBRARIES}
+        ${LIBXCB_UTIL_LIBRARIES}
+        ${LIBXCB_CURSOR_LIBRARIES}
+        ${LIBXCB_KEYSYMS_LIBRARIES}
+        ${LIBXCB_XKB_LIBRARIES}
+        ${LIBXKB_COMMON_LIBRARIES}
+        ${LIBXKB_COMMON_X11_LIBRARIES}
+        cairo
+        fontconfig
+        dl
+    )
+    target_link_libraries(${target} PRIVATE ${LINUX_LIBRARIES}) 
+endif()
 target_include_directories(${target} PUBLIC ${VST3_SDK_ROOT}/vstgui4)
-target_link_libraries(${target} PRIVATE ${VSTSDK_LIBRARIES})
-#target_link_libraries(${target} PRIVATE base sdk vstgui_support)
 
 # Resources
 
