@@ -11,7 +11,7 @@
 #define RELEASE_NUMBER_INT 1
 
 #define BUILD_NUMBER_STR "3" // Build number to be sure that each result could identified.
-#define BUILD_NUMBER_INT 3
+#define BUILD_NUMBER_INT 4
 
 // Version with build number (example "1.0.3.342")
 #define FULL_VERSION_STR MAJOR_VERSION_STR "." SUB_VERSION_STR "." RELEASE_NUMBER_STR "." BUILD_NUMBER_STR

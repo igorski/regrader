@@ -3,10 +3,10 @@
 #####################################
 
 # uncomment to build as VST2.4 instead of VST3.0 (provides wider DAW compatibility)
-#set(SMTG_CREATE_VST2_VERSION "Use VST2" ON)
-
-# uncomment to build Audio Unit (requires macOS and Xcode)
-#option(JAMBA_ENABLE_AUDIO_UNIT "Enable Audio Unit" ON)
+# note VST2 is only defined for macOS and Windows
+if(SMTG_MAC OR SMTG_WIN)
+    #set(SMTG_CREATE_VST2_VERSION "Use VST2" ON)
+endif()
 
 #######################
 # DO NOT CHANGE BELOW #
@@ -133,7 +133,6 @@ set(regrader_sources
     ${VSTSDK_PLUGIN_SOURCE}
 )
 
-# VST2 is only defined for macOS and Windows
 if(MAC OR WIN)
     set(regrader_sources ${regrader_sources} ${regrader_vst2_sources})
 endif()
@@ -158,24 +157,22 @@ if (JAMBA_ENABLE_AUDIO_UNIT)
     configure_file(${CPP_SOURCES}/version.h ${CMAKE_BINARY_DIR}/generated/version.h)
     include_directories(${CMAKE_BINARY_DIR}/generated/)
 
-    jamba_add_vst3plugin(${target} "${regrader_sources}")
-    target_include_directories(${target} PUBLIC ${VST3_SDK_ROOT}/vstgui4)
-    target_link_libraries(${target} PRIVATE base sdk vstgui_support jamba)
+    set(vst_resources
+        "resource/background.png"
+        "resource/slider_background.png"
+        "resource/slider_handle.png"
+        "resource/slider_handle_2.0x.png"
+    )
 
-    ###################################################
-    # Resources - add your resources here...
-    ###################################################
-
-    jamba_add_vst3_resource(${target} DATA "regrader.uidesc")
-    jamba_add_vst3_resource(${target} PNG "background.png")
-    jamba_add_vst3_resource(${target} PNG "slider_background.png")
-    jamba_add_vst3_resource(${target} PNG "slider_handle.png")
-    jamba_add_vst3_resource(${target} PNG "slider_handle_2.0x.png")
-
-    # this must be called after you are done calling jamba_add_vst3_resource for all resources
-    jamba_gen_vst3_resources(${target} "Regrader")
-
-    jamba_dev_scripts(${target})
+    jamba_add_vst_plugin(
+        TARGET              "${target}"
+        RELEASE_FILENAME    "${target}.component"
+        TARGETS_PREFIX      "jmb_"
+        VST_SOURCES         "${regrader_sources}"
+        UIDESC              "resource/regrader.uidesc"
+        RESOURCES           "${vst_resources}"
+        TEST_CASE_SOURCES   ""
+    )
 
 else()
 
@@ -186,8 +183,6 @@ else()
 smtg_add_vst3plugin(${target} ${regrader_sources})
 
 include_directories(${VSTSDK_INCLUDE_DIR})
-target_link_libraries(${target} ${VSTSDK_LIBRARIES})
-target_include_directories(${target} PUBLIC ${VST3_SDK_ROOT}/vstgui4)
 
 if (UNIX)
     target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/libbase.a)
@@ -222,12 +217,14 @@ IF (APPLE)
         find_library(EXPAT Expat)
         target_link_libraries(${target} PRIVATE ${COREFOUNDATION_FRAMEWORK} ${COCOA_FRAMEWORK} ${OPENGL_FRAMEWORK} ${ACCELERATE_FRAMEWORK} ${QUARTZCORE_FRAMEWORK} ${CARBON_FRAMEWORK} ${EXPAT})
     endif()
-    target_sources(${target} PRIVATE
-        ${VSTGUI_ROOT}/vstgui4/vstgui/vstgui_uidescription.cpp
-        ${VSTGUI_ROOT}/vstgui4/vstgui/vstgui_ios.mm
-        ${VSTGUI_ROOT}/vstgui4/vstgui/plugin-bindings/vst3editor.cpp
-        ${SDK_ROOT}/public.sdk/source/vst/vstguieditor.cpp
-    )
+    ## these are iOS-specific and require the following frameworks:
+    ## UIKit CoreGraphics QuartzCore CoreText Accelerate ImageIO MobileCoreServices
+    #target_sources(${target} PRIVATE
+    #    ${VST3_SDK_ROOT}/vstgui4/vstgui/vstgui_uidescription.cpp
+    #    ${VST3_SDK_ROOT}/vstgui4/vstgui/vstgui_ios.mm
+    #    ${VST3_SDK_ROOT}/vstgui4/vstgui/plugin-bindings/vst3editor.cpp
+    #    ${VST3_SDK_ROOT}/public.sdk/source/vst/vstguieditor.cpp
+    #)
     set_target_properties(regrader PROPERTIES
         BUNDLE true
         BUNDLE_EXTENSION "vst3"
@@ -236,10 +233,16 @@ IF (APPLE)
         MACOSX_BUNDLE_BUNDLE_NAME "Regrader"
         MACOSX_BUNDLE_GUI_IDENTIFIER "nl.igorski.regrader"
         MACOSX_BUNDLE_ICON_FILE ""
-        MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0.3"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0.4"
         MACOSX_BUNDLE_COPYRIGHT "igorski.nl © 2018"
     )
-ENDIF (APPLE)
+endif()
+
+# Steinberg SDK
+
+target_include_directories(${target} PUBLIC ${VST3_SDK_ROOT}/vstgui4)
+target_link_libraries(${target} PRIVATE ${VSTSDK_LIBRARIES})
+#target_link_libraries(${target} PRIVATE base sdk vstgui_support)
 
 # Resources
 
