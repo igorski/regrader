@@ -45,7 +45,7 @@ if(UNIX)
     endif()
 else()
     ## spotted to not be set by default on VS CLI. Here we assume any non-Unix
-    ## OS MUST be Windows. But that is the only remaining target, so hey...
+    ## OS MUST be Windows. Then again that's the only other intended target for this project...
     set(WIN true)
 endif()
 

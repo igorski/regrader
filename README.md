@@ -3,17 +3,17 @@
 Regrader is a VST/AU plug-in which provides a delay effect in which the repeats degrade in various ways to provide a nice twist on the ears.
 The delays repeats can be synced to the host tempo and time signature and be fully automated.
 
-If you require some inspiration, it is used pretty much all over the [Imago](https://songwhip.com/drosophelia/imago) album by Drosophelia or you can [read what others say](https://bedroomproducersblog.com/2018/06/08/free-regrader-lo-fi-delay/).
+If you require some inspiration, it is used pretty much all over the [Imago](https://songwhip.com/drosophelia/imago) album by Drosophelia. Alternatively, you can [read what others say](https://bedroomproducersblog.com/2018/06/08/free-regrader-lo-fi-delay/).
 
 ## On compatibility
 
 ### Build as VST 2.4
 
-VST3.0 is great and all, but support across DAW's is poor (looking at a certain popular German product). You can however build this plugin as a VST2.4 plugin and enjoy it on a wider range of host platforms.
+VST3 is great and all, but support across DAW's is poor (looking at a certain popular German product). You can however build as a VST2.4 plugin and enjoy it on a wider range of host platforms.
 
-However: as of SDK 3.6.11, Steinberg no longer packages the _./pluginterfaces/vst2.x_-folder inside the VST3_SDK folder.
-If you _really_ wish to build a VST2 plugin, copying the folder from an older SDK version _could_ work (verified 3.6.9. _vst2.x_ folders to work with SDK 3.7.0), though be aware
-that you _need a license to use VST2_. You can view [Steinbergs rationale on this decision here](https://www.steinberg.net/en/newsandevents/news/newsdetail/article/vst-2-coming-to-an-end-4727.html).
+However: as of SDK 3.6.11, Steinberg no longer packages the required _./pluginterfaces/vst2.x_-folder inside the VST3_SDK folder.
+If you wish to build a VST2 plugin, copying the folder from an older SDK version _could_ work (verified 3.6.9. _vst2.x_ folders to work with SDK 3.7.0), though be aware
+that you _need a license to target VST2_. You can view [Steinbergs rationale on this decision here](https://www.steinberg.net/en/newsandevents/news/newsdetail/article/vst-2-coming-to-an-end-4727.html).
 
 Once your SDK is "setup" for VST2, simply uncomment the following line in _CMakeLists.txt_:
 
@@ -25,33 +25,33 @@ And rename the generated plugin extension from _.vst3_ to _.vst_ (or _.dll_ on W
 
 ## Build instructions
 
+The project has been built and tested on macOS, Windows 10 and Linux (Ubuntu) and should build completely via CLI without requiring either a full IDE such as Xcode or Visual Studio (for aforementioned IDE's their
+command line/build tools suffice). The project uses [CMake](https://cmake.org) to generate the Makefiles.
+
 ### Environment setup
 
-The project uses [CMake](https://cmake.org) to generate the build system after which you can use _make_ to build the application.
+Apart from requiring _CMake_ and a C(++) compiler such as _Clang_ or _MSVC_, the only other dependency is the [VST SDK from Steinberg](https://www.steinberg.net/en/company/developers.html) (the project has been developed against VST3 SDK version 3.7.0).
 
-Apart from requiring _CMake_ and a _g++_ compiler, the only other dependency is the [VST SDK from Steinberg](https://www.steinberg.net/en/company/developers.html).
-
-## Generating the Makefiles
-
-The project has been developed against the [VST3 SDK version 3.7.0](https://www.steinberg.net/vst3sdk) on macOS and Windows 10 and should work completely via CLI without requiring either Xcode or Visual Studio (for both command line/build tools suffice). Linux build system is provided, but is as yet untested.
-
-Additionally, the Steinberg VST sources need to be built as well. Following Steinbergs guidelines, the target is a _/build_-subfolder of the _/VST3_SDK_-folder, execute the following commands from the Steinberg VST SDK root:
+Be aware that prior to building the plugin, the Steinberg VST needs to be built from source as well. Following Steinbergs guidelines, the build target should be a _/build_-subfolder of the _/VST3_SDK_-folder.
+To generate a release build, execute the following commands from the Steinberg VST SDK root (run the _.bat_ verions instead of the _.sh_ versions on Windows):
 
 ```
 ./copy_vst2_to_vst3_sdk.sh
 cd VST3_SDK
+./tools/setup_linux_packages_for_vst3sdk.sh # <- this step is Linux only
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build .
 ```
 
-The result being that in _{VST3_SDK_ROOT}/VST3_SDK/build/lib_ all Steinberg VST libraries are prebuilt.
-NOTE: Windows users need to append _--config Release_ to the last cmake (build) call as the build type must be defined during compilation.
+The result being that _{VST3_SDK_ROOT}/VST3_SDK/build/lib/Release/_ will contain the Steinberg VST libraries required to build the plugin.
 
-### Building the Regrader plugin
+NOTE: Windows users need to append _--config Release_ to the last cmake (build) call as the build type must be defined during this step.
 
-Run CMake to generate Regrader's Makefile for your environment, after which you can compile the plugin using make. The build output will be stored in _./build/VST3/regrader.vst_ as well as copied to your systems VST-plugin folder.
+### Building the plugin
+
+Run CMake to generate the Makefile for your environment, after which you can compile the plugin using make. The build output will be stored in _./build/VST3/regrader.vst3_ as well as symbolically linked to your systems VST-plugin folder (on Unix).
 
 You must provide the path to your custom SDK download location by providing _VST3_SDK_ROOT_ to CMake like so:
 
