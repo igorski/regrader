@@ -11,10 +11,9 @@
 
 project(Regrader)
 cmake_minimum_required(VERSION 3.12)
+set(target regrader)
 set(CMAKE_COLOR_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 14)
-
-set(target regrader)
 
 # compiler flags
 add_definitions(-DNDEBUG)
@@ -309,9 +308,12 @@ if (LINUX)
 endif()
 
 
-# Add the resource files to the bundle
+## Add the resource files to the bundle
 
-smtg_add_vst3_resources(${target} RESOURCES ${vst_ui_descr} ${vst_resources})
+smtg_add_vst3_resource(${target} ${vst_ui_descr})
+foreach(resource IN ITEMS ${vst_resources})
+    smtg_add_vst3_resource(${target} ${resource})
+endforeach()
 
 if(APPLE)
     smtg_set_bundle(${target} INFOPLIST "${CMAKE_CURRENT_SOURCE_DIR}/mac/Info.plist" PREPROCESS)
