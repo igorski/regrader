@@ -10,11 +10,11 @@ For inspiration, it is used pretty much all over the [Imago](https://songwhip.co
 
 ### Build as VST 2.4
 
-VST3.0 is great and all, but support across DAW's is poor (looking at a certain German product). You can however build this plugin as a VST2.4 plugin and enjoy it on a wider range of host platforms.
+VST3.0 is great and all, but support across DAW's is poor (looking at a certain popular German product). You can however build this plugin as a VST2.4 plugin and enjoy it on a wider range of host platforms.
 
 However: as of SDK 3.6.11, Steinberg no longer packages the _./pluginterfaces/vst2.x_-folder inside the VST3_SDK folder.
-If you really wish to build a VST2 plugin, copying the folder from an older SDK version _could_ work (verified 3.6.9. vst2.x folder to work with SDK 3.7.0).
-You can view [Steinbergs rationale on this decision](https://www.steinberg.net/en/newsandevents/news/newsdetail/article/vst-2-coming-to-an-end-4727.html), and who can blame them ?
+If you _really_ wish to build a VST2 plugin, copying the folder from an older SDK version _could_ work (verified 3.6.9. _vst2.x_ folders to work with SDK 3.7.0), though be aware
+that you _need a license to use VST2_. You can view [Steinbergs rationale on this decision here](https://www.steinberg.net/en/newsandevents/news/newsdetail/article/vst-2-coming-to-an-end-4727.html).
 
 Once your SDK is "setup" for VST2, simply uncomment the following line in _CMakeLists.txt_:
 
@@ -22,24 +22,7 @@ Once your SDK is "setup" for VST2, simply uncomment the following line in _CMake
 set(SMTG_CREATE_VST2_VERSION "Use VST2" ON)
 ```
 
-And rename the generated plugin extension from _.vst3_ to _.vst_.
-
-## Compiling for both 32-bit and 64-bit architectures:
-
-Depending on your host software having 32-bit or 64-bit support, you can best compile for a wider range of architectures, to do so replace all invocations of _cmake_ in this README with the following:
-
-### macOS:
-```
-cmake "-DCMAKE_OSX_ARCHITECTURES=x86_64;i386" ..
-```
-
-Note: while i386 is considered deprecated in macOS, you'd be surprised to find out how many people are running a 32-bit version of a DAW in this day and age...
-
-### Windows:
-```
-cmake.exe -G"Visual Studio 15 2017 Win64" ..
-cmake.exe -G"Visual Studio 15 2017 Win32" ..
-```
+And rename the generated plugin extension from _.vst3_ to _.vst_ (or _.dll_ on Windows).
 
 ## Build instructions
 
@@ -64,7 +47,8 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build .
 ```
 
-The result being that in _{VST3_SDK_ROOT}/VST3_SDK/build/lib_ all Steinberg VST libraries are prebuilt. Windows users need to append _--config Release_ to the last cmake (build) call.
+The result being that in _{VST3_SDK_ROOT}/VST3_SDK/build/lib_ all Steinberg VST libraries are prebuilt.
+NOTE: Windows users need to append _--config Release_ to the last cmake (build) call as the build type must be defined during compilation.
 
 ### Building the Regrader plugin
 
@@ -92,7 +76,7 @@ Assuming the Visual Studio Build Tools have been installed:
 ```
 mkdir build
 cd build
-cmake.exe -G"Visual Studio 15 2017 Win64" -DVST3_SDK_ROOT=/path/to/VST_SDK/VST3_SDK/ ..
+cmake.exe -G"Visual Studio 16 2019" -DVST3_SDK_ROOT=/path/to/VST_SDK/VST3_SDK/ ..
 cmake.exe --build .
 ```
 
