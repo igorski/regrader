@@ -194,16 +194,14 @@ include_directories(${VSTSDK_INCLUDE_DIR})
 foreach(lib IN ITEMS ${steinberg_libs})
     if (UNIX)
         target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/lib${lib}.a)
-    endif()
-    if (WIN)
+    elseif(WIN)
         target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/${lib}.lib)
     endif()
 endforeach(lib)
 
-# Include Steinberg VSTGUI
+## Include Steinberg VSTGUI
 
 target_include_directories(${target} PUBLIC ${VST3_SDK_ROOT}/vstgui4)
-
 target_sources(${target} PRIVATE
     ${VST3_SDK_ROOT}/vstgui4/vstgui/vstgui_uidescription.cpp
     ${VST3_SDK_ROOT}/vstgui4/vstgui/plugin-bindings/vst3editor.cpp
@@ -299,6 +297,14 @@ if (LINUX)
     target_link_libraries(${target} PRIVATE ${LINUX_LIBRARIES}) 
 endif()
 
+## Include Windows specific libraries
+
+if(WIN)
+    target_sources (${target} PRIVATE
+        ${VST3_SDK_ROOT}/public.sdk/source/main/dllmain.cpp
+#        ${VST3_SDK_ROOT}/vstgui4/vstgui/vstgui_win32.cpp
+    )
+endif()
 
 ## Add the resource files to the bundle
 
