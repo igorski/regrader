@@ -22,24 +22,7 @@ Once your SDK is "setup" for VST2, simply uncomment the following line in _CMake
 set(SMTG_CREATE_VST2_VERSION "Use VST2" ON)
 ```
 
-And rename the generated plugin extension from _.vst3_ to _.vst_.
-
-## Compiling for both 32-bit and 64-bit architectures:
-
-Depending on your host software having 32-bit or 64-bit support, you can best compile for a wider range of architectures, to do so replace all invocations of _cmake_ in this README with the following:
-
-### macOS:
-```
-cmake "-DCMAKE_OSX_ARCHITECTURES=x86_64;i386" ..
-```
-
-Note: while i386 is considered deprecated in macOS, you'd be surprised to find out how many people are running a 32-bit version of a DAW in this day and age...
-
-### Windows:
-```
-cmake.exe -G"Visual Studio 15 2017 Win64" ..
-cmake.exe -G"Visual Studio 15 2017 Win32" ..
-```
+And rename the generated plugin extension from _.vst3_ to _.vst_ (or _.dll_ on Windows).
 
 ## Build instructions
 
@@ -93,7 +76,7 @@ Assuming the Visual Studio Build Tools have been installed:
 ```
 mkdir build
 cd build
-cmake.exe -G"Visual Studio 15 2017 Win64" -DVST3_SDK_ROOT=/path/to/VST_SDK/VST3_SDK/ ..
+cmake.exe -G"Visual Studio 16 2019" -DVST3_SDK_ROOT=/path/to/VST_SDK/VST3_SDK/ ..
 cmake.exe --build .
 ```
 
