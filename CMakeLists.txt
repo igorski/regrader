@@ -352,7 +352,7 @@ elseif(WIN)
   install(TARGETS ${target}
     DESTINATION "C:/Program Files/Common Files/VST3/"
   )
-elseif(UNIX AND NOT APPLE) #Linux
+elseif(LINUX)
   install(TARGETS ${target}
     DESTINATION "/usr/lib/lxvst"
   )
