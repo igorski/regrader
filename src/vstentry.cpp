@@ -44,7 +44,7 @@ using namespace Igorski;
 bool InitModule ()
 {
 #if TARGET_OS_IPHONE
-    Steinberg::Vst::VSTGUIEditor::setBundleRef (moduleHandle);
+    Steinberg::Vst::VSTGUIEditor::setBundleRef( moduleHandle );
 #endif
     return true;
 }

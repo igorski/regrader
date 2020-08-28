@@ -1,8 +1,7 @@
 # REGRADER
 
-Regrader is a VST2/3/AU plug-in which provides a delay effect in which the repeats degrade in
-various ways to provide a nice twist on the ears. The delays repeats can be synced to the
-host tempo and time signature and be fully automated.
+Regrader is a VST/AU plug-in which provides a delay effect in which the repeats degrade in various ways to provide a nice twist on the ears.
+The delays repeats can be synced to the host tempo and time signature and be fully automated.
 
 For inspiration, it is used pretty much all over the [Imago](https://songwhip.com/drosophelia/imago) album by Drosophelia or
 [read what others say](https://bedroomproducersblog.com/2018/06/08/free-regrader-lo-fi-delay/).
@@ -11,17 +10,19 @@ For inspiration, it is used pretty much all over the [Imago](https://songwhip.co
 
 ### Build as VST 2.4
 
-VST3.0 is great and all, but support across DAW's is poor (shout out to Bitwig Studio for being awesome). You can however build this plugin as a VST2.4 plugin and enjoy it on a wider range of host platforms. Simply uncomment the following line in _CMakeLists.txt_:
+VST3.0 is great and all, but support across DAW's is poor (looking at a certain German product). You can however build this plugin as a VST2.4 plugin and enjoy it on a wider range of host platforms.
+
+However: as of SDK 3.6.11, Steinberg no longer packages the _./pluginterfaces/vst2.x_-folder inside the VST3_SDK folder.
+If you really wish to build a VST2 plugin, copying the folder from an older SDK version _could_ work (verified 3.6.9. vst2.x folder to work with SDK 3.7.0).
+You can view [Steinbergs rationale on this decision](https://www.steinberg.net/en/newsandevents/news/newsdetail/article/vst-2-coming-to-an-end-4727.html), and who can blame them ?
+
+Once your SDK is "setup" for VST2, simply uncomment the following line in _CMakeLists.txt_:
 
 ```
 set(SMTG_CREATE_VST2_VERSION "Use VST2" ON)
 ```
 
-And rename the plugin extension from _.vst3_ to _.vst_.
-
-```
-_VSTPluginMain
-```
+And rename the generated plugin extension from _.vst3_ to _.vst_.
 
 ## Compiling for both 32-bit and 64-bit architectures:
 

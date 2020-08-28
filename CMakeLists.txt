@@ -82,15 +82,7 @@ set(VSTSDK_PLUGIN_SOURCE
 )
 
 set(vst2_sources
-    ${VST3_SDK_ROOT}/public.sdk/source/common/memorystream.cpp
-    ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/eventlist.cpp
-    ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/hostclasses.cpp
-    ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/parameterchanges.cpp
-    ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/processdata.cpp
-    ${VST3_SDK_ROOT}/public.sdk/source/vst/vst2wrapper/vst2wrapper.cpp
-    ${VST3_SDK_ROOT}/public.sdk/source/vst/vst2wrapper/vst2wrapper.h
-    ${VST3_SDK_ROOT}/public.sdk/source/vst2.x/audioeffect.cpp
-    ${VST3_SDK_ROOT}/public.sdk/source/vst2.x/audioeffectx.cpp
+    ${VST3_SDK_ROOT}/public.sdk/source/vst/vst2wrapper/vst2wrapper.sdk.cpp
     src/vstentry_vst2.cpp
 )
 
