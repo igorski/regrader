@@ -3,8 +3,7 @@
 Regrader is a VST/AU plug-in which provides a delay effect in which the repeats degrade in various ways to provide a nice twist on the ears.
 The delays repeats can be synced to the host tempo and time signature and be fully automated.
 
-For inspiration, it is used pretty much all over the [Imago](https://songwhip.com/drosophelia/imago) album by Drosophelia or
-[read what others say](https://bedroomproducersblog.com/2018/06/08/free-regrader-lo-fi-delay/).
+If you require some inspiration, it is used pretty much all over the [Imago](https://songwhip.com/drosophelia/imago) album by Drosophelia or you can [read what others say](https://bedroomproducersblog.com/2018/06/08/free-regrader-lo-fi-delay/).
 
 ## On compatibility
 
