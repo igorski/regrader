@@ -15,16 +15,15 @@ set(target regrader)
 set(CMAKE_COLOR_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 14)
 
-# compiler flags
+#####################
+# Compiler settings #
+#####################
+
 add_definitions(-DNDEBUG)
 
 if(MSVC)
     add_definitions(/D _CRT_SECURE_NO_WARNINGS)
 endif()
-
-#####################
-# Compiler settings #
-#####################
 
 if(UNIX)
     if(XCODE)
@@ -44,6 +43,10 @@ if(UNIX)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wno-multichar")
         link_libraries(stdc++fs pthread dl)
     endif()
+else()
+    ## spotted to not be set by default on VS CLI. Here we assume any non-Unix
+    ## OS MUST be Windows. But that is the only remaining target, so hey...
+    set(WIN true)
 endif()
 
 ############
@@ -192,9 +195,11 @@ smtg_add_vst3plugin(${target} ${vst_sources})
 set(steinberg_libs "base" "pluginterfaces" "sdk" "vstgui_support" "vstgui_uidescription" "vstgui")
 include_directories(${VSTSDK_INCLUDE_DIR})
 foreach(lib IN ITEMS ${steinberg_libs})
-    if (UNIX)
+    if(UNIX)
+        message("unix ${lib}")
         target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/lib${lib}.a)
     elseif(WIN)
+        message("win ${lib}")
         target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/${lib}.lib)
     endif()
 endforeach(lib)
