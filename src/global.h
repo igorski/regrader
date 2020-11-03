@@ -17,9 +17,7 @@ namespace VST {
     static const FUID RegraderWithSideChainProcessorUID( 0x31C358F3, 0x528F457D, 0xBA31BDFB, 0x70A7A2DA );
     static const FUID RegraderControllerUID( 0xF99D622B, 0xCF48474A, 0xB7E202CD, 0x66D160D9 );
 
-    // set upon initialization, see vst.cpp
-    static float SAMPLE_RATE = 44100.f;
-    static int BUFFER_SIZE   = 8192;
+    extern float SAMPLE_RATE; // set upon initialization, see vst.cpp
 
     static const float PI     = 3.141592653589793f;
     static const float TWO_PI = PI * 2.f;
