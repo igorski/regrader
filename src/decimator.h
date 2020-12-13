@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2013-2018 Igor Zinken - http://www.igorski.nl
+ * Copyright (c) 2013-2020 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -37,13 +37,23 @@ class Decimator {
         int getBits();
         void setBits( int value );
 
-        // decimator has an internal oscillator
-        // as the effect is applied at the peak of the cycle
         // the range is 0 - 1 where 1 implies the original sample rate
+
         float getRate();
         void setRate( float value );
 
         void process( float* sampleBuffer, int bufferSize );
+
+        inline float processSingle( float sample )
+        {
+            _accumulator += _rate;
+
+            if ( _accumulator >= 1.f ) {
+                _accumulator -= 1.f;
+                return ( long int )( sample * _m ) / ( float ) _m;
+            }
+            return sample;
+        }
 
         // store/restore the processor properties
         // this ensures that multi channel processing for a

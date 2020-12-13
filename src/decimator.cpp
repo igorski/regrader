@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2013-2018 Igor Zinken - http://www.igorski.nl
+ * Copyright (c) 2013-2020 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -80,21 +80,10 @@ void Decimator::restore()
 void Decimator::process( float* sampleBuffer, int bufferSize )
 {
     float sample;
-    bool doProcess = ( _bits < 32 );
 
     for ( int i = 0; i < bufferSize; ++i )
     {
-        sample = sampleBuffer[ i ];
-        _accumulator += _rate;
-
-        if ( _accumulator >= 1.f )
-        {
-            _accumulator -= 1.f;
-
-            if ( doProcess )
-                sample = ( float ) _m * floor( sample / ( float ) _m + 0.5f );
-        }
-        sampleBuffer[ i ] = sample;
+        sampleBuffer[ i ] = processSingle( sampleBuffer[ i ]);
     }
 }
 
