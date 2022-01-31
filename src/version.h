@@ -22,13 +22,9 @@
 #define VERSION_STR MAJOR_VERSION_STR "." SUB_VERSION_STR "." RELEASE_NUMBER_STR
 
 #define stringOriginalFilename  "regrader.vst3"
-#if PLATFORM_64
-#define stringFileDescription   "Regrader plugin (64Bit)"
-#else
 #define stringFileDescription   "Regrader plugin"
-#endif
 #define stringCompanyName       "igorski.nl\0"
-#define stringLegalCopyright    #PLUGIN_COPYRIGHT
+#define stringLegalCopyright    "igorski.nl 2018-2020"
 #define stringLegalTrademarks   "VST is a trademark of Steinberg Media Technologies GmbH"
 
 #endif
