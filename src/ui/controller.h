@@ -39,7 +39,7 @@ class RegraderUIMessageController;
 //------------------------------------------------------------------------
 // RegraderController
 //------------------------------------------------------------------------
-class RegraderController : public EditControllerEx1, public IMidiMapping, public VST3EditorDelegate
+class RegraderController : public EditControllerEx1, public IMidiMapping, public VSTGUI::VST3EditorDelegate
 {
     public:
         typedef RegraderUIMessageController<RegraderController> UIMessageController;
