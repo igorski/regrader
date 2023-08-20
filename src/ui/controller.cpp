@@ -30,6 +30,7 @@
 #include "pluginterfaces/vst/ivstmidicontrollers.h"
 
 #include "base/source/fstring.h"
+#include "base/source/fstreamer.h"
 
 #include "vstgui/uidescription/delegationcontroller.h"
 
@@ -215,6 +216,11 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     parameters.addParameter(
         USTRING( "Flanger chain" ), 0, 1, 0, ParameterInfo::kCanAutomate, kFlangerChainId, unitId
     );
+
+    parameters.addParameter(
+        STR16( "Bypass" ), nullptr, 1, 0, ParameterInfo::kCanAutomate | ParameterInfo::kIsBypass, kBypassId
+    );
+
     // initialization
 
     String str( "REGRADER" );
@@ -235,113 +241,98 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
     // we receive the current state of the component (processor part)
     if ( state )
     {
+        IBStreamer streamer( state, kLittleEndian );
+
         float savedDelayTime = 1.f;
-        if ( state->read( &savedDelayTime, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedDelayTime ) == false )
             return kResultFalse;
 
         float savedDelayHostSync = 1.f;
-        if ( state->read( &savedDelayHostSync, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedDelayHostSync ) == false )
             return kResultFalse;
 
         float savedDelayFeedback = 1.f;
-        if ( state->read( &savedDelayFeedback, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedDelayFeedback ) == false )
             return kResultFalse;
 
         float savedDelayMix = 1.f;
-        if ( state->read( &savedDelayMix, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedDelayMix ) == false )
             return kResultFalse;
 
         float savedBitResolution = 1.f;
-        if ( state->read( &savedBitResolution, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedBitResolution ) == false )
             return kResultFalse;
 
         float savedBitResolutionChain = 0.f;
-        if ( state->read( &savedBitResolutionChain, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedBitResolutionChain ) == false )
             return kResultFalse;
 
         float savedLFOBitResolution = Igorski::VST::MIN_LFO_RATE();
-        if ( state->read( &savedLFOBitResolution, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedLFOBitResolution ) == false )
             return kResultFalse;
 
         float savedLFOBitResolutionDepth = 1.f;
-        if ( state->read( &savedLFOBitResolutionDepth, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedLFOBitResolutionDepth ) == false )
             return kResultFalse;
 
         float savedDecimator = 1.f;
-        if ( state->read( &savedDecimator, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedDecimator ) == false )
             return kResultFalse;
 
         float savedDecimatorChain = 0;
-        if ( state->read( &savedDecimatorChain, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedDecimatorChain ) == false )
             return kResultFalse;
 
         float savedLFODecimator = 0.f;
-        if ( state->read( &savedLFODecimator, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedLFODecimator ) == false )
             return kResultFalse;
 
         float savedFilterChain = 0.f;
-        if ( state->read( &savedFilterChain, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedFilterChain ) == false )
             return kResultFalse;
 
         float savedFilterCutoff = Igorski::VST::FILTER_MAX_FREQ;
-        if ( state->read( &savedFilterCutoff, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedFilterCutoff ) == false )
             return kResultFalse;
 
         float savedFilterResonance = Igorski::VST::FILTER_MAX_RESONANCE;
-        if ( state->read( &savedFilterResonance, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedFilterResonance ) == false )
             return kResultFalse;
 
         float savedLFOFilter = Igorski::VST::MIN_LFO_RATE();
-        if ( state->read( &savedLFOFilter, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedLFOFilter ) == false )
             return kResultFalse;
 
         float savedLFOFilterDepth = 1.f;
-        if ( state->read( &savedLFOFilterDepth, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedLFOFilterDepth ) == false )
             return kResultFalse;
 
         float savedFlangerChain = 0.f;
-        if ( state->read( &savedFlangerChain, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedFlangerChain ) == false )
             return kResultFalse;
 
         float savedFlangerRate = 1.f;
-        if ( state->read( &savedFlangerRate, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedFlangerRate ) == false )
             return kResultFalse;
 
         float savedFlangerWidth = 1.f;
-        if ( state->read( &savedFlangerWidth, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedFlangerWidth ) == false )
             return kResultFalse;
 
         float savedFlangerFeedback = 1.f;
-        if ( state->read( &savedFlangerFeedback, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedFlangerFeedback ) == false )
             return kResultFalse;
 
         float savedFlangerDelay = 1.f;
-        if ( state->read( &savedFlangerDelay, sizeof( float )) != kResultOk )
+        if ( streamer.readFloat( savedFlangerDelay ) == false )
             return kResultFalse;
 
-#if BYTEORDER == kBigEndian
-    SWAP_32( savedDelayTime )
-    SWAP_32( savedDelayHostSync )
-    SWAP_32( savedDelayFeedback )
-    SWAP_32( savedDelayMix )
-    SWAP_32( savedBitResolution )
-    SWAP_32( savedBitResolutionChain )
-    SWAP_32( savedLFOBitResolution )
-    SWAP_32( savedLFOBitResolutionDepth )
-    SWAP_32( savedDecimator )
-    SWAP_32( savedDecimatorChain )
-    SWAP_32( savedLFODecimator )
-    SWAP_32( savedFilterChain )
-    SWAP_32( savedFilterCutoff )
-    SWAP_32( savedFilterResonance )
-    SWAP_32( savedLFOFilter )
-    SWAP_32( savedLFOFilterDepth )
-    SWAP_32( savedFlangerChain )
-    SWAP_32( savedFlangerRate )
-    SWAP_32( savedFlangerWidth )
-    SWAP_32( savedFlangerFeedback )
-    SWAP_32( savedFlangerDelay )
-#endif
+        // may fail as this was only added in version 1.0.5.1
+        int32 savedBypass = 0;
+        if ( streamer.readInt32( savedBypass ) != false ) {
+            setParamNormalized( kBypassId, savedBypass ? 1 : 0 );
+        }
+
         setParamNormalized( kDelayTimeId,             savedDelayTime );
         setParamNormalized( kDelayHostSyncId,         savedDelayHostSync );
         setParamNormalized( kDelayFeedbackId,         savedDelayFeedback );
@@ -363,8 +354,6 @@ tresult PLUGIN_API RegraderController::setComponentState( IBStream* state )
         setParamNormalized( kFlangerWidthId,          savedFlangerWidth );
         setParamNormalized( kFlangerFeedbackId,       savedFlangerFeedback );
         setParamNormalized( kFlangerDelayId,          savedFlangerDelay );
-
-        state->seek( sizeof ( float ), IBStream::kIBSeekCur );
     }
     return kResultOk;
 }

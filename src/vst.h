@@ -115,7 +115,8 @@ class Regrader : public AudioEffect
         float fFlangerFeedback;
         float fFlangerDelay;
 
-        float outputGainOld; // for visualizing output gain in DAW
+        // float outputGainOld; // for visualizing output gain in DAW
+        bool _bypass { false };
 
         int32 currentProcessMode;
 
