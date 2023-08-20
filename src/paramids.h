@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2018 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2018-2023 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -53,7 +53,8 @@ enum
     kFlangerFeedbackId,       // flanger feedback
     kFlangerDelayId,          // flanger delay
 
-    kVuPPMId                  // for the Vu value return to host
+    // kVuPPMId                  // for the Vu value return to host
+    kBypassId,                // bypass process (added in v1.0.5.1)
 };
 
 #endif

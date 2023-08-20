@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2018 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2018-2023 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -32,6 +32,7 @@
 #include "pluginterfaces/vst/ivstevents.h"
 #include "pluginterfaces/vst/ivstparameterchanges.h"
 #include "pluginterfaces/vst/vstpresetkeys.h"
+#include "base/source/fstreamer.h"
 
 #include <stdio.h>
 
@@ -65,7 +66,7 @@ Regrader::Regrader()
 , fFlangerFeedback( 0.f )
 , fFlangerDelay( 0.f )
 , regraderProcess( nullptr )
-, outputGainOld( 0.f )
+// , outputGainOld( 0.f )
 , currentProcessMode( -1 ) // -1 means not initialized
 {
     // register its editor class (the same as used in vstentry.cpp)
@@ -117,7 +118,7 @@ tresult PLUGIN_API Regrader::setActive (TBool state)
         sendTextMessage( "Regrader::setActive (false)" );
 
     // reset output level meter
-    outputGainOld = 0.f;
+    // outputGainOld = 0.f;
 
     // call our parent setActive
     return AudioEffect::setActive( state );
@@ -255,6 +256,11 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
                         if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
                             fFlangerDelay = ( float ) value;
                         break;
+
+                    case kBypassId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            _bypass = ( value > 0.5f );
+                        break;
                 }
                 syncModel();
             }
@@ -293,39 +299,55 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
 
     // process the incoming sound!
 
-    bool isDoublePrecision = ( data.symbolicSampleSize == kSample64 );
+    bool isDoublePrecision = data.symbolicSampleSize == kSample64;
+    bool isSilent = data.inputs[ 0 ].silenceFlags != 0;
 
-    if ( isDoublePrecision ) {
-        // 64-bit samples, e.g. Reaper64
-        regraderProcess->process<double>(
-            ( double** ) in, ( double** ) out, numInChannels, numOutChannels,
-            data.numSamples, sampleFramesSize
-        );
-    }
-    else {
-        // 32-bit samples, e.g. Ableton Live, Bitwig Studio... (oddly enough also when 64-bit?)
-        regraderProcess->process<float>(
-            ( float** ) in, ( float** ) out, numInChannels, numOutChannels,
-            data.numSamples, sampleFramesSize
-        );
+    if ( _bypass )
+    {
+        // bypass mode, write the input unchanged into the output
+        for ( int32 i = 0, l = std::min( numInChannels, numOutChannels ); i < l; i++ )
+        {
+            if ( in[ i ] != out[ i ])
+            {
+                memcpy( out[ i ], in[ i ], sampleFramesSize );
+            }
+        }
+    } else {
+        if ( isDoublePrecision ) {
+            // 64-bit samples, e.g. Reaper64
+            regraderProcess->process<double>(
+                ( double** ) in, ( double** ) out, numInChannels, numOutChannels,
+                data.numSamples, sampleFramesSize
+            );
+        }
+        else {
+            // 32-bit samples, e.g. Ableton Live, Bitwig Studio... (oddly enough also when 64-bit?)
+            regraderProcess->process<float>(
+                ( float** ) in, ( float** ) out, numInChannels, numOutChannels,
+                data.numSamples, sampleFramesSize
+            );
+        }
     }
 
     // output flags
 
-    data.outputs[ 0 ].silenceFlags = false; // there should always be output
-    float outputGain = regraderProcess->limiter->getLinearGR();
+    // we don't process silence flags as the delay process can have a tail from previous input
+    // if ( isSilent ) {
+    //     data.outputs[ 0 ].silenceFlags = (( uint64 ) 1 << numOutChannels ) - 1;
+    // }
+    // float outputGain = regraderProcess->limiter->getLinearGR();
 
-    //---4) Write output parameter changes-----------
-    IParameterChanges* outParamChanges = data.outputParameterChanges;
-    // a new value of VuMeter will be sent to the host
-    // (the host will send it back in sync to our controller for updating our editor)
-    if ( !isDoublePrecision && outParamChanges && outputGainOld != outputGain ) {
-        int32 index = 0;
-        IParamValueQueue* paramQueue = outParamChanges->addParameterData( kVuPPMId, index );
-        if ( paramQueue )
-            paramQueue->addPoint( 0, outputGain, index );
-    }
-    outputGainOld = outputGain;
+    // //---4) Write output parameter changes-----------
+    // IParameterChanges* outParamChanges = data.outputParameterChanges;
+    // // a new value of VuMeter will be sent to the host
+    // // (the host will send it back in sync to our controller for updating our editor)
+    // if ( !isDoublePrecision && outParamChanges && outputGainOld != outputGain ) {
+    //     int32 index = 0;
+    //     IParamValueQueue* paramQueue = outParamChanges->addParameterData( kVuPPMId, index );
+    //     if ( paramQueue )
+    //         paramQueue->addPoint( 0, outputGain, index );
+    // }
+    // outputGainOld = outputGain;
     return kResultOk;
 }
 
@@ -345,113 +367,97 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
 {
     // called when we load a preset, the model has to be reloaded
 
+    IBStreamer streamer( state, kLittleEndian );
+
     float savedDelayTime = 0.f;
-    if ( state->read( &savedDelayTime, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedDelayTime ) == false )
         return kResultFalse;
 
     float savedDelayHostSync = 0.f;
-    if ( state->read( &savedDelayHostSync, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedDelayHostSync ) == false )
         return kResultFalse;
 
     float savedDelayFeedback = 0.f;
-    if ( state->read( &savedDelayFeedback, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedDelayFeedback ) == false )
         return kResultFalse;
 
     float savedDelayMix = 0.f;
-    if ( state->read( &savedDelayMix, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedDelayMix ) == false )
         return kResultFalse;
 
     float savedBitResolution = 0.f;
-    if ( state->read( &savedBitResolution, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedBitResolution ) == false )
         return kResultFalse;
 
     float savedBitResolutionChain = 0.f;
-    if ( state->read( &savedBitResolutionChain, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedBitResolutionChain ) == false )
         return kResultFalse;
 
     float savedLFOBitResolution = 0.f;
-    if ( state->read( &savedLFOBitResolution, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedLFOBitResolution ) == false )
         return kResultFalse;
 
     float savedLFOBitResolutionDepth = 0.f;
-    if ( state->read( &savedLFOBitResolutionDepth, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedLFOBitResolutionDepth ) == false )
         return kResultFalse;
 
     float savedDecimator = 0.f;
-    if ( state->read( &savedDecimator, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedDecimator ) == false )
         return kResultFalse;
 
     float savedDecimatorChain = 0.f;
-    if ( state->read( &savedDecimatorChain, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedDecimatorChain ) == false )
         return kResultFalse;
 
     float savedLFODecimator = 1.f;
-    if ( state->read( &savedLFODecimator, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedLFODecimator ) == false )
         return kResultFalse;
 
     float savedFilterChain = 0.f;
-    if ( state->read( &savedFilterChain, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedFilterChain ) == false )
         return kResultFalse;
 
     float savedFilterCutoff = 1.f;
-    if ( state->read( &savedFilterCutoff, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedFilterCutoff ) == false )
         return kResultFalse;
 
     float savedFilterResonance = 1.f;
-    if ( state->read( &savedFilterResonance, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedFilterResonance ) == false )
         return kResultFalse;
 
     float savedLFOFilter = 1.f;
-    if ( state->read( &savedLFOFilter, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedLFOFilter ) == false )
         return kResultFalse;
 
     float savedLFOFilterDepth = 1.f;
-    if ( state->read( &savedLFOFilterDepth, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedLFOFilterDepth ) == false )
         return kResultFalse;
 
     float savedFlangerChain = 0.f;
-    if ( state->read( &savedFlangerChain, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedFlangerChain ) == false )
         return kResultFalse;
 
     float savedFlangerRate = 1.f;
-    if ( state->read( &savedFlangerRate, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedFlangerRate ) == false )
         return kResultFalse;
 
     float savedFlangerWidth = 1.f;
-    if ( state->read( &savedFlangerWidth, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedFlangerWidth ) == false )
         return kResultFalse;
 
     float savedFlangerFeedback = 1.f;
-    if ( state->read( &savedFlangerFeedback, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedFlangerFeedback ) == false )
         return kResultFalse;
 
     float savedFlangerDelay = 1.f;
-    if ( state->read( &savedFlangerDelay, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedFlangerDelay ) == false )
         return kResultFalse;
 
-#if BYTEORDER == kBigEndian
-    SWAP_32( savedDelayTime )
-    SWAP_32( savedDelayHostSync )
-    SWAP_32( savedDelayFeedback )
-    SWAP_32( savedDelayMix )
-    SWAP_32( savedBitResolution )
-    SWAP_32( savedBitResolutionChain )
-    SWAP_32( savedLFOBitResolution )
-    SWAP_32( savedLFOBitResolutionDepth )
-    SWAP_32( savedDecimator )
-    SWAP_32( savedDecimatorChain )
-    SWAP_32( savedLFODecimator )
-    SWAP_32( savedFilterChain )
-    SWAP_32( savedFilterCutoff )
-    SWAP_32( savedFilterResonance )
-    SWAP_32( savedLFOFilter )
-    SWAP_32( savedLFOFilterDepth )
-    SWAP_32( savedFlangerChain )
-    SWAP_32( savedFlangerRate )
-    SWAP_32( savedFlangerWidth )
-    SWAP_32( savedFlangerFeedback )
-    SWAP_32( savedFlangerDelay )
-#endif
+    // may fail as this was only added in version 1.0.5.1
+    int32 savedBypass = 0;
+    if ( streamer.readInt32( savedBypass ) != false ) {
+        _bypass = savedBypass;
+    }
 
     fDelayTime             = savedDelayTime;
     fDelayHostSync         = savedDelayHostSync;
@@ -513,75 +519,32 @@ tresult PLUGIN_API Regrader::setState( IBStream* state )
 //------------------------------------------------------------------------
 tresult PLUGIN_API Regrader::getState( IBStream* state )
 {
-    // here we need to save the model
+    // here we need to save the model values
 
-    float toSaveDelayTime             = fDelayTime;
-    float toSavedDelayHostSync        = fDelayHostSync;
-    float toSaveDelayFeedback         = fDelayFeedback;
-    float toSaveDelayMix              = fDelayMix;
-    float toSaveBitResolution         = fBitResolution;
-    float toSaveBitResolutionChain    = fBitResolutionChain;
-    float toSaveLFOBitResolution      = fLFOBitResolution;
-    float toSaveLFOBitResolutionDepth = fLFOBitResolutionDepth;
-    float toSaveDecimator             = fDecimator;
-    float toSaveDecimatorChain        = fDecimatorChain;
-    float toSaveLFODecimator          = fLFODecimator;
-    float toSaveFilterChain           = fFilterChain;
-    float toSaveFilterCutoff          = fFilterCutoff;
-    float toSaveFilterResonance       = fFilterResonance;
-    float toSaveLFOFilter             = fLFOFilter;
-    float toSaveLFOFilterDepth        = fLFOFilterDepth;
-    float toSaveFlangerChain          = fFlangerChain;
-    float toSaveFlangerRate           = fFlangerRate;
-    float toSaveFlangerWidth          = fFlangerWidth;
-    float toSaveFlangerFeedback       = fFlangerFeedback;
-    float toSaveFlangerDelay          = fFlangerDelay;
+    IBStreamer streamer( state, kLittleEndian );
 
-#if BYTEORDER == kBigEndian
-    SWAP_32( toSaveDelayTime )
-    SWAP_32( toSavedDelayHostSync )
-    SWAP_32( toSaveDelayFeedback )
-    SWAP_32( toSaveDelayMix )
-    SWAP_32( toSaveBitResolution )
-    SWAP_32( toSaveBitResolutionChain )
-    SWAP_32( toSaveLFOBitResolution )
-    SWAP_32( toSaveLFOBitResolutionDepth )
-    SWAP_32( toSaveDecimator )
-    SWAP_32( toSaveDecimatorChain )
-    SWAP_32( toSaveLFODecimator )
-    SWAP_32( toSaveFilterChain )
-    SWAP_32( toSaveFilterCutoff )
-    SWAP_32( toSaveFilterResonance )
-    SWAP_32( toSaveLFOFilter )
-    SWAP_32( toSaveLFOFilterDepth )
-    SWAP_32( toSaveFlangerChain )
-    SWAP_32( toSaveFlangerRate )
-    SWAP_32( toSaveFlangerWidth )
-    SWAP_32( toSaveFlangerFeedback )
-    SWAP_32( toSaveFlangerDelay )
-#endif
-
-    state->write( &toSaveDelayTime,             sizeof( float ));
-    state->write( &toSavedDelayHostSync,        sizeof( float ));
-    state->write( &toSaveDelayFeedback,         sizeof( float ));
-    state->write( &toSaveDelayMix,              sizeof( float ));
-    state->write( &toSaveBitResolution,         sizeof( float ));
-    state->write( &toSaveBitResolutionChain,    sizeof( float ));
-    state->write( &toSaveLFOBitResolution,      sizeof( float ));
-    state->write( &toSaveLFOBitResolutionDepth, sizeof( float ));
-    state->write( &toSaveDecimator,             sizeof( float ));
-    state->write( &toSaveDecimatorChain,        sizeof( float ));
-    state->write( &toSaveLFODecimator,          sizeof( float ));
-    state->write( &toSaveFilterChain,           sizeof( float ));
-    state->write( &toSaveFilterCutoff,          sizeof( float ));
-    state->write( &toSaveFilterResonance,       sizeof( float ));
-    state->write( &toSaveLFOFilter,             sizeof( float ));
-    state->write( &toSaveLFOFilterDepth,        sizeof( float ));
-    state->write( &toSaveFlangerChain,          sizeof( float ));
-    state->write( &toSaveFlangerRate,           sizeof( float ));
-    state->write( &toSaveFlangerWidth,          sizeof( float ));
-    state->write( &toSaveFlangerFeedback,       sizeof( float ));
-    state->write( &toSaveFlangerDelay,          sizeof( float ));
+    streamer.writeFloat( fDelayTime );
+    streamer.writeFloat( fDelayHostSync );
+    streamer.writeFloat( fDelayFeedback );
+    streamer.writeFloat( fDelayMix );
+    streamer.writeFloat( fBitResolution );
+    streamer.writeFloat( fBitResolutionChain );
+    streamer.writeFloat( fLFOBitResolution );
+    streamer.writeFloat( fLFOBitResolutionDepth );
+    streamer.writeFloat( fDecimator );
+    streamer.writeFloat( fDecimatorChain );
+    streamer.writeFloat( fLFODecimator );
+    streamer.writeFloat( fFilterChain );
+    streamer.writeFloat( fFilterCutoff );
+    streamer.writeFloat( fFilterResonance );
+    streamer.writeFloat( fLFOFilter );
+    streamer.writeFloat( fLFOFilterDepth );
+    streamer.writeFloat( fFlangerChain );
+    streamer.writeFloat( fFlangerRate );
+    streamer.writeFloat( fFlangerWidth );
+    streamer.writeFloat( fFlangerFeedback );
+    streamer.writeFloat( fFlangerDelay );
+    streamer.writeInt32( _bypass ? 1 : 0 );
 
     return kResultOk;
 }
@@ -595,15 +558,6 @@ tresult PLUGIN_API Regrader::setupProcessing( ProcessSetup& newSetup )
     currentProcessMode = newSetup.processMode;
 
     VST::SAMPLE_RATE = newSetup.sampleRate;
-
-    // spotted to fire multiple times...
-
-    if ( regraderProcess != nullptr )
-        delete regraderProcess;
-
-    // TODO: creating a bunch of extra channels for no apparent reason?
-    // get the correct channel amount and don't allocate more than necessary...
-    regraderProcess = new RegraderProcess( 6 );
 
     syncModel();
 
