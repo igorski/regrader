@@ -300,7 +300,8 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
     // process the incoming sound!
 
     bool isDoublePrecision = data.symbolicSampleSize == kSample64;
-    bool isSilent = data.inputs[ 0 ].silenceFlags != 0;
+    bool isSilentInput  = data.inputs[ 0 ].silenceFlags != 0;
+    bool isSilentOutput = false;
 
     if ( _bypass )
     {
@@ -311,6 +312,7 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
             {
                 memcpy( out[ i ], in[ i ], sampleFramesSize );
             }
+            isSilentOutput = isSilentInput;
         }
     } else {
         if ( isDoublePrecision ) {
@@ -331,10 +333,8 @@ tresult PLUGIN_API Regrader::process( ProcessData& data )
 
     // output flags
 
-    // we don't process silence flags as the delay process can have a tail from previous input
-    // if ( isSilent ) {
-    //     data.outputs[ 0 ].silenceFlags = (( uint64 ) 1 << numOutChannels ) - 1;
-    // }
+    data.outputs[ 0 ].silenceFlags = isSilentOutput ? (( uint64 ) 1 << numOutChannels ) - 1 : 0;
+ 
     // float outputGain = regraderProcess->limiter->getLinearGR();
 
     // //---4) Write output parameter changes-----------
