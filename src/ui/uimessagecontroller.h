@@ -25,6 +25,7 @@
 
 #include "vstgui/lib/iviewlistener.h"
 #include "vstgui/uidescription/icontroller.h"
+#include "public.sdk/source/vst/utility/stringconvert.h"
 
 //------------------------------------------------------------------------
 namespace Steinberg {
@@ -57,9 +58,7 @@ class RegraderUIMessageController : public VSTGUI::IController, public VSTGUI::V
             if ( !textEdit )
                 return;
 
-            String str( msgText );
-            str.toMultiByte( kCP_Utf8 );
-            textEdit->setText( str.text8() );
+            textEdit->setText( VST3::StringConvert::convert( msgText ));
         }
 
     private:
@@ -110,10 +109,8 @@ class RegraderUIMessageController : public VSTGUI::IController, public VSTGUI::V
                 // add this as listener in order to get viewWillDelete and viewLostFocus calls
                 textEdit->registerViewListener (this);
 
-                // initialize it content
-                String str( regraderController->getDefaultMessageText());
-                str.toMultiByte (kCP_Utf8);
-                textEdit->setText (str.text8 ());
+                // set its contents
+                textEdit->setText( VST3::StringConvert::convert( regraderController->getDefaultMessageText()));
             }
             return view;
         }
@@ -133,12 +130,9 @@ class RegraderUIMessageController : public VSTGUI::IController, public VSTGUI::V
             if (dynamic_cast<CTextEdit*> (view) == textEdit)
             {
                 // save the last content of the text edit view
-                const UTF8String& text = textEdit->getText ();
-                String128 messageText;
-                String str;
-                str.fromUTF8 (text.data ());
-                str.copyTo (messageText, 128);
-                regraderController->setDefaultMessageText (messageText);
+                const auto& text = textEdit->getText();
+                auto utf16Text = VST3::StringConvert::convert( text.getString());
+                regraderController->setDefaultMessageText( utf16Text.data());
             }
         }
         ControllerType* regraderController;
