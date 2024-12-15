@@ -20,8 +20,8 @@ if [ "$1" == "vst2" ]; then
     SMTG_CREATE_VST2_VERSION="-DSMTG_CREATE_VST2_VERSION=ON"
 fi
 
-cmake "-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64" ${SMTG_CREATE_VST2_VERSION} ${DVST3_SDK_ROOT} ..
-make
+cmake ${SMTG_CREATE_VST2_VERSION} ${DVST3_SDK_ROOT} ..
+cmake --build . --config Release
 
 buildStatus=$?
 
