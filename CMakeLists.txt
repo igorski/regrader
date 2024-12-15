@@ -213,13 +213,21 @@ smtg_add_vst3plugin(${target} ${vst_sources})
 
 ## include Steinberg libraries
 
+set(LIB_PATH "")
+if(NOT CMAKE_BUILD_TYPE)
+    set(LIB_PATH "Release/")
+elseif (NOT CMAKE_BUILD_TYPE STREQUAL "None")
+    set(LIB_PATH "${CMAKE_BUILD_TYPE}/")
+endif()
+
 set(steinberg_libs "base" "pluginterfaces" "sdk" "vstgui_support" "vstgui_uidescription" "vstgui")
 include_directories(${VSTSDK_INCLUDE_DIR})
+
 foreach(lib IN ITEMS ${steinberg_libs})
     if(UNIX)
-        target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/lib${lib}.a)
+        target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/${LIB_PATH}lib${lib}.a)
     elseif(WIN)
-        target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/Release/${lib}.lib)
+        target_link_libraries(${target} PRIVATE ${VST3_SDK_ROOT}/build/lib/${LIB_PATH}${lib}.lib)
     endif()
 endforeach(lib)
 
