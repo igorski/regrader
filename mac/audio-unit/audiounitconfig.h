@@ -19,7 +19,7 @@
 
 // The full name of the audio unit.
 // This is derived from the manufacturer and description key values
-#define kAUcomponentName Regrader
+#define kAUcomponentName Igorski: Regrader
 
 // Displayed Tags
 #define kAUcomponentTag Effects
