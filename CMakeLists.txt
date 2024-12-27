@@ -1,5 +1,5 @@
 ﻿#####################################
-# CMake Project for Regrader Plugin #
+# CMake Project for REGRADER Plugin #
 #####################################
 
 cmake_minimum_required(VERSION 3.19)
@@ -105,12 +105,12 @@ if(APPLE)
         ${vst2_sources}
         ${VST3_SDK_ROOT}/public.sdk/source/common/threadchecker_mac.mm
     )
- elseif(WIN)
+elseif(WIN)
     set(vst2_sources
         ${vst2_sources}
         ${VST3_SDK_ROOT}/public.sdk/source/common/threadchecker_win32.cpp
     )
- endif()
+endif()
 
 ##########################
 # Plugin project sources #

@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2018 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2018-2024 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -79,25 +79,25 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
 
     RangeParameter* delayTimeParam = new RangeParameter(
         USTRING( "Delay time" ), kDelayTimeId, USTRING( "seconds" ),
-        0.f, 1.f, 0.f,
+        0.f, 1.f, 0.125f,
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( delayTimeParam );
 
     parameters.addParameter(
-        USTRING( "Delay host sync" ), 0, 1, 0, ParameterInfo::kCanAutomate, kDelayHostSyncId, unitId
+        USTRING( "Delay host sync" ), 0, 1, 1, ParameterInfo::kCanAutomate, kDelayHostSyncId, unitId
     );
 
     RangeParameter* delayFeedbackParam = new RangeParameter(
         USTRING( "Delay feedback" ), kDelayFeedbackId, USTRING( "0 - 1" ),
-        0.f, 1.f, 0.f,
+        0.f, 1.f, 0.2f,
         0, ParameterInfo::kCanAutomate, unitId
      );
     parameters.addParameter( delayFeedbackParam );
 
     RangeParameter* delayMixParam = new RangeParameter(
         USTRING( "Delay mix" ), kDelayMixId, USTRING( "0 - 1" ),
-        0.f, 1.f, 0.f,
+        0.f, 1.f, 0.5f,
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( delayMixParam );
@@ -106,13 +106,13 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
 
     RangeParameter* bitParam = new RangeParameter(
         USTRING( "Bit resolution" ), kBitResolutionId, USTRING( "0 - 16" ),
-        16, 0, 16,
+        0.f, 1.f, 1.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( bitParam );
 
     parameters.addParameter(
-        USTRING( "BitCrusher chain" ), 0, 1, 0, ParameterInfo::kCanAutomate, kBitResolutionChainId, unitId
+        USTRING( "BitCrusher chain" ), 0, 1, 1, ParameterInfo::kCanAutomate, kBitResolutionChainId, unitId
     );
 
     RangeParameter* bitLfoRateParam = new RangeParameter(
@@ -124,7 +124,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
 
     RangeParameter* bitLfoDepthParam = new RangeParameter(
         USTRING( "Bit LFO depth" ), kLFOBitResolutionDepthId, USTRING( "%" ),
-        0.f, 1.f, 0.f,
+        0.f, 1.f, 0.75f,
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( bitLfoDepthParam );
@@ -133,7 +133,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
 
     RangeParameter* decimatorParam = new RangeParameter(
         USTRING( "Decimator resolution" ), kDecimatorId, USTRING( "1 - 32" ),
-        0.f, 1.f, 0.f,
+        0.f, 1.f, 1.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( decimatorParam );
@@ -152,19 +152,22 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
     // Filter controls
 
     parameters.addParameter(
-        USTRING( "Filter chain" ), 0, 1, 0, ParameterInfo::kCanAutomate, kFilterChainId, unitId
+        USTRING( "Filter chain" ), 0, 1, 1, ParameterInfo::kCanAutomate, kFilterChainId, unitId
     );
+
+    float co  = Igorski::VST::FILTER_MIN_FREQ + ( 0.5f * ( Igorski::VST::FILTER_MAX_FREQ - Igorski::VST::FILTER_MIN_FREQ ));
+    float res = Igorski::VST::FILTER_MIN_RESONANCE + ( 1.f * ( Igorski::VST::FILTER_MAX_RESONANCE - Igorski::VST::FILTER_MIN_RESONANCE ));
 
     RangeParameter* filterCutoffParam = new RangeParameter(
         USTRING( "Filter cutoff" ), kFilterCutoffId, USTRING( "Hz" ),
-        Igorski::VST::FILTER_MIN_FREQ, Igorski::VST::FILTER_MAX_FREQ, Igorski::VST::FILTER_MIN_FREQ,
+        Igorski::VST::FILTER_MIN_FREQ, Igorski::VST::FILTER_MAX_FREQ, co,
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( filterCutoffParam );
 
     RangeParameter* filterResonanceParam = new RangeParameter(
         USTRING( "Filter resonance" ), kFilterResonanceId, USTRING( "dB" ),
-         Igorski::VST::FILTER_MIN_RESONANCE, Igorski::VST::FILTER_MAX_RESONANCE, Igorski::VST::FILTER_MIN_RESONANCE,
+         Igorski::VST::FILTER_MIN_RESONANCE, Igorski::VST::FILTER_MAX_RESONANCE, res,
         0, ParameterInfo::kCanAutomate, unitId
      );
     parameters.addParameter( filterResonanceParam );
@@ -178,7 +181,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
 
     RangeParameter* filterLFODepthParam = new RangeParameter(
         USTRING( "Filter LFO depth" ), kLFOFilterDepthId, USTRING( "%" ),
-        0.f, 1.f, 0.f,
+        0.f, 1.f, 0.5f,
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( filterLFODepthParam );
@@ -208,7 +211,7 @@ tresult PLUGIN_API RegraderController::initialize( FUnknown* context )
 
     RangeParameter* flangerDelayParam = new RangeParameter(
         USTRING( "Flanger delay" ), kFlangerDelayId, USTRING( "%" ),
-        0.1f, 1.f, 0.1f,
+        0.1f, 1.f, 0.0f,
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( flangerDelayParam );
