@@ -72,7 +72,6 @@ Regrader::Regrader()
     // register its editor class (the same as used in vstentry.cpp)
     setControllerClass( VST::RegraderControllerUID );
 
-    // should be created on setupProcessing, this however doesn't fire for Audio Unit using auval?
     regraderProcess = new RegraderProcess( 2 );
 }
 
