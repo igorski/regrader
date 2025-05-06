@@ -567,6 +567,9 @@ tresult PLUGIN_API Regrader::setupProcessing( ProcessSetup& newSetup )
 tresult PLUGIN_API Regrader::setBusArrangements( SpeakerArrangement* inputs,  int32 numIns,
                                                  SpeakerArrangement* outputs, int32 numOuts )
 {
+#ifdef BUILD_AUDIO_UNIT
+    return AudioEffect::setBusArrangements( inputs, numIns, outputs, numOuts ); // solves auval 4099 error
+#else
     if ( numIns == 1 && numOuts == 1 )
     {
         // the host wants Mono => Mono (or 1 channel -> 1 channel)
@@ -615,6 +618,7 @@ tresult PLUGIN_API Regrader::setBusArrangements( SpeakerArrangement* inputs,  in
         }
     }
     return kResultFalse;
+#endif
 }
 
 //------------------------------------------------------------------------
