@@ -582,11 +582,11 @@ tresult PLUGIN_API Regrader::setBusArrangements( SpeakerArrangement* inputs,  in
             if ( bus )
             {
                 // check if we are Mono => Mono, if not we need to recreate the buses
-                if ( bus->getArrangement() != inputs[0])
+                if ( bus->getArrangement() != inputs[ 0 ])
                 {
                     removeAudioBusses();
-                    addAudioInput ( STR16( "Mono In" ),  inputs[0] );
-                    addAudioOutput( STR16( "Mono Out" ), inputs[0] );
+                    addAudioInput ( STR16( "Mono In" ),  inputs[ 0 ] );
+                    addAudioOutput( STR16( "Mono Out" ), inputs[ 0 ] );
                 }
                 return kResultOk;
             }
@@ -594,15 +594,15 @@ tresult PLUGIN_API Regrader::setBusArrangements( SpeakerArrangement* inputs,  in
         // the host wants something else than Mono => Mono, in this case we are always Stereo => Stereo
         else
         {
-            AudioBus* bus = FCast<AudioBus>( audioInputs.at(0));
+            AudioBus* bus = FCast<AudioBus>( audioInputs.at( 0 ));
             if ( bus )
             {
                 // the host wants 2->2 (could be LsRs -> LsRs)
                 if ( isStereoInOut )
                 {
                     removeAudioBusses();
-                    addAudioInput  ( STR16( "Stereo In"),  inputs[0] );
-                    addAudioOutput ( STR16( "Stereo Out"), outputs[0]);
+                    addAudioInput  ( STR16( "Stereo In"),  inputs [ 0 ] );
+                    addAudioOutput ( STR16( "Stereo Out"), outputs[ 0 ]);
 
                     return kResultTrue;
                 }
