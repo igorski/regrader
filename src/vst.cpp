@@ -567,21 +567,26 @@ tresult PLUGIN_API Regrader::setupProcessing( ProcessSetup& newSetup )
 tresult PLUGIN_API Regrader::setBusArrangements( SpeakerArrangement* inputs,  int32 numIns,
                                                  SpeakerArrangement* outputs, int32 numOuts )
 {
+    bool isMonoInOut   = SpeakerArr::getChannelCount( inputs[ 0 ]) == 1 && SpeakerArr::getChannelCount( outputs[ 0 ]) == 1;
+    bool isStereoInOut = SpeakerArr::getChannelCount( inputs[ 0 ]) == 2 && SpeakerArr::getChannelCount( outputs[ 0 ]) == 2;
+#ifdef BUILD_AUDIO_UNIT
+    if ( !isMonoInOut && !isStereoInOut ) {
+        return AudioEffect::setBusArrangements( inputs, numIns, outputs, numOuts ); // solves auval 4099 error
+    }
+#endif
     if ( numIns == 1 && numOuts == 1 )
     {
-        // the host wants Mono => Mono (or 1 channel -> 1 channel)
-        if ( SpeakerArr::getChannelCount( inputs[0])  == 1 &&
-             SpeakerArr::getChannelCount( outputs[0]) == 1 )
+        if ( isMonoInOut )
         {
             AudioBus* bus = FCast<AudioBus>( audioInputs.at( 0 ));
             if ( bus )
             {
                 // check if we are Mono => Mono, if not we need to recreate the buses
-                if ( bus->getArrangement() != inputs[0])
+                if ( bus->getArrangement() != inputs[ 0 ])
                 {
                     removeAudioBusses();
-                    addAudioInput ( STR16( "Mono In" ),  inputs[0] );
-                    addAudioOutput( STR16( "Mono Out" ), inputs[0] );
+                    addAudioInput ( STR16( "Mono In" ),  inputs[ 0 ] );
+                    addAudioOutput( STR16( "Mono Out" ), inputs[ 0 ] );
                 }
                 return kResultOk;
             }
@@ -589,18 +594,17 @@ tresult PLUGIN_API Regrader::setBusArrangements( SpeakerArrangement* inputs,  in
         // the host wants something else than Mono => Mono, in this case we are always Stereo => Stereo
         else
         {
-            AudioBus* bus = FCast<AudioBus>( audioInputs.at(0));
+            AudioBus* bus = FCast<AudioBus>( audioInputs.at( 0 ));
             if ( bus )
             {
-                tresult result = kResultFalse;
-
                 // the host wants 2->2 (could be LsRs -> LsRs)
-                if ( SpeakerArr::getChannelCount(inputs[0]) == 2 && SpeakerArr::getChannelCount( outputs[0]) == 2 )
+                if ( isStereoInOut )
                 {
                     removeAudioBusses();
-                    addAudioInput  ( STR16( "Stereo In"),  inputs[0] );
-                    addAudioOutput ( STR16( "Stereo Out"), outputs[0]);
-                    result = kResultTrue;
+                    addAudioInput  ( STR16( "Stereo In"),  inputs [ 0 ] );
+                    addAudioOutput ( STR16( "Stereo Out"), outputs[ 0 ]);
+
+                    return kResultTrue;
                 }
                 // the host want something different than 1->1 or 2->2 : in this case we want stereo
                 else if ( bus->getArrangement() != SpeakerArr::kStereo )
@@ -608,9 +612,9 @@ tresult PLUGIN_API Regrader::setBusArrangements( SpeakerArrangement* inputs,  in
                     removeAudioBusses();
                     addAudioInput ( STR16( "Stereo In"),  SpeakerArr::kStereo );
                     addAudioOutput( STR16( "Stereo Out"), SpeakerArr::kStereo );
-                    result = kResultFalse;
+                    
+                    return kResultFalse;
                 }
-                return result;
             }
         }
     }
