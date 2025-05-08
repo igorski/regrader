@@ -586,7 +586,7 @@ tresult PLUGIN_API Regrader::setBusArrangements( SpeakerArrangement* inputs,  in
                 {
                     removeAudioBusses();
                     addAudioInput ( STR16( "Mono In" ),  inputs[ 0 ] );
-                    addAudioOutput( STR16( "Mono Out" ), inputs[ 0 ] );
+                    addAudioOutput( STR16( "Mono Out" ), outputs[ 0 ] );
                 }
                 return kResultOk;
             }
